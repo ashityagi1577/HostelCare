@@ -1,0 +1,31 @@
+{
+  "name": "hostelcare",
+  "version": "1.0.0",
+  "description": "HostelCare - Hostel Maintenance and Complaint Management Portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:init": "node src/database/init.js",
+    "seed": "node src/database/seed.js"
+  },
+  "keywords": [
+    "hostel",
+    "maintenance",
+    "complaint-portal",
+    "pbl-project",
+    "express",
+    "mysql"
+  ],
+  "author": "HostelCare Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.12.0"
+  }
+}
