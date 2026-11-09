@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "db:test": "node src/database/testConnection.js",
     "db:init": "node src/database/init.js",
     "seed": "node src/database/seed.js"
   },
