@@ -15,6 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// API Routes
+app.use('/api/auth', require('./src/routes/auth.routes'));
+
 // API Health Check
 app.get('/api/health', (req, res) => {
   res.status(200).json({

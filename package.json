@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "test:auth": "node src/tests/testAuthEndpoints.js",
+    "test:upload": "node src/tests/testUpload.js",
+    "test:complaint": "node src/tests/testComplaintModel.js",
     "db:test": "node src/database/testConnection.js",
     "db:init": "node src/database/init.js",
     "seed": "node src/database/seed.js"
