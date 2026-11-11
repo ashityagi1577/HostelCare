@@ -1,4 +1,5 @@
 const ComplaintModel = require('../models/complaint.model');
+const FeedbackModel = require('../models/feedback.model');
 const { TimelineService } = require('../services/timeline.service');
 
 const ALLOWED_CATEGORIES = ['Electrical', 'Plumbing', 'Carpentry', 'Cleaning', 'WiFi_Internet', 'Other'];
@@ -201,11 +202,71 @@ async function getComplaintTimeline(req, res) {
   }
 }
 
+/**
+ * Submit resident rating & review remarks for a resolved complaint.
+ * POST /api/complaints/:id/feedback
+ * Body: { rating, comments }
+ */
+async function submitFeedback(req, res) {
+  try {
+    const complaintId = parseInt(req.params.id, 10);
+    const { rating, comments } = req.body;
+    const studentId = req.user.id;
+
+    if (isNaN(complaintId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid complaint ID parameter.'
+      });
+    }
+
+    if (rating === undefined || rating === null) {
+      return res.status(400).json({
+        success: false,
+        error: 'Rating is required (1 to 5 stars).'
+      });
+    }
+
+    const feedback = await FeedbackModel.createFeedback({
+      complaint_id: complaintId,
+      student_id: studentId,
+      rating,
+      comments
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Thank you for your feedback! The maintenance ticket has been closed.',
+      data: feedback
+    });
+  } catch (error) {
+    if (error.code === 'NOT_FOUND') {
+      return res.status(404).json({ success: false, error: error.message });
+    }
+    if (error.code === 'FORBIDDEN') {
+      return res.status(403).json({ success: false, error: error.message });
+    }
+    if (error.code === 'INVALID_STATUS') {
+      return res.status(400).json({ success: false, error: error.message });
+    }
+    if (error.code === 'ALREADY_EXISTS') {
+      return res.status(409).json({ success: false, error: error.message });
+    }
+
+    console.error('[Submit Feedback Error]:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to submit feedback.'
+    });
+  }
+}
+
 module.exports = {
   lodgeComplaint,
   getMyComplaints,
   getComplaintByTicket,
   getComplaintTimeline,
+  submitFeedback,
   ALLOWED_CATEGORIES,
   ALLOWED_PRIORITIES
 };

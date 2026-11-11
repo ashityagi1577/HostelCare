@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Master Control – HostelCare Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .staff-header {
+      padding: 2rem 0;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .staff-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .staff-header h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #1e1b4b;
+    }
+    /* Metric Cards */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      padding: 1.25rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: white;
+      box-shadow: var(--shadow-sm);
+    }
+    .metric-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .metric-val {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    /* Filter & Search Bar */
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      background: white;
+      padding: 1rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-select {
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      font-size: 0.88rem;
+      background: white;
+      color: var(--text-main);
+    }
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+    }
+    /* Table */
+    .table-container {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 3rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      background: #f8fafc;
+      padding: 0.85rem 1.25rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background-color: #faf5ff;
+    }
+    /* Modal Styles */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-card {
+      background: white;
+      width: 100%;
+      max-width: 500px;
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🏠</span>
+        <span>HostelCare <small style="font-size: 0.75rem; background: var(--amber-bg); color: var(--amber-text); padding: 0.15rem 0.4rem; border-radius: var(--radius-full); margin-left: 0.4rem;">Staff Control</small></span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Rendered by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Staff Header -->
+  <header class="staff-header">
+    <div class="container staff-header-row">
+      <div>
+        <h1>Maintenance Control Center</h1>
+        <p id="staffSubtitle">Review, prioritize, assign, and resolve student maintenance complaints</p>
+      </div>
+      <div>
+        <button onclick="refreshData()" class="btn btn-secondary btn-sm">🔄 Refresh Data</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Metric Cards -->
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-title">Total Lodged</div>
+        <div class="metric-val" id="metricTotal">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title" style="color: #64748b;">Pending Triage</div>
+        <div class="metric-val" id="metricPending" style="color: #475569;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title" style="color: var(--amber);">In Progress</div>
+        <div class="metric-val" id="metricInProgress" style="color: #b45309;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title" style="color: var(--emerald);">Resolved Today</div>
+        <div class="metric-val" id="metricResolved" style="color: #047857;">0</div>
+      </div>
+      <div class="metric-card" style="border-color: #fecdd3; background: #fff1f2;">
+        <div class="metric-title" style="color: #be123c;">🚨 Emergency Action</div>
+        <div class="metric-val" id="metricEmergency" style="color: #e11d48;">0</div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="filter-bar">
+      <input type="text" id="searchInput" class="form-control search-input" placeholder="Search by Ticket ID, Room, Resident..." oninput="applyFilters()">
+      
+      <select id="statusFilter" class="filter-select" onchange="applyFilters()">
+        <option value="">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Assigned">Assigned</option>
+        <option value="In_Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+        <option value="Closed">Closed</option>
+      </select>
+
+      <select id="categoryFilter" class="filter-select" onchange="applyFilters()">
+        <option value="">All Categories</option>
+        <option value="Electrical">Electrical</option>
+        <option value="Plumbing">Plumbing</option>
+        <option value="Carpentry">Carpentry</option>
+        <option value="Cleaning">Cleaning</option>
+        <option value="WiFi_Internet">Wi-Fi</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <select id="priorityFilter" class="filter-select" onchange="applyFilters()">
+        <option value="">All Priorities</option>
+        <option value="Emergency">🚨 Emergency</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+
+      <button onclick="resetFilters()" class="btn btn-secondary btn-sm">Reset</button>
+    </div>
+
+    <!-- Complaints Grid -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Resident & Room</th>
+            <th>Category & Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assigned Technician</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="staffTableBody">
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              Loading maintenance complaints...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal: Assign Technician -->
+  <div class="modal-backdrop" id="assignModal">
+    <div class="modal-card">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: #1e1b4b;">Assign Technician</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        Ticket: <strong id="assignTicketNo">HC-2026-0000</strong>
+      </p>
+
+      <form onsubmit="handleAssignSubmit(event)">
+        <input type="hidden" id="assignComplaintId">
+
+        <div class="form-group">
+          <label class="form-label" for="techSelect">Select On-Duty Technician *</label>
+          <select id="techSelect" class="form-control" required>
+            <option value="">Loading technicians...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="assignDate">Expected Target Date</label>
+          <input type="date" id="assignDate" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="assignRemarks">Staff Instructions / Notes</label>
+          <textarea id="assignRemarks" class="form-control" rows="2" placeholder="e.g. Inspect switchboard insulation and replace circuit breaker..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('assignModal')">Cancel</button>
+          <button type="submit" id="assignSubmitBtn" class="btn btn-primary">Allocate Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Resolve Complaint -->
+  <div class="modal-backdrop" id="resolveModal">
+    <div class="modal-card">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: #1e1b4b;">Mark Work as Resolved</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        Ticket: <strong id="resolveTicketNo">HC-2026-0000</strong>
+      </p>
+
+      <form onsubmit="handleResolveSubmit(event)">
+        <input type="hidden" id="resolveComplaintId">
+
+        <div class="form-group">
+          <label class="form-label" for="resolveNotes">Technician Resolution Report *</label>
+          <textarea id="resolveNotes" class="form-control" rows="3" placeholder="Describe the repairs performed, replaced parts, and inspection results..." required minlength="5"></textarea>
+          <small style="color: var(--text-muted); font-size: 0.8rem;">Min 5 characters</small>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('resolveModal')">Cancel</button>
+          <button type="submit" id="resolveSubmitBtn" class="btn btn-primary" style="background:#059669; border-color:#059669;">Confirm Resolved</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let allComplaints = [];
+    let techniciansList = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getUser();
+      if (!user) {
+        showToast('Staff credentials required.', 'warning');
+        setTimeout(() => window.location.href = '/login.html?role=staff', 800);
+        return;
+      }
+      if (user.role !== 'staff' && user.role !== 'admin') {
+        showToast('Access denied: Resident students cannot access staff portal.', 'error');
+        setTimeout(() => window.location.href = '/student-dashboard.html', 1000);
+        return;
+      }
+
+      document.getElementById('staffSubtitle').innerText = `Logged in as ${user.name} (${user.role.toUpperCase()}) • Campus Maintenance Operations`;
+      refreshData();
+    });
+
+    async function refreshData() {
+      await Promise.all([fetchComplaints(), fetchTechnicians(), fetchAnalyticsKPIs()]);
+    }
+
+    async function fetchComplaints() {
+      const res = await apiRequest('/api/staff/complaints');
+      if (!res.success) {
+        showToast('Failed to load complaints.', 'error');
+        return;
+      }
+      allComplaints = res.data || [];
+      renderTable(allComplaints);
+    }
+
+    async function fetchTechnicians() {
+      const res = await apiRequest('/api/staff/technicians');
+      if (res.success) {
+        techniciansList = res.data || [];
+        populateTechDropdown();
+      }
+    }
+
+    async function fetchAnalyticsKPIs() {
+      const res = await apiRequest('/api/analytics/dashboard');
+      if (res.success && res.data.kpis) {
+        const k = res.data.kpis;
+        document.getElementById('metricTotal').innerText = k.total;
+        document.getElementById('metricPending').innerText = k.pending;
+        document.getElementById('metricInProgress').innerText = k.in_progress + k.assigned;
+        document.getElementById('metricResolved').innerText = k.resolved + k.closed;
+        document.getElementById('metricEmergency').innerText = k.emergency_pending;
+      }
+    }
+
+    function populateTechDropdown() {
+      const select = document.getElementById('techSelect');
+      select.innerHTML = '<option value="">-- Choose Technician --</option>' + 
+        techniciansList.map(t => `<option value="${t.id}">${t.name} (${t.trade}) - ${t.active_tasks_count} active task(s)</option>`).join('');
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById('staffTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">No complaints match the filter criteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(c => {
+        const priorityBadge = `badge-${c.priority.toLowerCase()}`;
+        const statusBadge = `badge-${c.status.toLowerCase()}`;
+        const techDisplay = c.technician_name ? `<strong>${c.technician_name}</strong><br><small style="color:#64748b;">${c.technician_trade}</small>` : '<span style="color:#94a3b8; font-style: italic;">Unassigned</span>';
+        const formattedDate = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+        let actions = `<a href="/track.html?ticket=${c.ticket_no}" class="btn btn-secondary btn-sm" title="View Stepper">Track</a>`;
+        if (c.status === 'Pending' || c.status === 'Assigned') {
+          actions += ` <button onclick="openAssignModal(${c.id}, '${c.ticket_no}')" class="btn btn-primary btn-sm">Assign</button>`;
+        }
+        if (c.status === 'Assigned' || c.status === 'In_Progress') {
+          actions += ` <button onclick="openResolveModal(${c.id}, '${c.ticket_no}')" class="btn btn-sm" style="background:#059669; color:white;">Resolve</button>`;
+        }
+
+        return `
+          <tr>
+            <td>
+              <a href="/track.html?ticket=${c.ticket_no}" class="ticket-cell">${c.ticket_no}</a>
+            </td>
+            <td>
+              <strong>${c.student_name}</strong><br>
+              <small style="color: #64748b;">${c.hostel_block || 'Block'} • Rm ${c.room_no || 'N/A'}</small>
+            </td>
+            <td>
+              <strong>${c.title}</strong><br>
+              <small style="color: #64748b;">${c.category}</small>
+            </td>
+            <td><span class="badge ${priorityBadge}">${c.priority}</span></td>
+            <td><span class="badge ${statusBadge}">${c.status.replace('_', ' ')}</span></td>
+            <td>${techDisplay}</td>
+            <td style="color: #64748b; font-size: 0.85rem;">${formattedDate}</td>
+            <td>
+              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                ${actions}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const category = document.getElementById('categoryFilter').value;
+      const priority = document.getElementById('priorityFilter').value;
+
+      const filtered = allComplaints.filter(c => {
+        const matchesQ = !q || c.ticket_no.toLowerCase().includes(q) ||
+          c.title.toLowerCase().includes(q) ||
+          c.student_name.toLowerCase().includes(q) ||
+          (c.room_no && c.room_no.toLowerCase().includes(q));
+        const matchesStatus = !status || c.status === status;
+        const matchesCategory = !category || c.category === category;
+        const matchesPriority = !priority || c.priority === priority;
+        return matchesQ && matchesStatus && matchesCategory && matchesPriority;
+      });
+
+      renderTable(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('categoryFilter').value = '';
+      document.getElementById('priorityFilter').value = '';
+      renderTable(allComplaints);
+    }
+
+    function openAssignModal(id, ticketNo) {
+      document.getElementById('assignComplaintId').value = id;
+      document.getElementById('assignTicketNo').innerText = ticketNo;
+      document.getElementById('assignModal').classList.add('active');
+    }
+
+    function openResolveModal(id, ticketNo) {
+      document.getElementById('resolveComplaintId').value = id;
+      document.getElementById('resolveTicketNo').innerText = ticketNo;
+      document.getElementById('resolveModal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    async function handleAssignSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('assignComplaintId').value;
+      const techId = document.getElementById('techSelect').value;
+      const date = document.getElementById('assignDate').value;
+      const remarks = document.getElementById('assignRemarks').value.trim();
+
+      const res = await apiRequest(`/api/staff/complaints/${id}/assign`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          technician_id: parseInt(techId, 10),
+          estimated_date: date || null,
+          remarks: remarks || null
+        })
+      });
+
+      if (!res.success) {
+        showToast(res.error || 'Assignment failed.', 'error');
+        return;
+      }
+
+      showToast(res.message || 'Assigned successfully!', 'success');
+      closeModal('assignModal');
+      refreshData();
+    }
+
+    async function handleResolveSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('resolveComplaintId').value;
+      const notes = document.getElementById('resolveNotes').value.trim();
+
+      const res = await apiRequest(`/api/staff/complaints/${id}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolution_notes: notes })
+      });
+
+      if (!res.success) {
+        showToast(res.error || 'Failed to resolve.', 'error');
+        return;
+      }
+
+      showToast(res.message || 'Resolved successfully!', 'success');
+      closeModal('resolveModal');
+      refreshData();
+    }
+  </script>
+</body>
+</html>
+

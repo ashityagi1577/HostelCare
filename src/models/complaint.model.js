@@ -2,6 +2,16 @@ const db = require('../config/db');
 const { generateTicketNumber } = require('../utils/ticket.util');
 
 /**
+ * Helper to safely format Date or ISO string into MySQL DATETIME ('YYYY-MM-DD HH:MM:SS')
+ */
+function toMySqlDateTime(dateInput) {
+  if (!dateInput) return null;
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+/**
  * Complaint Data Access Model
  * Manages operations on `complaints` and `complaint_logs` tables.
  */
@@ -211,6 +221,8 @@ class ComplaintModel {
     const complaint = await this.findById(complaintId);
     if (!complaint) throw new Error('Complaint not found');
 
+    const formattedDate = toMySqlDateTime(estimatedDate);
+
     const updateSql = `
       UPDATE complaints 
       SET assigned_tech_id = ?, 
@@ -218,7 +230,7 @@ class ComplaintModel {
           status = 'Assigned'
       WHERE id = ?;
     `;
-    await db.execute(updateSql, [technicianId, estimatedDate, complaintId]);
+    await db.execute(updateSql, [technicianId, formattedDate, complaintId]);
 
     // Insert log entry
     const logSql = `

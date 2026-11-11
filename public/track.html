@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Ticket Progress – HostelCare Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .track-header {
+      padding: 2.5rem 0 1.5rem 0;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .track-search-box {
+      max-width: 500px;
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .ticket-summary-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .ticket-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    /* Horizontal Stepper */
+    .stepper-container {
+      margin: 2.5rem 0;
+      padding: 1.5rem 1rem;
+      background: #f8fafc;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+    }
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      right: 30px;
+      height: 4px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+    .step-node {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      flex: 1;
+    }
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.75rem auto;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #64748b;
+      transition: var(--transition);
+    }
+    .step-node.completed .step-circle {
+      background: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+    .step-node.current .step-circle {
+      background: var(--primary);
+      border-color: #818cf8;
+      color: white;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+    .step-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+    .step-node.upcoming .step-label {
+      color: #94a3b8;
+    }
+    .step-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    /* History Feed */
+    .timeline-feed {
+      position: relative;
+      padding-left: 2rem;
+      margin-top: 1.5rem;
+    }
+    .timeline-feed::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 5px;
+      bottom: 5px;
+      width: 2px;
+      background: var(--border);
+    }
+    .feed-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .feed-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid var(--primary);
+    }
+    .feed-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+    .feed-time {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+    .feed-remarks {
+      background: #f8fafc;
+      padding: 0.6rem 0.9rem;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      color: #334155;
+      margin-top: 0.35rem;
+      border: 1px solid #e2e8f0;
+    }
+    /* Star Rating Box */
+    .rating-box {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+    .star-rating {
+      display: inline-flex;
+      gap: 0.4rem;
+      font-size: 2rem;
+      cursor: pointer;
+      margin: 0.75rem 0;
+    }
+    .star {
+      color: #cbd5e1;
+      transition: color 0.15s ease;
+    }
+    .star.active, .star:hover, .star.hover {
+      color: #f59e0b;
+    }
+    @media (max-width: 650px) {
+      .stepper {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .stepper::before {
+        display: none;
+      }
+      .step-node {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-align: left;
+      }
+      .step-circle {
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🏠</span>
+        <span>HostelCare</span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Rendered by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Track Header -->
+  <header class="track-header">
+    <div class="container">
+      <h1>Track Maintenance Ticket</h1>
+      <p>Live visibility from submission to resolution and student quality sign-off</p>
+      
+      <form class="track-search-box" onsubmit="handleSearch(event)">
+        <input type="text" id="ticketSearchInput" class="form-control" placeholder="Enter Ticket Number (e.g. HC-2026-0001)" required>
+        <button type="submit" class="btn btn-primary">Track</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="container" style="margin-bottom: 4rem;">
+    <!-- Loading / Error Box -->
+    <div id="statusNotice" style="text-align: center; padding: 3rem 1rem;">
+      <p style="color: var(--text-muted);">Please enter a ticket number above to view timeline.</p>
+    </div>
+
+    <!-- Ticket Detail Display Area -->
+    <div id="ticketDetailArea" style="display: none;">
+      
+      <!-- Summary Card -->
+      <div class="ticket-summary-card">
+        <div class="ticket-title-row">
+          <div>
+            <span id="ticketBadgeCategory" class="badge badge-assigned" style="margin-bottom: 0.5rem;">Electrical</span>
+            <h2 id="ticketTitle" style="font-size: 1.5rem; color: #1e1b4b; margin-top: 0.2rem;">Ceiling fan loose wire</h2>
+            <p id="ticketLocation" style="color: var(--text-muted); font-size: 0.9rem;">Block A • Room 204 • Lodged on Nov 11, 2026</p>
+          </div>
+          <div style="text-align: right;">
+            <div id="ticketNumber" style="font-family: monospace; font-size: 1.3rem; font-weight: 800; color: var(--primary);">HC-2026-0001</div>
+            <span id="ticketStatusPill" class="badge badge-pending" style="font-size: 0.85rem; margin-top: 0.35rem;">Pending</span>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border); margin: 1rem 0;">
+          <strong style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Resident Description:</strong>
+          <p id="ticketDescription" style="margin-top: 0.35rem; font-size: 0.95rem; line-height: 1.5;"></p>
+        </div>
+
+        <div id="photoEvidenceRow" style="display: none; margin-top: 1rem;">
+          <strong style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Attached Photo Evidence:</strong>
+          <div style="margin-top: 0.5rem;">
+            <a id="photoLink" href="" target="_blank">
+              <img id="photoThumb" src="" alt="Proof" style="max-height: 150px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5-Node Visual Stepper -->
+      <div class="stepper-container">
+        <h3 style="font-size: 1.1rem; color: #1e1b4b; margin-bottom: 1.5rem; text-align: center;">Maintenance Progress Stepper</h3>
+        <div class="stepper" id="stepperNodes">
+          <!-- Dynamically generated stepper nodes -->
+        </div>
+      </div>
+
+      <!-- Resolution Rating Section (Shown when Resolved) -->
+      <div id="ratingSection" class="rating-box" style="display: none;">
+        <span style="font-size: 2.2rem;">⭐</span>
+        <h3 style="font-size: 1.3rem; color: #065f46; margin: 0.35rem 0;">Work Completed! Rate Your Experience</h3>
+        <p style="color: #047857; font-size: 0.92rem;">How satisfied are you with the technician's repair work and punctuality?</p>
+        
+        <div class="star-rating" id="starContainer">
+          <span class="star" data-val="1" onclick="setRating(1)">★</span>
+          <span class="star" data-val="2" onclick="setRating(2)">★</span>
+          <span class="star" data-val="3" onclick="setRating(3)">★</span>
+          <span class="star" data-val="4" onclick="setRating(4)">★</span>
+          <span class="star" data-val="5" onclick="setRating(5)">★</span>
+        </div>
+        <input type="hidden" id="selectedStarValue" value="5">
+
+        <div style="max-width: 480px; margin: 0.75rem auto;">
+          <textarea id="feedbackComment" class="form-control" rows="2" placeholder="Optional comments regarding the repair..."></textarea>
+          <button onclick="submitStudentFeedback()" id="feedbackBtn" class="btn btn-primary" style="background: #059669; border-color: #059669; margin-top: 0.75rem;">
+            Submit Rating & Close Ticket
+          </button>
+        </div>
+      </div>
+
+      <!-- Chronological History Trail -->
+      <div class="card" style="padding: 2rem; margin-top: 2rem;">
+        <h3 style="font-size: 1.15rem; color: #1e1b4b; margin-bottom: 1rem;">Chronological Audit Trail</h3>
+        <div class="timeline-feed" id="historyFeed">
+          <!-- Dynamically populated events -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentComplaintData = null;
+    let chosenRating = 5;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const ticketParam = params.get('ticket');
+      if (ticketParam) {
+        document.getElementById('ticketSearchInput').value = ticketParam;
+        loadTicket(ticketParam);
+      }
+    });
+
+    function handleSearch(e) {
+      e.preventDefault();
+      const ticket = document.getElementById('ticketSearchInput').value.trim();
+      if (ticket) loadTicket(ticket);
+    }
+
+    async function loadTicket(ticketNo) {
+      const notice = document.getElementById('statusNotice');
+      const area = document.getElementById('ticketDetailArea');
+
+      notice.innerHTML = '<p style="color: var(--text-muted);">Fetching ticket details & timeline...</p>';
+      notice.style.display = 'block';
+      area.style.display = 'none';
+
+      // First get complaint info
+      const res = await apiRequest(`/api/complaints/${encodeURIComponent(ticketNo)}`);
+      if (!res.success) {
+        notice.innerHTML = `<p style="color: var(--rose); font-weight: 600;">✖ ${res.error || 'Ticket not found or access denied.'}</p>`;
+        return;
+      }
+
+      currentComplaintData = res.data;
+
+      // Get enriched timeline stepper
+      const timelineRes = await apiRequest(`/api/complaints/${encodeURIComponent(ticketNo)}/timeline`);
+      const timeline = timelineRes.success ? timelineRes.data : null;
+
+      notice.style.display = 'none';
+      area.style.display = 'block';
+
+      renderTicketDetails(currentComplaintData, timeline);
+    }
+
+    function renderTicketDetails(c, t) {
+      document.getElementById('ticketNumber').innerText = c.ticket_no;
+      document.getElementById('ticketTitle').innerText = c.title;
+      document.getElementById('ticketBadgeCategory').innerText = c.category;
+      document.getElementById('ticketDescription').innerText = c.description;
+      
+      const loc = `${c.hostel_block || 'Hostel'} • Room ${c.room_no || 'N/A'} • Lodged on ${new Date(c.created_at).toLocaleDateString()}`;
+      document.getElementById('ticketLocation').innerText = loc;
+
+      const pill = document.getElementById('ticketStatusPill');
+      pill.innerText = c.status.replace('_', ' ');
+      pill.className = `badge badge-${c.status.toLowerCase()}`;
+
+      // Photo
+      const photoRow = document.getElementById('photoEvidenceRow');
+      if (c.photo_url) {
+        document.getElementById('photoThumb').src = c.photo_url;
+        document.getElementById('photoLink').href = c.photo_url;
+        photoRow.style.display = 'block';
+      } else {
+        photoRow.style.display = 'none';
+      }
+
+      // Stepper
+      if (t && t.stepper) {
+        const stepperContainer = document.getElementById('stepperNodes');
+        stepperContainer.innerHTML = t.stepper.map(s => {
+          const icon = s.state === 'completed' ? '✔' : s.step;
+          const timeText = s.timestamp ? new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          return `
+            <div class="step-node ${s.state}">
+              <div class="step-circle">${icon}</div>
+              <div class="step-label">${s.label}</div>
+              <div class="step-time">${timeText}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Rating Box (Show if Resolved and logged in as this student)
+      const user = getUser();
+      const ratingSec = document.getElementById('ratingSection');
+      if (c.status === 'Resolved' && user && user.id === c.student_id) {
+        ratingSec.style.display = 'block';
+        setRating(5);
+      } else {
+        ratingSec.style.display = 'none';
+      }
+
+      // History Feed
+      const feed = document.getElementById('historyFeed');
+      if (t && t.history) {
+        feed.innerHTML = t.history.map(h => {
+          const dateStr = new Date(h.timestamp).toLocaleString();
+          return `
+            <div class="feed-item">
+              <div class="feed-header">
+                <span>${h.action}</span>
+                <span class="feed-time">(${dateStr})</span>
+              </div>
+              <small style="color: var(--text-muted);">By: ${h.actor.name} [${h.actor.role}]</small>
+              ${h.remarks ? `<div class="feed-remarks">${h.remarks}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function setRating(val) {
+      chosenRating = val;
+      document.getElementById('selectedStarValue').value = val;
+      const stars = document.querySelectorAll('.star');
+      stars.forEach(s => {
+        const starVal = parseInt(s.getAttribute('data-val'), 10);
+        if (starVal <= val) s.classList.add('active');
+        else s.classList.remove('active');
+      });
+    }
+
+    async function submitStudentFeedback() {
+      if (!currentComplaintData) return;
+      const btn = document.getElementById('feedbackBtn');
+      const comments = document.getElementById('feedbackComment').value.trim();
+
+      btn.disabled = true;
+      btn.innerText = 'Submitting...';
+
+      const res = await apiRequest(`/api/complaints/${currentComplaintData.id}/feedback`, {
+        method: 'POST',
+        body: JSON.stringify({
+          rating: chosenRating,
+          comments: comments || null
+        })
+      });
+
+      btn.disabled = false;
+      btn.innerText = 'Submit Rating & Close Ticket';
+
+      if (!res.success) {
+        showToast(res.error || 'Failed to submit rating.', 'error');
+        return;
+      }
+
+      showToast('Thank you! Ticket has been closed.', 'success');
+      loadTicket(currentComplaintData.ticket_no);
+    }
+  </script>
+</body>
+</html>
+

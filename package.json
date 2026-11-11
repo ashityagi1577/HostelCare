@@ -12,6 +12,9 @@
     "test:student-api": "node src/tests/testStudentComplaintAPIs.js",
     "test:timeline": "node src/tests/testTimelineService.js",
     "test:staff": "node src/tests/testStaffAPIs.js",
+    "test:technician": "node src/tests/testTechnicianAPIs.js",
+    "test:feedback": "node src/tests/testResolutionFeedbackAPIs.js",
+    "test:analytics": "node src/tests/testAnalyticsAPIs.js",
     "db:test": "node src/database/testConnection.js",
     "db:init": "node src/database/init.js",
     "seed": "node src/database/seed.js"

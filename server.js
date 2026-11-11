@@ -19,6 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', require('./src/routes/auth.routes'));
 app.use('/api/complaints', require('./src/routes/complaint.routes'));
 app.use('/api/staff', require('./src/routes/staff.routes'));
+app.use('/api/analytics', require('./src/routes/analytics.routes'));
 
 // API Health Check
 app.get('/api/health', (req, res) => {

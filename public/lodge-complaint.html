@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lodge Maintenance Complaint – HostelCare Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .page-header {
+      padding: 2.5rem 0 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+      background: white;
+      margin-bottom: 2rem;
+    }
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin-bottom: 0.35rem;
+    }
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .form-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+    /* Category Selector Grid */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .category-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: white;
+    }
+    .category-card:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .category-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    .category-card .icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+    .category-card .name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    /* Priority Radio Buttons */
+    .priority-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+    .priority-option {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: white;
+    }
+    .priority-option input {
+      display: none;
+    }
+    .priority-option.selected-Low {
+      border-color: #64748b;
+      background: #f1f5f9;
+      font-weight: 700;
+    }
+    .priority-option.selected-Medium {
+      border-color: #f59e0b;
+      background: #fef9c3;
+      color: #854d0e;
+      font-weight: 700;
+    }
+    .priority-option.selected-High {
+      border-color: #ea580c;
+      background: #ffedd5;
+      color: #9a3412;
+      font-weight: 700;
+    }
+    .priority-option.selected-Emergency {
+      border-color: #e11d48;
+      background: #ffe4e6;
+      color: #9f1239;
+      font-weight: 800;
+      box-shadow: 0 0 0 2px #f43f5e;
+    }
+    /* Photo Upload Dropzone */
+    .dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-md);
+      padding: 1.75rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      background: #f8fafc;
+      transition: var(--transition);
+      position: relative;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .preview-container {
+      margin-top: 1rem;
+      position: relative;
+      display: none;
+    }
+    .preview-image {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+    .remove-photo-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(15, 23, 42, 0.75);
+      color: white;
+      border: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    /* Resident Info Card */
+    .resident-summary-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      position: sticky;
+      top: 90px;
+    }
+    .resident-summary-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #1e1b4b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .info-list {
+      list-style: none;
+    }
+    .info-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.88rem;
+    }
+    .info-list li:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: var(--text-muted);
+    }
+    .info-value {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    /* Success Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-card {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      padding: 2.5rem;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+    }
+    .ticket-display {
+      background: #f1f5f9;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      font-family: monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 1.25rem 0;
+      letter-spacing: 1px;
+      border: 1px dashed #cbd5e1;
+    }
+    @media (max-width: 800px) {
+      .form-layout {
+        grid-template-columns: 1fr;
+      }
+      .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .priority-options {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🏠</span>
+        <span>HostelCare</span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Rendered by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="container">
+      <h1>Lodge Maintenance Request</h1>
+      <p>Submit room repairs or cleaning issues to hostel staff. A tracking ticket will be issued automatically.</p>
+    </div>
+  </header>
+
+  <!-- Form Layout -->
+  <main class="container">
+    <form id="complaintForm" onsubmit="handleComplaintSubmit(event)" class="form-layout">
+      
+      <!-- Left Column: Complaint Details -->
+      <div class="card" style="padding: 2rem;">
+        
+        <!-- 1. Category Selection -->
+        <div class="form-group">
+          <label class="form-label">1. Select Maintenance Category *</label>
+          <div class="category-grid" id="categoryGrid">
+            <div class="category-card selected" onclick="selectCategory('Electrical', this)">
+              <span class="icon">⚡</span>
+              <span class="name">Electrical</span>
+            </div>
+            <div class="category-card" onclick="selectCategory('Plumbing', this)">
+              <span class="icon">🚰</span>
+              <span class="name">Plumbing</span>
+            </div>
+            <div class="category-card" onclick="selectCategory('Carpentry', this)">
+              <span class="icon">🪚</span>
+              <span class="name">Carpentry</span>
+            </div>
+            <div class="category-card" onclick="selectCategory('Cleaning', this)">
+              <span class="icon">🧹</span>
+              <span class="name">Cleaning</span>
+            </div>
+            <div class="category-card" onclick="selectCategory('WiFi_Internet', this)">
+              <span class="icon">🌐</span>
+              <span class="name">Wi-Fi / LAN</span>
+            </div>
+            <div class="category-card" onclick="selectCategory('Other', this)">
+              <span class="icon">📦</span>
+              <span class="name">Other Issue</span>
+            </div>
+          </div>
+          <input type="hidden" id="categoryInput" value="Electrical" required>
+        </div>
+
+        <!-- 2. Priority Selection -->
+        <div class="form-group">
+          <label class="form-label">2. Urgency Level *</label>
+          <div class="priority-options">
+            <label class="priority-option" onclick="selectPriority('Low', this)">
+              <input type="radio" name="priorityRadio" value="Low">
+              Low
+            </label>
+            <label class="priority-option selected-Medium" onclick="selectPriority('Medium', this)">
+              <input type="radio" name="priorityRadio" value="Medium" checked>
+              Medium
+            </label>
+            <label class="priority-option" onclick="selectPriority('High', this)">
+              <input type="radio" name="priorityRadio" value="High">
+              High
+            </label>
+            <label class="priority-option" onclick="selectPriority('Emergency', this)">
+              <input type="radio" name="priorityRadio" value="Emergency">
+              🚨 Emergency
+            </label>
+          </div>
+          <input type="hidden" id="priorityInput" value="Medium" required>
+        </div>
+
+        <!-- 3. Title & Description -->
+        <div class="form-group">
+          <label class="form-label" for="title">3. Brief Summary / Title *</label>
+          <input type="text" id="title" class="form-control" placeholder="e.g. Ceiling fan regulator sparking and loose wire" required minlength="5">
+          <small style="color: var(--text-muted); font-size: 0.8rem;">Minimum 5 characters</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">4. Detailed Description *</label>
+          <textarea id="description" class="form-control" placeholder="Please describe the exact location, symptoms of the fault, and how long the issue has persisted..." required minlength="10" rows="4"></textarea>
+          <small style="color: var(--text-muted); font-size: 0.8rem;">Minimum 10 characters</small>
+        </div>
+
+        <!-- 4. Photo Proof Upload -->
+        <div class="form-group">
+          <label class="form-label">5. Photo Evidence (Optional but recommended)</label>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('photoInput').click()">
+            <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📸</span>
+            <p style="font-weight: 600; color: var(--text-main); margin-bottom: 0.2rem;">Click to browse or drag & drop photo here</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Supports JPG, PNG, WEBP up to 5MB</p>
+            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePhotoSelect(event)">
+          </div>
+
+          <div class="preview-container" id="previewContainer">
+            <img id="imagePreview" class="preview-image" src="" alt="Complaint Evidence Preview">
+            <button type="button" class="remove-photo-btn" onclick="removePhoto()">✖ Remove Photo</button>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+          Submit Maintenance Request
+        </button>
+      </div>
+
+      <!-- Right Column: Resident Info Card -->
+      <div>
+        <div class="resident-summary-card">
+          <h3><span>👤</span> Resident Profile</h3>
+          <ul class="info-list">
+            <li>
+              <span class="info-label">Name</span>
+              <span class="info-value" id="profileName">Loading...</span>
+            </li>
+            <li>
+              <span class="info-label">Hostel Block</span>
+              <span class="info-value" id="profileBlock">Loading...</span>
+            </li>
+            <li>
+              <span class="info-label">Room Number</span>
+              <span class="info-value" id="profileRoom">Loading...</span>
+            </li>
+            <li>
+              <span class="info-label">Email</span>
+              <span class="info-value" id="profileEmail" style="font-size: 0.8rem;">Loading...</span>
+            </li>
+          </ul>
+
+          <div style="background: #f8fafc; border-radius: var(--radius-md); padding: 1rem; margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+            <p><strong>💡 What happens next?</strong></p>
+            <p style="margin-top: 0.35rem;">Staff reviews your complaint and assigns an on-duty technician. You can track live updates on your dashboard.</p>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </main>
+
+  <!-- Success Confirmation Modal -->
+  <div class="modal-backdrop" id="successModal">
+    <div class="modal-card">
+      <span style="font-size: 3rem;">🎉</span>
+      <h2 style="font-size: 1.6rem; color: #1e1b4b; margin: 0.5rem 0 0.25rem 0;">Complaint Submitted!</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Your maintenance request has been logged. Use this ticket ID to track progress:</p>
+      
+      <div class="ticket-display" id="modalTicketNo">HC-2026-0000</div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+        <a id="trackTicketBtn" href="#" class="btn btn-primary">Track Progress</a>
+        <a href="/student-dashboard.html" class="btn btn-secondary">My Complaints</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let selectedPhotoFile = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Access guard: Must be logged in as student
+      const user = getUser();
+      if (!user) {
+        showToast('Please sign in to lodge a complaint.', 'warning');
+        setTimeout(() => window.location.href = '/login.html', 1000);
+        return;
+      }
+      if (user.role !== 'student') {
+        showToast('Staff users cannot lodge resident complaints.', 'info');
+        setTimeout(() => window.location.href = '/staff-dashboard.html', 1000);
+        return;
+      }
+
+      // Populate resident profile card
+      document.getElementById('profileName').innerText = user.name || 'Resident';
+      document.getElementById('profileBlock').innerText = user.hostel_block || 'Unassigned';
+      document.getElementById('profileRoom').innerText = user.room_no || 'N/A';
+      document.getElementById('profileEmail').innerText = user.email || '';
+    });
+
+    function selectCategory(cat, el) {
+      document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('categoryInput').value = cat;
+    }
+
+    function selectPriority(priority, el) {
+      document.querySelectorAll('.priority-option').forEach(p => {
+        p.className = 'priority-option';
+      });
+      el.classList.add(`selected-${priority}`);
+      document.getElementById('priorityInput').value = priority;
+    }
+
+    function handlePhotoSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Photo is too large! Maximum allowed size is 5MB.', 'error');
+        e.target.value = '';
+        return;
+      }
+
+      selectedPhotoFile = file;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('imagePreview').src = evt.target.result;
+        document.getElementById('dropzone').style.display = 'none';
+        document.getElementById('previewContainer').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removePhoto() {
+      selectedPhotoFile = null;
+      document.getElementById('photoInput').value = '';
+      document.getElementById('imagePreview').src = '';
+      document.getElementById('previewContainer').style.display = 'none';
+      document.getElementById('dropzone').style.display = 'block';
+    }
+
+    async function handleComplaintSubmit(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      const category = document.getElementById('categoryInput').value;
+      const priority = document.getElementById('priorityInput').value;
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Submitting Request...';
+
+      // Build FormData for multipart request
+      const formData = new FormData();
+      formData.append('category', category);
+      formData.append('priority', priority);
+      formData.append('title', title);
+      formData.append('description', description);
+      if (selectedPhotoFile) {
+        formData.append('photo', selectedPhotoFile);
+      }
+
+      const response = await apiRequest('/api/complaints', {
+        method: 'POST',
+        body: formData
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Submit Maintenance Request';
+
+      if (!response.success) {
+        showToast(response.error || 'Failed to lodge complaint.', 'error');
+        return;
+      }
+
+      // Show Success Modal
+      const ticketNo = response.data.ticket_no;
+      document.getElementById('modalTicketNo').innerText = ticketNo;
+      document.getElementById('trackTicketBtn').href = `/track.html?ticket=${encodeURIComponent(ticketNo)}`;
+      document.getElementById('successModal').classList.add('active');
+    }
+  </script>
+</body>
+</html>
+

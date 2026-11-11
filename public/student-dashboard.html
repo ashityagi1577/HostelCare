@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard – HostelCare Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .dash-header {
+      padding: 2rem 0;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .dash-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .dash-header h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #1e1b4b;
+    }
+    .dash-header p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 0.2rem;
+    }
+    /* Metric Cards */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      padding: 1.25rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: white;
+      box-shadow: var(--shadow-sm);
+    }
+    .metric-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .metric-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    /* Filter Bar */
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      background: white;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .filter-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    /* Complaints Table */
+    .table-container {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      background: #f8fafc;
+      padding: 0.85rem 1.25rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background-color: #faf5ff;
+    }
+    .ticket-cell {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .ticket-cell:hover {
+      text-decoration: underline;
+    }
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+    .empty-state span {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    .empty-state h3 {
+      font-size: 1.3rem;
+      color: #1e1b4b;
+      margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🏠</span>
+        <span>HostelCare</span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Rendered by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Dashboard Header -->
+  <header class="dash-header">
+    <div class="container dash-header-row">
+      <div>
+        <h1 id="welcomeGreeting">Welcome, Resident</h1>
+        <p id="roomSubtitle">Room repairs and complaint tracker</p>
+      </div>
+      <div>
+        <a href="/lodge-complaint.html" class="btn btn-primary">
+          <span>➕</span> Lodge New Complaint
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="margin-bottom: 4rem;">
+    <!-- Metric Summary Grid -->
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-title">Total Lodged</div>
+        <div class="metric-val" id="metricTotal">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title" style="color: #64748b;">Pending Triage</div>
+        <div class="metric-val" id="metricPending" style="color: #475569;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title" style="color: var(--amber);">In Progress / Assigned</div>
+        <div class="metric-val" id="metricInProgress" style="color: #b45309;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title" style="color: var(--emerald);">Resolved / Closed</div>
+        <div class="metric-val" id="metricResolved" style="color: #047857;">0</div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterComplaints('all', this)">All Complaints</button>
+      <button class="filter-tab" onclick="filterComplaints('active', this)">Active Only</button>
+      <button class="filter-tab" onclick="filterComplaints('Resolved', this)">Resolved</button>
+      <button class="filter-tab" onclick="filterComplaints('Closed', this)">Closed</button>
+    </div>
+
+    <!-- Table Container -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket No</th>
+            <th>Category</th>
+            <th>Issue Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assigned Technician</th>
+            <th>Date Lodged</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="complaintsTableBody">
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              Loading your maintenance requests...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State Container -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <span>🎉</span>
+      <h3>No Complaints Found</h3>
+      <p>Everything in your room is running smoothly! Need something fixed?</p>
+      <a href="/lodge-complaint.html" class="btn btn-primary">Lodge a Maintenance Request</a>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let allComplaints = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getUser();
+      if (!user) {
+        showToast('Please sign in to view your dashboard.', 'warning');
+        setTimeout(() => window.location.href = '/login.html', 800);
+        return;
+      }
+      if (user.role !== 'student') {
+        window.location.href = '/staff-dashboard.html';
+        return;
+      }
+
+      document.getElementById('welcomeGreeting').innerText = `Welcome, ${user.name}!`;
+      document.getElementById('roomSubtitle').innerText = `${user.hostel_block || 'Hostel'} • Room ${user.room_no || 'N/A'}`;
+
+      fetchMyComplaints();
+    });
+
+    async function fetchMyComplaints() {
+      const res = await apiRequest('/api/complaints/my');
+      if (!res.success) {
+        showToast('Failed to load complaints.', 'error');
+        return;
+      }
+
+      allComplaints = res.data || [];
+      updateMetrics(allComplaints);
+      renderTable(allComplaints);
+    }
+
+    function updateMetrics(list) {
+      document.getElementById('metricTotal').innerText = list.length;
+      document.getElementById('metricPending').innerText = list.filter(c => c.status === 'Pending').length;
+      document.getElementById('metricInProgress').innerText = list.filter(c => ['Assigned', 'In_Progress'].includes(c.status)).length;
+      document.getElementById('metricResolved').innerText = list.filter(c => ['Resolved', 'Closed'].includes(c.status)).length;
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById('complaintsTableBody');
+      const emptyState = document.getElementById('emptyState');
+      const tableContainer = document.querySelector('.table-container');
+
+      if (list.length === 0) {
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      tableContainer.style.display = 'block';
+      emptyState.style.display = 'none';
+
+      tbody.innerHTML = list.map(c => {
+        const priorityBadge = `badge-${c.priority.toLowerCase()}`;
+        const statusBadge = `badge-${c.status.toLowerCase()}`;
+        const techDisplay = c.technician_name ? `${c.technician_name} (${c.technician_trade})` : '<span style="color:#94a3b8;">Unassigned</span>';
+        const formattedDate = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        let actionBtn = `<a href="/track.html?ticket=${c.ticket_no}" class="btn btn-secondary btn-sm">Track</a>`;
+        if (c.status === 'Resolved' && !c.feedback_rating) {
+          actionBtn += ` <a href="/track.html?ticket=${c.ticket_no}#rate" class="btn btn-primary btn-sm" style="background:#059669; border-color:#059669;">Rate</a>`;
+        }
+
+        const categoryIcons = {
+          'Electrical': '⚡',
+          'Plumbing': '🚰',
+          'Carpentry': '🪚',
+          'Cleaning': '🧹',
+          'WiFi_Internet': '🌐',
+          'Other': '📦'
+        };
+        const icon = categoryIcons[c.category] || '🔧';
+
+        return `
+          <tr>
+            <td>
+              <a href="/track.html?ticket=${c.ticket_no}" class="ticket-cell">${c.ticket_no}</a>
+            </td>
+            <td>
+              <span>${icon} ${c.category}</span>
+            </td>
+            <td>
+              <strong>${c.title}</strong>
+            </td>
+            <td>
+              <span class="badge ${priorityBadge}">${c.priority}</span>
+            </td>
+            <td>
+              <span class="badge ${statusBadge}">${c.status.replace('_', ' ')}</span>
+            </td>
+            <td>${techDisplay}</td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">${formattedDate}</td>
+            <td>
+              <div style="display: flex; gap: 0.35rem;">
+                ${actionBtn}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterComplaints(type, btn) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (type === 'all') {
+        renderTable(allComplaints);
+      } else if (type === 'active') {
+        renderTable(allComplaints.filter(c => ['Pending', 'Assigned', 'In_Progress'].includes(c.status)));
+      } else {
+        renderTable(allComplaints.filter(c => c.status === type));
+      }
+    }
+  </script>
+</body>
+</html>
+

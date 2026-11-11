@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HostelCare – Hostel Maintenance & Complaint Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .hero {
+      padding: 4.5rem 0 3.5rem 0;
+      text-align: center;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+    .hero h1 span {
+      color: var(--primary);
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 2rem auto;
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .quick-track-box {
+      max-width: 520px;
+      margin: 0 auto;
+      background: white;
+      padding: 0.75rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      gap: 0.5rem;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin: 4rem 0;
+    }
+    .feature-card {
+      text-align: left;
+      padding: 2rem;
+    }
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+      padding: 0.6rem;
+      background: var(--primary-light);
+      border-radius: var(--radius-md);
+    }
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Universal Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🏠</span>
+        <span>HostelCare</span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Injected dynamically by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <span class="badge badge-assigned" style="margin-bottom: 1rem;">Campus Facility Management Portal</span>
+      <h1>Fast, Transparent <span>Hostel Maintenance</span></h1>
+      <p>Report room repairs, plumbing leaks, electrical faults, or cleaning issues with photo proof. Follow live technician progress from assignment to resolution.</p>
+
+      <div class="hero-actions">
+        <a href="/login.html" class="btn btn-primary btn-lg">Student Login</a>
+        <a href="/register.html" class="btn btn-secondary btn-lg">Register Account</a>
+        <a href="/login.html?role=staff" class="btn btn-secondary btn-lg" style="color: var(--amber-text); border-color: #fde68a;">Staff & Warden Portal</a>
+      </div>
+
+      <!-- Quick Ticket Tracker -->
+      <form class="quick-track-box" onsubmit="handleQuickTrack(event)">
+        <input type="text" id="quickTicketInput" class="form-control" placeholder="Enter Ticket Number (e.g. HC-2026-0001)" required style="border: none; box-shadow: none;">
+        <button type="submit" class="btn btn-primary">Track Ticket</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <main class="container">
+    <div class="features-grid">
+      <div class="card feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Category Triage</h3>
+        <p>Specific classification for Electrical, Plumbing, Carpentry, Cleaning, and Wi-Fi issues to alert the right technicians immediately.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon">📸</div>
+        <h3>Photo Proof Upload</h3>
+        <p>Attach clear photographs of the repair issue directly from your phone or laptop to avoid miscommunication.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon">⏱️</div>
+        <h3>5-Stage Stepper Tracker</h3>
+        <p>Live progress visibility: Submitted ➔ Assigned ➔ In Progress ➔ Resolved ➔ Closed, with timestamped audit notes.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon">⭐</div>
+        <h3>Rating & Quality Sign-Off</h3>
+        <p>Rate completed repairs with a 1-to-5 star review to ensure hostel maintenance staff adhere to high standards.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>HostelCare – Campus Maintenance & Facility Portal &copy; 2026. Built for Project-Based Learning (PBL).</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    function handleQuickTrack(e) {
+      e.preventDefault();
+      const ticketNo = document.getElementById('quickTicketInput').value.trim();
+      if (ticketNo) {
+        window.location.href = `/track.html?ticket=${encodeURIComponent(ticketNo)}`;
+      }
+    }
+  </script>
+</body>
+</html>
+

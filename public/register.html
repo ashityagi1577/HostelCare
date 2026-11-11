@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resident Registration – HostelCare Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .auth-wrapper {
+      min-height: calc(100vh - 140px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 520px;
+      padding: 2.5rem;
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .auth-header h2 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin-top: 0.5rem;
+    }
+    .auth-header p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .auth-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 540px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🏠</span>
+        <span>HostelCare</span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Rendered by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Registration Form Section -->
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span style="font-size: 2.2rem;">📝</span>
+        <h2>Resident Registration</h2>
+        <p>Create your student account to lodge repairs and track maintenance</p>
+      </div>
+
+      <form id="registerForm" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name *</label>
+          <input type="text" id="name" class="form-control" placeholder="e.g. Priya Sharma" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Student Email Address *</label>
+          <input type="email" id="email" class="form-control" placeholder="priya.sharma@hostel.edu" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="password">Password *</label>
+            <input type="password" id="password" class="form-control" placeholder="Min. 6 chars" required minlength="6">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm Password *</label>
+            <input type="password" id="confirmPassword" class="form-control" placeholder="Re-type password" required minlength="6">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="hostel_block">Hostel Block *</label>
+            <select id="hostel_block" class="form-control" required>
+              <option value="">Select Block...</option>
+              <option value="Block A (Boys)">Block A (Boys)</option>
+              <option value="Block B (Boys)">Block B (Boys)</option>
+              <option value="Block C (Girls)">Block C (Girls)</option>
+              <option value="Block D (Girls)">Block D (Girls)</option>
+              <option value="PG / International Hostel">PG / International Hostel</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="room_no">Room Number *</label>
+            <input type="text" id="room_no" class="form-control" placeholder="e.g. A-204" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Mobile / Contact Number</label>
+          <input type="tel" id="phone" class="form-control" placeholder="e.g. 9876543210">
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          Complete Registration
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already registered? <a href="/login.html">Sign in to your account</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    async function handleRegister(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const hostel_block = document.getElementById('hostel_block').value;
+      const room_no = document.getElementById('room_no').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+
+      if (password !== confirmPassword) {
+        showToast('Passwords do not match. Please verify.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Creating account...';
+
+      const response = await apiRequest('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          hostel_block,
+          room_no,
+          phone: phone || null
+        })
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Complete Registration';
+
+      if (!response.success) {
+        showToast(response.error || 'Registration failed.', 'error');
+        return;
+      }
+
+      const user = response.data.user;
+      const token = response.data.token;
+
+      // Automatically store session
+      setSession(user, token);
+      showToast('Registration successful! Welcome to HostelCare.', 'success');
+
+      setTimeout(() => {
+        window.location.href = '/student-dashboard.html';
+      }, 700);
+    }
+  </script>
+</body>
+</html>
+

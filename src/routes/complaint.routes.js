@@ -12,6 +12,7 @@ router.use(authenticateToken);
  */
 router.post('/', requireRoles('student'), handlePhotoUpload, complaintController.lodgeComplaint);
 router.get('/my', requireRoles('student'), complaintController.getMyComplaints);
+router.post('/:id/feedback', requireRoles('student'), complaintController.submitFeedback);
 
 /**
  * Universal Complaint Tracking & Timeline Endpoints
