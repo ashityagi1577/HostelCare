@@ -3,21 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Track Ticket Progress – HostelCare Portal</title>
+  <title>Track Ticket – HostelCare Portal</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    /* ── Track Header ───────────────────────────────── */
     .track-header {
-      padding: 2.5rem 0 1.5rem 0;
+      padding: 2.5rem 0 1.5rem;
       background: white;
       border-bottom: 1px solid var(--border);
       margin-bottom: 2rem;
     }
+    .track-header h1 { font-size: 1.9rem; font-weight: 800; color: #1e1b4b; }
+    .track-header p  { color: var(--text-muted); font-size: 0.93rem; margin-top: 0.25rem; }
+
     .track-search-box {
-      max-width: 500px;
       display: flex;
       gap: 0.5rem;
-      margin-top: 1rem;
+      max-width: 520px;
+      margin-top: 1.1rem;
     }
+    .track-search-box .form-control { flex: 1; font-family: monospace; letter-spacing: 0.03em; }
+
+    /* ── Ticket Summary Card ────────────────────────── */
     .ticket-summary-card {
       background: white;
       border: 1px solid var(--border);
@@ -30,53 +37,90 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 1rem;
       flex-wrap: wrap;
+      gap: 1rem;
       margin-bottom: 1rem;
     }
-    /* Horizontal Stepper */
-    .stepper-container {
-      margin: 2.5rem 0;
-      padding: 1.5rem 1rem;
+    .ticket-no-mono {
+      font-family: monospace;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.04em;
+    }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0.75rem 0 0;
+    }
+    .meta-row span { display: flex; align-items: center; gap: 0.3rem; }
+
+    /* ── Stepper ────────────────────────────────────── */
+    .stepper-wrap {
       background: #f8fafc;
-      border-radius: var(--radius-lg);
       border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stepper-wrap h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e1b4b;
+      text-align: center;
+      margin-bottom: 1.75rem;
     }
     .stepper {
       display: flex;
       justify-content: space-between;
       position: relative;
     }
+    /* full-width grey track */
     .stepper::before {
       content: '';
       position: absolute;
-      top: 20px;
-      left: 30px;
-      right: 30px;
+      top: 19px;
+      left: 48px;
+      right: 48px;
       height: 4px;
       background: #e2e8f0;
       z-index: 1;
     }
+    /* green fill that grows based on CSS var --pct */
+    .stepper::after {
+      content: '';
+      position: absolute;
+      top: 19px;
+      left: 48px;
+      width: var(--fill-pct, 0%);
+      height: 4px;
+      background: #10b981;
+      z-index: 2;
+      transition: width 0.6s ease;
+    }
+
     .step-node {
       position: relative;
-      z-index: 2;
+      z-index: 3;
       text-align: center;
       flex: 1;
     }
     .step-circle {
-      width: 40px;
-      height: 40px;
+      width: 42px; height: 42px;
       border-radius: 50%;
       background: white;
       border: 3px solid #cbd5e1;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 0.75rem auto;
+      margin: 0 auto 0.7rem;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #64748b;
-      transition: var(--transition);
+      transition: all 0.35s ease;
     }
     .step-node.completed .step-circle {
       background: #10b981;
@@ -87,33 +131,97 @@
       background: var(--primary);
       border-color: #818cf8;
       color: white;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 0 5px rgba(99,102,241,0.18);
     }
     .step-label {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.15rem;
     }
-    .step-node.upcoming .step-label {
-      color: #94a3b8;
+    .step-node.upcoming .step-label { color: #94a3b8; }
+    .step-time { font-size: 0.72rem; color: var(--text-muted); }
+
+    /* ── Description / Photo ────────────────────────── */
+    .desc-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #334155;
+      margin-top: 0.5rem;
     }
-    .step-time {
-      font-size: 0.75rem;
+    .photo-evidence {
+      margin-top: 1rem;
+    }
+    .photo-evidence strong {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
       color: var(--text-muted);
+      margin-bottom: 0.5rem;
     }
-    /* History Feed */
+    .photo-thumb {
+      max-height: 160px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      cursor: zoom-in;
+      transition: transform 0.2s;
+    }
+    .photo-thumb:hover { transform: scale(1.03); }
+
+    /* ── Rating Box ─────────────────────────────────── */
+    .rating-box {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1px solid #a7f3d0;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .rating-box h3 { font-size: 1.3rem; color: #065f46; margin: 0.4rem 0 0.2rem; }
+    .rating-box p  { color: #047857; font-size: 0.92rem; }
+    .already-rated-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .already-rated-box .big-rating { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+    .star-row {
+      display: inline-flex;
+      gap: 0.4rem;
+      font-size: 2.1rem;
+      cursor: pointer;
+      margin: 0.75rem 0;
+    }
+    .star { color: #cbd5e1; transition: color 0.12s; user-select: none; }
+    .star.active, .star.hover { color: #f59e0b; }
+
+    /* ── Audit Trail ────────────────────────────────── */
+    .audit-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .audit-card h3 { font-size: 1.1rem; color: #1e1b4b; margin-bottom: 1.25rem; }
+
     .timeline-feed {
       position: relative;
-      padding-left: 2rem;
-      margin-top: 1.5rem;
+      padding-left: 2.2rem;
     }
     .timeline-feed::before {
       content: '';
       position: absolute;
-      left: 7px;
-      top: 5px;
-      bottom: 5px;
+      left: 7px; top: 5px; bottom: 5px;
       width: 2px;
       background: var(--border);
     }
@@ -124,10 +232,9 @@
     .feed-item::before {
       content: '';
       position: absolute;
-      left: -2rem;
+      left: -2.2rem;
       top: 4px;
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       border-radius: 50%;
       background: white;
       border: 3px solid var(--primary);
@@ -138,62 +245,70 @@
       gap: 0.5rem;
       font-weight: 700;
       font-size: 0.95rem;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.2rem;
     }
-    .feed-time {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: normal;
-    }
+    .feed-time { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; }
+    .feed-actor { font-size: 0.82rem; color: var(--text-muted); }
     .feed-remarks {
       background: #f8fafc;
-      padding: 0.6rem 0.9rem;
+      border: 1px solid #e2e8f0;
       border-radius: var(--radius-md);
+      padding: 0.55rem 0.9rem;
       font-size: 0.88rem;
       color: #334155;
       margin-top: 0.35rem;
-      border: 1px solid #e2e8f0;
     }
-    /* Star Rating Box */
-    .rating-box {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      margin-top: 2rem;
+    .feed-empty {
+      color: var(--text-muted);
+      font-size: 0.9rem;
       text-align: center;
+      padding: 1.5rem;
     }
-    .star-rating {
-      display: inline-flex;
-      gap: 0.4rem;
-      font-size: 2rem;
+
+    /* ── Lightbox ───────────────────────────────────── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 92vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+    .lightbox-close {
+      position: absolute;
+      top: 1.2rem; right: 1.5rem;
+      color: white;
+      font-size: 2.2rem;
       cursor: pointer;
-      margin: 0.75rem 0;
+      line-height: 1;
+      opacity: 0.8;
+      transition: opacity 0.2s;
     }
-    .star {
-      color: #cbd5e1;
-      transition: color 0.15s ease;
+    .lightbox-close:hover { opacity: 1; }
+
+    /* ── Shared Notice ──────────────────────────────── */
+    .share-hint {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
     }
-    .star.active, .star:hover, .star.hover {
-      color: #f59e0b;
+    .share-hint code {
+      background: #f1f5f9;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #334155;
     }
-    @media (max-width: 650px) {
-      .stepper {
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-      .stepper::before {
-        display: none;
-      }
-      .step-node {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        text-align: left;
-      }
-      .step-circle {
-        margin: 0;
-      }
+
+    /* ── Mobile Stepper ─────────────────────────────── */
+    @media (max-width: 640px) {
+      .stepper { flex-direction: column; gap: 1.2rem; }
+      .stepper::before, .stepper::after { display: none; }
+      .step-node { display: flex; align-items: flex-start; gap: 1rem; text-align: left; }
+      .step-circle { margin: 0; flex-shrink: 0; }
     }
   </style>
 </head>
@@ -206,112 +321,150 @@
         <span class="brand-icon">🏠</span>
         <span>HostelCare</span>
       </a>
-      <ul class="nav-links" id="navbar-links">
-        <!-- Rendered by auth.js -->
-      </ul>
+      <ul class="nav-links" id="navbar-links"></ul>
     </div>
   </nav>
 
   <!-- Track Header -->
   <header class="track-header">
     <div class="container">
-      <h1>Track Maintenance Ticket</h1>
-      <p>Live visibility from submission to resolution and student quality sign-off</p>
-      
+      <h1>🔍 Track Maintenance Ticket</h1>
+      <p>Live status from submission to resolution — no login required for ticket lookup</p>
+
       <form class="track-search-box" onsubmit="handleSearch(event)">
-        <input type="text" id="ticketSearchInput" class="form-control" placeholder="Enter Ticket Number (e.g. HC-2026-0001)" required>
-        <button type="submit" class="btn btn-primary">Track</button>
+        <input
+          type="text"
+          id="ticketSearchInput"
+          class="form-control"
+          placeholder="HC-2026-0001"
+          autocomplete="off"
+          required
+        >
+        <button type="submit" class="btn btn-primary">Track →</button>
       </form>
+
+      <p class="share-hint" id="shareHint" style="display:none;">
+        🔗 Direct link: <code id="shareUrl"></code>
+      </p>
     </div>
   </header>
 
   <main class="container" style="margin-bottom: 4rem;">
-    <!-- Loading / Error Box -->
-    <div id="statusNotice" style="text-align: center; padding: 3rem 1rem;">
-      <p style="color: var(--text-muted);">Please enter a ticket number above to view timeline.</p>
+
+    <!-- Status Notice (default / loading / error) -->
+    <div id="statusNotice" style="text-align: center; padding: 4rem 1rem;">
+      <span style="font-size: 3rem;">🎫</span>
+      <p style="color: var(--text-muted); margin-top: 0.75rem; font-size: 1rem;">
+        Enter a ticket number above to view its live status and audit trail.
+      </p>
     </div>
 
-    <!-- Ticket Detail Display Area -->
+    <!-- Main Ticket Detail Area -->
     <div id="ticketDetailArea" style="display: none;">
-      
+
       <!-- Summary Card -->
       <div class="ticket-summary-card">
         <div class="ticket-title-row">
           <div>
-            <span id="ticketBadgeCategory" class="badge badge-assigned" style="margin-bottom: 0.5rem;">Electrical</span>
-            <h2 id="ticketTitle" style="font-size: 1.5rem; color: #1e1b4b; margin-top: 0.2rem;">Ceiling fan loose wire</h2>
-            <p id="ticketLocation" style="color: var(--text-muted); font-size: 0.9rem;">Block A • Room 204 • Lodged on Nov 11, 2026</p>
+            <span id="ticketBadgeCategory" class="badge badge-assigned">Category</span>
+            <h2 id="ticketTitle" style="font-size: 1.5rem; color: #1e1b4b; margin: 0.4rem 0 0;">Title</h2>
+            <div class="meta-row">
+              <span>🏢 <span id="metaBlock">—</span></span>
+              <span>🚪 Room <span id="metaRoom">—</span></span>
+              <span>🕒 <span id="metaDate">—</span></span>
+              <span>⚡ <span id="metaPriority">—</span></span>
+            </div>
           </div>
-          <div style="text-align: right;">
-            <div id="ticketNumber" style="font-family: monospace; font-size: 1.3rem; font-weight: 800; color: var(--primary);">HC-2026-0001</div>
-            <span id="ticketStatusPill" class="badge badge-pending" style="font-size: 0.85rem; margin-top: 0.35rem;">Pending</span>
+          <div style="text-align: right; flex-shrink: 0;">
+            <div class="ticket-no-mono" id="ticketNumber">HC-XXXX-XXXX</div>
+            <span id="ticketStatusPill" class="badge badge-pending" style="margin-top: 0.4rem; font-size: 0.85rem;">Status</span>
           </div>
         </div>
 
-        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border); margin: 1rem 0;">
-          <strong style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Resident Description:</strong>
-          <p id="ticketDescription" style="margin-top: 0.35rem; font-size: 0.95rem; line-height: 1.5;"></p>
+        <!-- Description -->
+        <strong style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted);">Resident Description</strong>
+        <div class="desc-box" id="ticketDescription"></div>
+
+        <!-- Assigned Tech -->
+        <div id="techRow" style="display: none; margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
+          🔧 Assigned Technician: <strong id="techName" style="color: #334155;">—</strong>
         </div>
 
-        <div id="photoEvidenceRow" style="display: none; margin-top: 1rem;">
-          <strong style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Attached Photo Evidence:</strong>
-          <div style="margin-top: 0.5rem;">
-            <a id="photoLink" href="" target="_blank">
-              <img id="photoThumb" src="" alt="Proof" style="max-height: 150px; border-radius: var(--radius-md); border: 1px solid var(--border);">
-            </a>
-          </div>
+        <!-- Photo Evidence -->
+        <div class="photo-evidence" id="photoEvidenceRow" style="display: none;">
+          <strong>Attached Photo Evidence</strong>
+          <img class="photo-thumb" id="photoThumb" src="" alt="Evidence Photo" onclick="openLightbox(this.src)">
         </div>
       </div>
 
       <!-- 5-Node Visual Stepper -->
-      <div class="stepper-container">
-        <h3 style="font-size: 1.1rem; color: #1e1b4b; margin-bottom: 1.5rem; text-align: center;">Maintenance Progress Stepper</h3>
-        <div class="stepper" id="stepperNodes">
-          <!-- Dynamically generated stepper nodes -->
-        </div>
+      <div class="stepper-wrap">
+        <h3>📋 Maintenance Progress</h3>
+        <div class="stepper" id="stepperNodes" style="--fill-pct: 0%;"></div>
       </div>
 
-      <!-- Resolution Rating Section (Shown when Resolved) -->
+      <!-- Rating Box (shown to ticket owner if status = Resolved and not yet rated) -->
       <div id="ratingSection" class="rating-box" style="display: none;">
-        <span style="font-size: 2.2rem;">⭐</span>
-        <h3 style="font-size: 1.3rem; color: #065f46; margin: 0.35rem 0;">Work Completed! Rate Your Experience</h3>
-        <p style="color: #047857; font-size: 0.92rem;">How satisfied are you with the technician's repair work and punctuality?</p>
-        
-        <div class="star-rating" id="starContainer">
-          <span class="star" data-val="1" onclick="setRating(1)">★</span>
-          <span class="star" data-val="2" onclick="setRating(2)">★</span>
-          <span class="star" data-val="3" onclick="setRating(3)">★</span>
-          <span class="star" data-val="4" onclick="setRating(4)">★</span>
-          <span class="star" data-val="5" onclick="setRating(5)">★</span>
+        <div style="font-size: 2.5rem;">⭐</div>
+        <h3>Work Completed! Rate Your Experience</h3>
+        <p>How satisfied are you with the technician's repair quality and punctuality?</p>
+
+        <div class="star-row" id="starContainer">
+          <span class="star" data-val="1" onclick="setRating(1)" onmouseover="hoverRating(1)" onmouseout="unhoverRating()">★</span>
+          <span class="star" data-val="2" onclick="setRating(2)" onmouseover="hoverRating(2)" onmouseout="unhoverRating()">★</span>
+          <span class="star" data-val="3" onclick="setRating(3)" onmouseover="hoverRating(3)" onmouseout="unhoverRating()">★</span>
+          <span class="star" data-val="4" onclick="setRating(4)" onmouseover="hoverRating(4)" onmouseout="unhoverRating()">★</span>
+          <span class="star" data-val="5" onclick="setRating(5)" onmouseover="hoverRating(5)" onmouseout="unhoverRating()">★</span>
         </div>
         <input type="hidden" id="selectedStarValue" value="5">
 
-        <div style="max-width: 480px; margin: 0.75rem auto;">
-          <textarea id="feedbackComment" class="form-control" rows="2" placeholder="Optional comments regarding the repair..."></textarea>
-          <button onclick="submitStudentFeedback()" id="feedbackBtn" class="btn btn-primary" style="background: #059669; border-color: #059669; margin-top: 0.75rem;">
-            Submit Rating & Close Ticket
+        <div style="max-width: 460px; margin: 0 auto;">
+          <textarea
+            id="feedbackComment"
+            class="form-control"
+            rows="2"
+            placeholder="Optional comments about the repair work…"
+          ></textarea>
+          <button onclick="submitStudentFeedback()" id="feedbackBtn"
+            class="btn btn-primary"
+            style="background:#059669; border-color:#059669; width:100%; margin-top:0.75rem;">
+            ✔ Submit Rating &amp; Close Ticket
           </button>
         </div>
       </div>
 
-      <!-- Chronological History Trail -->
-      <div class="card" style="padding: 2rem; margin-top: 2rem;">
-        <h3 style="font-size: 1.15rem; color: #1e1b4b; margin-bottom: 1rem;">Chronological Audit Trail</h3>
-        <div class="timeline-feed" id="historyFeed">
-          <!-- Dynamically populated events -->
-        </div>
+      <!-- Already Rated -->
+      <div id="alreadyRatedSection" class="already-rated-box" style="display: none;">
+        <div class="big-rating" id="submittedStars">★★★★★</div>
+        <strong style="color:#065f46;">You already rated this ticket!</strong>
+        <p id="submittedComment" style="color:#047857; font-size:0.9rem; margin-top:0.4rem;"></p>
       </div>
 
-    </div>
+      <!-- Chronological Audit Trail -->
+      <div class="audit-card">
+        <h3>🗒 Chronological Audit Trail</h3>
+        <div class="timeline-feed" id="historyFeed"></div>
+      </div>
+
+    </div><!-- /ticketDetailArea -->
   </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+    <img id="lightboxImg" src="" alt="Evidence">
+  </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script>
-    let currentComplaintData = null;
+    let currentComplaint = null;
     let chosenRating = 5;
 
+    // ── On Page Load ──────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+      renderNavbar();
+
       const params = new URLSearchParams(window.location.search);
       const ticketParam = params.get('ticket');
       if (ticketParam) {
@@ -320,146 +473,252 @@
       }
     });
 
+    // ── Search Handler ────────────────────────────────────────
     function handleSearch(e) {
       e.preventDefault();
-      const ticket = document.getElementById('ticketSearchInput').value.trim();
-      if (ticket) loadTicket(ticket);
+      const ticket = document.getElementById('ticketSearchInput').value.trim().toUpperCase();
+      if (!ticket) return;
+      // Update URL without reload
+      const url = new URL(window.location.href);
+      url.searchParams.set('ticket', ticket);
+      window.history.replaceState({}, '', url.toString());
+      // Show share hint
+      document.getElementById('shareUrl').textContent = window.location.href;
+      document.getElementById('shareHint').style.display = 'block';
+      loadTicket(ticket);
     }
 
+    // ── Load Ticket ───────────────────────────────────────────
     async function loadTicket(ticketNo) {
       const notice = document.getElementById('statusNotice');
-      const area = document.getElementById('ticketDetailArea');
+      const area   = document.getElementById('ticketDetailArea');
 
-      notice.innerHTML = '<p style="color: var(--text-muted);">Fetching ticket details & timeline...</p>';
+      notice.innerHTML = `<span style="font-size:2.5rem;">⏳</span>
+        <p style="color:var(--text-muted); margin-top:0.75rem;">Fetching ticket details…</p>`;
       notice.style.display = 'block';
       area.style.display = 'none';
 
-      // First get complaint info
-      const res = await apiRequest(`/api/complaints/${encodeURIComponent(ticketNo)}`);
-      if (!res.success) {
-        notice.innerHTML = `<p style="color: var(--rose); font-weight: 600;">✖ ${res.error || 'Ticket not found or access denied.'}</p>`;
+      // Parallel fetch for speed
+      const [complaintRes, timelineRes] = await Promise.all([
+        apiRequest(`/api/complaints/${encodeURIComponent(ticketNo)}`),
+        apiRequest(`/api/complaints/${encodeURIComponent(ticketNo)}/timeline`)
+      ]);
+
+      if (!complaintRes.success) {
+        notice.innerHTML = `
+          <span style="font-size:2.5rem;">❌</span>
+          <p style="color:var(--rose); font-weight:600; margin-top:0.75rem;">
+            ${complaintRes.error || 'Ticket not found. Please check the ticket number.'}
+          </p>
+          <p style="color:var(--text-muted); font-size:0.88rem; margin-top:0.4rem;">
+            Ticket numbers look like: HC-2026-0001
+          </p>`;
         return;
       }
 
-      currentComplaintData = res.data;
-
-      // Get enriched timeline stepper
-      const timelineRes = await apiRequest(`/api/complaints/${encodeURIComponent(ticketNo)}/timeline`);
-      const timeline = timelineRes.success ? timelineRes.data : null;
+      currentComplaint = complaintRes.data;
+      const timeline   = timelineRes.success ? timelineRes.data : null;
 
       notice.style.display = 'none';
-      area.style.display = 'block';
+      area.style.display   = 'block';
 
-      renderTicketDetails(currentComplaintData, timeline);
+      renderTicket(currentComplaint, timeline);
     }
 
-    function renderTicketDetails(c, t) {
-      document.getElementById('ticketNumber').innerText = c.ticket_no;
-      document.getElementById('ticketTitle').innerText = c.title;
-      document.getElementById('ticketBadgeCategory').innerText = c.category;
-      document.getElementById('ticketDescription').innerText = c.description;
-      
-      const loc = `${c.hostel_block || 'Hostel'} • Room ${c.room_no || 'N/A'} • Lodged on ${new Date(c.created_at).toLocaleDateString()}`;
-      document.getElementById('ticketLocation').innerText = loc;
+    // ── Render Full Ticket ────────────────────────────────────
+    function renderTicket(c, t) {
+      // Header fields
+      document.getElementById('ticketNumber').textContent   = c.ticket_no;
+      document.getElementById('ticketTitle').textContent    = c.title;
+      document.getElementById('ticketDescription').textContent = c.description;
+
+      const catBadge = document.getElementById('ticketBadgeCategory');
+      catBadge.textContent  = c.category;
+      catBadge.className    = 'badge badge-assigned';
+
+      document.getElementById('metaBlock').textContent    = c.hostel_block || '—';
+      document.getElementById('metaRoom').textContent     = c.room_no     || '—';
+      document.getElementById('metaDate').textContent     = formatDate(c.created_at);
+      document.getElementById('metaPriority').textContent = c.priority    || '—';
 
       const pill = document.getElementById('ticketStatusPill');
-      pill.innerText = c.status.replace('_', ' ');
-      pill.className = `badge badge-${c.status.toLowerCase()}`;
+      pill.textContent = c.status.replace('_', ' ');
+      pill.className   = `badge badge-${c.status.toLowerCase().replace(' ', '-')}`;
+
+      // Assigned technician
+      const techRow = document.getElementById('techRow');
+      if (c.technician_name) {
+        document.getElementById('techName').textContent = c.technician_name;
+        techRow.style.display = 'block';
+      } else {
+        techRow.style.display = 'none';
+      }
 
       // Photo
       const photoRow = document.getElementById('photoEvidenceRow');
       if (c.photo_url) {
         document.getElementById('photoThumb').src = c.photo_url;
-        document.getElementById('photoLink').href = c.photo_url;
         photoRow.style.display = 'block';
       } else {
         photoRow.style.display = 'none';
       }
 
       // Stepper
-      if (t && t.stepper) {
-        const stepperContainer = document.getElementById('stepperNodes');
-        stepperContainer.innerHTML = t.stepper.map(s => {
-          const icon = s.state === 'completed' ? '✔' : s.step;
-          const timeText = s.timestamp ? new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-          return `
-            <div class="step-node ${s.state}">
-              <div class="step-circle">${icon}</div>
-              <div class="step-label">${s.label}</div>
-              <div class="step-time">${timeText}</div>
-            </div>
-          `;
-        }).join('');
-      }
+      renderStepper(t ? t.stepper : null, c.status);
 
-      // Rating Box (Show if Resolved and logged in as this student)
+      // Rating section logic
       const user = getUser();
-      const ratingSec = document.getElementById('ratingSection');
-      if (c.status === 'Resolved' && user && user.id === c.student_id) {
-        ratingSec.style.display = 'block';
-        setRating(5);
-      } else {
-        ratingSec.style.display = 'none';
+      const isOwner = user && user.id === c.student_id;
+
+      document.getElementById('ratingSection').style.display      = 'none';
+      document.getElementById('alreadyRatedSection').style.display = 'none';
+
+      if (c.status === 'Resolved' && isOwner) {
+        // Check if feedback already exists in timeline or complaint data
+        if (c.feedback_rating) {
+          showAlreadyRated(c.feedback_rating, c.feedback_comments);
+        } else {
+          document.getElementById('ratingSection').style.display = 'block';
+          setRating(5);
+        }
       }
 
-      // History Feed
-      const feed = document.getElementById('historyFeed');
-      if (t && t.history) {
-        feed.innerHTML = t.history.map(h => {
-          const dateStr = new Date(h.timestamp).toLocaleString();
-          return `
-            <div class="feed-item">
-              <div class="feed-header">
-                <span>${h.action}</span>
-                <span class="feed-time">(${dateStr})</span>
-              </div>
-              <small style="color: var(--text-muted);">By: ${h.actor.name} [${h.actor.role}]</small>
-              ${h.remarks ? `<div class="feed-remarks">${h.remarks}</div>` : ''}
-            </div>
-          `;
-        }).join('');
-      }
+      // Audit trail
+      renderAuditTrail(t ? t.history : null);
     }
 
-    function setRating(val) {
-      chosenRating = val;
-      document.getElementById('selectedStarValue').value = val;
-      const stars = document.querySelectorAll('.star');
-      stars.forEach(s => {
-        const starVal = parseInt(s.getAttribute('data-val'), 10);
-        if (starVal <= val) s.classList.add('active');
-        else s.classList.remove('active');
-      });
-    }
-
-    async function submitStudentFeedback() {
-      if (!currentComplaintData) return;
-      const btn = document.getElementById('feedbackBtn');
-      const comments = document.getElementById('feedbackComment').value.trim();
-
-      btn.disabled = true;
-      btn.innerText = 'Submitting...';
-
-      const res = await apiRequest(`/api/complaints/${currentComplaintData.id}/feedback`, {
-        method: 'POST',
-        body: JSON.stringify({
-          rating: chosenRating,
-          comments: comments || null
-        })
-      });
-
-      btn.disabled = false;
-      btn.innerText = 'Submit Rating & Close Ticket';
-
-      if (!res.success) {
-        showToast(res.error || 'Failed to submit rating.', 'error');
+    // ── Stepper Renderer ──────────────────────────────────────
+    function renderStepper(steps, status) {
+      const container = document.getElementById('stepperNodes');
+      if (!steps || !steps.length) {
+        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.9rem;">No stepper data available.</p>';
         return;
       }
 
-      showToast('Thank you! Ticket has been closed.', 'success');
-      loadTicket(currentComplaintData.ticket_no);
+      // Calculate fill percentage (between completed nodes)
+      const totalGaps    = steps.length - 1;
+      const completedGaps = steps.filter(s => s.state === 'completed').length;
+      const pct = totalGaps > 0 ? Math.round((completedGaps / totalGaps) * 100) : 0;
+      container.parentElement.style.setProperty('--fill-pct', pct + '%');
+
+      container.innerHTML = steps.map(s => {
+        const icon = s.state === 'completed' ? '✔' : s.step;
+        const timeStr = s.timestamp
+          ? new Date(s.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+          : '—';
+        return `
+          <div class="step-node ${s.state}">
+            <div class="step-circle">${icon}</div>
+            <div class="step-label">${s.label}</div>
+            <div class="step-time">${timeStr}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Audit Trail Renderer ──────────────────────────────────
+    function renderAuditTrail(history) {
+      const feed = document.getElementById('historyFeed');
+      if (!history || !history.length) {
+        feed.innerHTML = '<div class="feed-empty">No activity recorded yet for this ticket.</div>';
+        return;
+      }
+      feed.innerHTML = history.map(h => {
+        const dateStr = new Date(h.timestamp).toLocaleString('en-IN', {
+          day: '2-digit', month: 'short', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+        return `
+          <div class="feed-item">
+            <div class="feed-header">
+              <span>${h.action}</span>
+              <span class="feed-time">${dateStr}</span>
+            </div>
+            <div class="feed-actor">By: ${h.actor.name} [${h.actor.role}]</div>
+            ${h.remarks ? `<div class="feed-remarks">${escapeHtml(h.remarks)}</div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    // ── Star Rating ───────────────────────────────────────────
+    function setRating(val) {
+      chosenRating = val;
+      document.getElementById('selectedStarValue').value = val;
+      document.querySelectorAll('#starContainer .star').forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+        s.classList.remove('hover');
+      });
+    }
+
+    function hoverRating(val) {
+      document.querySelectorAll('#starContainer .star').forEach(s => {
+        s.classList.toggle('hover', parseInt(s.dataset.val) <= val);
+      });
+    }
+
+    function unhoverRating() {
+      document.querySelectorAll('#starContainer .star').forEach(s => s.classList.remove('hover'));
+    }
+
+    // ── Submit Feedback ───────────────────────────────────────
+    async function submitStudentFeedback() {
+      if (!currentComplaint) return;
+      const btn      = document.getElementById('feedbackBtn');
+      const comments = document.getElementById('feedbackComment').value.trim();
+
+      btn.disabled    = true;
+      btn.textContent = 'Submitting…';
+
+      const res = await apiRequest(`/api/complaints/${currentComplaint.id}/feedback`, {
+        method: 'POST',
+        body: JSON.stringify({ rating: chosenRating, comments: comments || null })
+      });
+
+      btn.disabled    = false;
+      btn.textContent = '✔ Submit Rating & Close Ticket';
+
+      if (!res.success) {
+        showToast(res.error || 'Could not submit rating.', 'error');
+        return;
+      }
+
+      showToast('Thank you! Your rating has been recorded. 🎉', 'success');
+      showAlreadyRated(chosenRating, comments);
+      document.getElementById('ratingSection').style.display = 'none';
+      // Reload to refresh timeline
+      setTimeout(() => loadTicket(currentComplaint.ticket_no), 1200);
+    }
+
+    // ── Already Rated Display ─────────────────────────────────
+    function showAlreadyRated(rating, comment) {
+      const sec = document.getElementById('alreadyRatedSection');
+      document.getElementById('submittedStars').textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      document.getElementById('submittedComment').textContent = comment
+        ? `"${comment}"`
+        : 'No additional comments provided.';
+      sec.style.display = 'block';
+    }
+
+    // ── Lightbox ──────────────────────────────────────────────
+    function openLightbox(src) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightbox').classList.add('open');
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    // ── Helpers ───────────────────────────────────────────────
+    function formatDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.appendChild(document.createTextNode(str));
+      return d.innerHTML;
     }
   </script>
 </body>
 </html>
-

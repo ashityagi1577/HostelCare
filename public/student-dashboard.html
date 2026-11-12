@@ -42,6 +42,11 @@
       border: 1px solid var(--border);
       background: white;
       box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .metric-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
     }
     .metric-title {
       font-size: 0.82rem;
@@ -56,11 +61,18 @@
       font-weight: 800;
       color: var(--text-main);
     }
-    /* Filter Bar */
+    /* Filter & Search Bar */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
     .filter-tabs {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 1.5rem;
       flex-wrap: wrap;
     }
     .filter-tab {
@@ -79,13 +91,38 @@
       color: white;
       border-color: var(--primary);
     }
-    /* Complaints Table */
+    .search-view-group {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .search-box {
+      min-width: 240px;
+    }
+    .view-toggle-btn {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+    .view-toggle-btn.active {
+      background: #f1f5f9;
+      color: var(--primary);
+      border-color: var(--border-focus);
+    }
+    /* Table View */
     .table-container {
       background: white;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       overflow-x: auto;
       box-shadow: var(--shadow-sm);
+      margin-bottom: 3rem;
     }
     table {
       width: 100%;
@@ -123,10 +160,76 @@
     .ticket-cell:hover {
       text-decoration: underline;
     }
+    /* Card Grid View */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .complaint-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .complaint-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1e1b4b;
+      margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      flex-grow: 1;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.85rem;
+    }
+    /* Photo thumbnail */
+    .photo-thumb-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--primary-light);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+    }
     /* Empty State */
     .empty-state {
       text-align: center;
       padding: 4rem 1rem;
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--border);
+      margin-bottom: 3rem;
     }
     .empty-state span {
       font-size: 3rem;
@@ -141,6 +244,47 @@
     .empty-state p {
       color: var(--text-muted);
       margin-bottom: 1.5rem;
+    }
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-card {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+    }
+    /* Stars */
+    .star-rating {
+      display: inline-flex;
+      gap: 0.4rem;
+      font-size: 2rem;
+      cursor: pointer;
+      margin: 0.75rem 0;
+    }
+    .star {
+      color: #cbd5e1;
+      transition: color 0.15s ease;
+    }
+    .star.active, .star:hover {
+      color: #f59e0b;
     }
   </style>
 </head>
@@ -164,9 +308,10 @@
     <div class="container dash-header-row">
       <div>
         <h1 id="welcomeGreeting">Welcome, Resident</h1>
-        <p id="roomSubtitle">Room repairs and complaint tracker</p>
+        <p id="roomSubtitle">Room repairs & maintenance tracker</p>
       </div>
-      <div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button onclick="fetchMyComplaints()" class="btn btn-secondary btn-sm" title="Refresh list">🔄 Refresh</button>
         <a href="/lodge-complaint.html" class="btn btn-primary">
           <span>➕</span> Lodge New Complaint
         </a>
@@ -174,7 +319,7 @@
     </div>
   </header>
 
-  <main class="container" style="margin-bottom: 4rem;">
+  <main class="container">
     <!-- Metric Summary Grid -->
     <div class="metric-grid">
       <div class="metric-card">
@@ -195,16 +340,26 @@
       </div>
     </div>
 
-    <!-- Filter Tabs -->
-    <div class="filter-tabs">
-      <button class="filter-tab active" onclick="filterComplaints('all', this)">All Complaints</button>
-      <button class="filter-tab" onclick="filterComplaints('active', this)">Active Only</button>
-      <button class="filter-tab" onclick="filterComplaints('Resolved', this)">Resolved</button>
-      <button class="filter-tab" onclick="filterComplaints('Closed', this)">Closed</button>
+    <!-- Controls Bar (Filters, Search, View Toggle) -->
+    <div class="controls-bar">
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-tab" onclick="setFilter('active', this)">Active Work</button>
+        <button class="filter-tab" onclick="setFilter('Resolved', this)">Awaiting Rating</button>
+        <button class="filter-tab" onclick="setFilter('Closed', this)">Closed</button>
+      </div>
+
+      <!-- Search & Layout Toggle -->
+      <div class="search-view-group">
+        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search my complaints..." oninput="applyFilters()">
+        <button class="view-toggle-btn active" id="viewTableBtn" onclick="switchView('table')">Table</button>
+        <button class="view-toggle-btn" id="viewCardsBtn" onclick="switchView('cards')">Cards</button>
+      </div>
     </div>
 
-    <!-- Table Container -->
-    <div class="table-container">
+    <!-- Table View Container -->
+    <div id="tableViewContainer" class="table-container">
       <table>
         <thead>
           <tr>
@@ -213,39 +368,98 @@
             <th>Issue Title</th>
             <th>Priority</th>
             <th>Status</th>
-            <th>Assigned Technician</th>
-            <th>Date Lodged</th>
+            <th>Technician</th>
+            <th>Photo</th>
+            <th>Submitted</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="complaintsTableBody">
           <tr>
-            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-              Loading your maintenance requests...
+            <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              Loading maintenance requests...
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Empty State Container -->
+    <!-- Cards Grid Container -->
+    <div id="cardsViewContainer" class="cards-grid" style="display: none;">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- Empty State -->
     <div id="emptyState" class="empty-state" style="display: none;">
       <span>🎉</span>
-      <h3>No Complaints Found</h3>
-      <p>Everything in your room is running smoothly! Need something fixed?</p>
+      <h3 id="emptyTitle">No Complaints Found</h3>
+      <p id="emptyDesc">Everything in your room is in top working order! Need a repair or cleaning?</p>
       <a href="/lodge-complaint.html" class="btn btn-primary">Lodge a Maintenance Request</a>
     </div>
   </main>
+
+  <!-- Photo Lightbox Modal -->
+  <div class="modal-backdrop" id="photoModal">
+    <div class="modal-card" style="max-width: 600px; text-align: center;">
+      <h3 style="font-size: 1.15rem; color: #1e1b4b; margin-bottom: 1rem;">Attached Photo Proof</h3>
+      <img id="lightboxImg" src="" alt="Proof" style="max-width: 100%; max-height: 400px; border-radius: var(--radius-md); object-fit: contain;">
+      <div style="margin-top: 1.25rem;">
+        <button class="btn btn-secondary" onclick="closeModal('photoModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inline Rating Modal -->
+  <div class="modal-backdrop" id="ratingModal">
+    <div class="modal-card" style="text-align: center;">
+      <span style="font-size: 2.5rem;">⭐</span>
+      <h3 style="font-size: 1.3rem; color: #065f46; margin: 0.5rem 0 0.2rem 0;">Rate Completed Repair</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Ticket: <strong id="ratingTicketNo">HC-2026-0000</strong></p>
+
+      <div class="star-rating" id="starContainer">
+        <span class="star active" data-val="1" onclick="setRating(1)">★</span>
+        <span class="star active" data-val="2" onclick="setRating(2)">★</span>
+        <span class="star active" data-val="3" onclick="setRating(3)">★</span>
+        <span class="star active" data-val="4" onclick="setRating(4)">★</span>
+        <span class="star active" data-val="5" onclick="setRating(5)">★</span>
+      </div>
+      <input type="hidden" id="selectedRatingVal" value="5">
+
+      <div style="margin: 1rem 0;">
+        <textarea id="ratingComment" class="form-control" rows="3" placeholder="Share your feedback on the technician's punctuality and work quality..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: center;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('ratingModal')">Cancel</button>
+        <button type="button" id="submitFeedbackBtn" class="btn btn-primary" onclick="submitFeedbackFromModal()" style="background: #059669; border-color: #059669;">
+          Submit & Close Ticket
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     let allComplaints = [];
+    let currentFilter = 'all';
+    let currentView = 'table';
+    let activeRatingComplaintId = null;
+    let chosenRating = 5;
+
+    const categoryIcons = {
+      'Electrical': '⚡',
+      'Plumbing': '🚰',
+      'Carpentry': '🪚',
+      'Cleaning': '🧹',
+      'WiFi_Internet': '🌐',
+      'Other': '📦'
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       const user = getUser();
       if (!user) {
-        showToast('Please sign in to view your dashboard.', 'warning');
+        showToast('Please sign in to access your student dashboard.', 'warning');
         setTimeout(() => window.location.href = '/login.html', 800);
         return;
       }
@@ -269,7 +483,7 @@
 
       allComplaints = res.data || [];
       updateMetrics(allComplaints);
-      renderTable(allComplaints);
+      applyFilters();
     }
 
     function updateMetrics(list) {
@@ -279,83 +493,220 @@
       document.getElementById('metricResolved').innerText = list.filter(c => ['Resolved', 'Closed'].includes(c.status)).length;
     }
 
-    function renderTable(list) {
-      const tbody = document.getElementById('complaintsTableBody');
+    function setFilter(filterType, btn) {
+      currentFilter = filterType;
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilters();
+    }
+
+    function switchView(view) {
+      currentView = view;
+      document.getElementById('viewTableBtn').classList.toggle('active', view === 'table');
+      document.getElementById('viewCardsBtn').classList.toggle('active', view === 'cards');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      let filtered = allComplaints.filter(c => {
+        // Tab filter
+        let matchesTab = true;
+        if (currentFilter === 'active') {
+          matchesTab = ['Pending', 'Assigned', 'In_Progress'].includes(c.status);
+        } else if (currentFilter === 'Resolved') {
+          matchesTab = c.status === 'Resolved' && !c.feedback_rating;
+        } else if (currentFilter === 'Closed') {
+          matchesTab = c.status === 'Closed' || c.feedback_rating;
+        }
+
+        // Search query
+        let matchesSearch = true;
+        if (query) {
+          matchesSearch = c.ticket_no.toLowerCase().includes(query) ||
+            c.title.toLowerCase().includes(query) ||
+            c.category.toLowerCase().includes(query);
+        }
+
+        return matchesTab && matchesSearch;
+      });
+
+      renderDisplay(filtered);
+    }
+
+    function renderDisplay(list) {
+      const tableBox = document.getElementById('tableViewContainer');
+      const cardsBox = document.getElementById('cardsViewContainer');
       const emptyState = document.getElementById('emptyState');
-      const tableContainer = document.querySelector('.table-container');
 
       if (list.length === 0) {
-        tableContainer.style.display = 'none';
+        tableBox.style.display = 'none';
+        cardsBox.style.display = 'none';
         emptyState.style.display = 'block';
         return;
       }
 
-      tableContainer.style.display = 'block';
       emptyState.style.display = 'none';
 
+      if (currentView === 'table') {
+        tableBox.style.display = 'block';
+        cardsBox.style.display = 'none';
+        renderTable(list);
+      } else {
+        tableBox.style.display = 'none';
+        cardsBox.style.display = 'grid';
+        renderCards(list);
+      }
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById('complaintsTableBody');
       tbody.innerHTML = list.map(c => {
         const priorityBadge = `badge-${c.priority.toLowerCase()}`;
         const statusBadge = `badge-${c.status.toLowerCase()}`;
-        const techDisplay = c.technician_name ? `${c.technician_name} (${c.technician_trade})` : '<span style="color:#94a3b8;">Unassigned</span>';
-        const formattedDate = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-        let actionBtn = `<a href="/track.html?ticket=${c.ticket_no}" class="btn btn-secondary btn-sm">Track</a>`;
-        if (c.status === 'Resolved' && !c.feedback_rating) {
-          actionBtn += ` <a href="/track.html?ticket=${c.ticket_no}#rate" class="btn btn-primary btn-sm" style="background:#059669; border-color:#059669;">Rate</a>`;
-        }
-
-        const categoryIcons = {
-          'Electrical': '⚡',
-          'Plumbing': '🚰',
-          'Carpentry': '🪚',
-          'Cleaning': '🧹',
-          'WiFi_Internet': '🌐',
-          'Other': '📦'
-        };
+        const techDisplay = c.technician_name ? `${c.technician_name} (${c.technician_trade})` : '<span style="color:#94a3b8; font-style: italic;">Unassigned</span>';
+        const formattedDate = formatTimeAgo(c.created_at);
         const icon = categoryIcons[c.category] || '🔧';
+
+        const photoHtml = c.photo_url 
+          ? `<button class="photo-thumb-btn" onclick="openPhotoModal('${c.photo_url}')">📷 View</button>`
+          : '<span style="color:#cbd5e1;">—</span>';
+
+        let actionHtml = `<a href="/track.html?ticket=${c.ticket_no}" class="btn btn-secondary btn-sm">Track</a>`;
+        if (c.status === 'Resolved' && !c.feedback_rating) {
+          actionHtml += ` <button onclick="openRatingModal(${c.id}, '${c.ticket_no}')" class="btn btn-sm" style="background:#059669; color:white;">⭐ Rate</button>`;
+        } else if (c.feedback_rating) {
+          actionHtml += ` <span title="${c.feedback_rating} Stars" style="color:#f59e0b; font-weight:700;">★ ${c.feedback_rating}</span>`;
+        }
 
         return `
           <tr>
-            <td>
-              <a href="/track.html?ticket=${c.ticket_no}" class="ticket-cell">${c.ticket_no}</a>
-            </td>
-            <td>
-              <span>${icon} ${c.category}</span>
-            </td>
-            <td>
-              <strong>${c.title}</strong>
-            </td>
-            <td>
-              <span class="badge ${priorityBadge}">${c.priority}</span>
-            </td>
-            <td>
-              <span class="badge ${statusBadge}">${c.status.replace('_', ' ')}</span>
-            </td>
+            <td><a href="/track.html?ticket=${c.ticket_no}" class="ticket-cell">${c.ticket_no}</a></td>
+            <td>${icon} ${c.category}</td>
+            <td><strong>${c.title}</strong></td>
+            <td><span class="badge ${priorityBadge}">${c.priority}</span></td>
+            <td><span class="badge ${statusBadge}">${c.status.replace('_', ' ')}</span></td>
             <td>${techDisplay}</td>
+            <td>${photoHtml}</td>
             <td style="color: var(--text-muted); font-size: 0.85rem;">${formattedDate}</td>
-            <td>
-              <div style="display: flex; gap: 0.35rem;">
-                ${actionBtn}
-              </div>
-            </td>
+            <td><div style="display:flex; gap:0.35rem; align-items:center;">${actionHtml}</div></td>
           </tr>
         `;
       }).join('');
     }
 
-    function filterComplaints(type, btn) {
-      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
+    function renderCards(list) {
+      const container = document.getElementById('cardsViewContainer');
+      container.innerHTML = list.map(c => {
+        const priorityBadge = `badge-${c.priority.toLowerCase()}`;
+        const statusBadge = `badge-${c.status.toLowerCase()}`;
+        const icon = categoryIcons[c.category] || '🔧';
+        const formattedDate = formatTimeAgo(c.created_at);
 
-      if (type === 'all') {
-        renderTable(allComplaints);
-      } else if (type === 'active') {
-        renderTable(allComplaints.filter(c => ['Pending', 'Assigned', 'In_Progress'].includes(c.status)));
-      } else {
-        renderTable(allComplaints.filter(c => c.status === type));
+        let rateBtn = '';
+        if (c.status === 'Resolved' && !c.feedback_rating) {
+          rateBtn = `<button onclick="openRatingModal(${c.id}, '${c.ticket_no}')" class="btn btn-sm" style="background:#059669; color:white;">⭐ Rate Work</button>`;
+        }
+
+        const photoBtn = c.photo_url ? `<button class="photo-thumb-btn" onclick="openPhotoModal('${c.photo_url}')">📷 Photo</button>` : '';
+
+        return `
+          <div class="complaint-card">
+            <div class="card-top">
+              <a href="/track.html?ticket=${c.ticket_no}" class="ticket-cell">${c.ticket_no}</a>
+              <span class="badge ${statusBadge}">${c.status.replace('_', ' ')}</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.35rem;">${icon} ${c.category}</div>
+            <h3 class="card-title">${c.title}</h3>
+            <p class="card-desc">${c.description}</p>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+              <span class="badge ${priorityBadge}">${c.priority}</span>
+              ${photoBtn}
+            </div>
+            <div class="card-footer">
+              <span style="color: var(--text-muted);">${formattedDate}</span>
+              <div style="display: flex; gap: 0.5rem;">
+                ${rateBtn}
+                <a href="/track.html?ticket=${c.ticket_no}" class="btn btn-secondary btn-sm">Track</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function formatTimeAgo(dateString) {
+      const now = new Date();
+      const past = new Date(dateString);
+      const diffMs = now - past;
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffMins < 2) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays === 1) return 'Yesterday';
+      return `${diffDays}d ago`;
+    }
+
+    function openPhotoModal(url) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('photoModal').classList.add('active');
+    }
+
+    function openRatingModal(id, ticketNo) {
+      activeRatingComplaintId = id;
+      document.getElementById('ratingTicketNo').innerText = ticketNo;
+      setRating(5);
+      document.getElementById('ratingComment').value = '';
+      document.getElementById('ratingModal').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function setRating(val) {
+      chosenRating = val;
+      document.getElementById('selectedRatingVal').value = val;
+      const stars = document.querySelectorAll('#starContainer .star');
+      stars.forEach(s => {
+        const starVal = parseInt(s.getAttribute('data-val'), 10);
+        if (starVal <= val) s.classList.add('active');
+        else s.classList.remove('active');
+      });
+    }
+
+    async function submitFeedbackFromModal() {
+      if (!activeRatingComplaintId) return;
+      const btn = document.getElementById('submitFeedbackBtn');
+      const comments = document.getElementById('ratingComment').value.trim();
+
+      btn.disabled = true;
+      btn.innerText = 'Submitting...';
+
+      const res = await apiRequest(`/api/complaints/${activeRatingComplaintId}/feedback`, {
+        method: 'POST',
+        body: JSON.stringify({
+          rating: chosenRating,
+          comments: comments || null
+        })
+      });
+
+      btn.disabled = false;
+      btn.innerText = 'Submit & Close Ticket';
+
+      if (!res.success) {
+        showToast(res.error || 'Failed to submit feedback.', 'error');
+        return;
       }
+
+      showToast('Thank you! Ticket has been closed.', 'success');
+      closeModal('ratingModal');
+      fetchMyComplaints();
     }
   </script>
 </body>
 </html>
-

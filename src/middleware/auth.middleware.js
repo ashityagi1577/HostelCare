@@ -59,8 +59,29 @@ function requireRoles(...allowedRoles) {
   };
 }
 
+/**
+ * Middleware: Optional JWT auth — attaches req.user if token present, never blocks.
+ * Used for public endpoints that benefit from knowing who the caller is (e.g., ticket tracking).
+ */
+function optionalAuth(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = extractTokenFromHeader(authHeader);
+
+  if (token) {
+    try {
+      req.user = verifyToken(token);
+    } catch (_) {
+      req.user = null; // bad token = treat as guest
+    }
+  } else {
+    req.user = null;
+  }
+  next();
+}
+
 module.exports = {
   authenticateToken,
-  requireRoles
+  requireRoles,
+  optionalAuth
 };
 

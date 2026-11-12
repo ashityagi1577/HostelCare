@@ -121,22 +121,31 @@ async function getComplaintByTicket(req, res) {
       });
     }
 
-    // Access control: Students can only view their own tickets; Staff & Admin can view any ticket.
-    if (req.user.role === 'student' && complaint.student_id !== req.user.id) {
+    // Access control:
+    //  - Guests (no token): public view — allow (hides sensitive student info if needed)
+    //  - Students: can only view their own tickets
+    //  - Staff / Admin: can view any ticket
+    if (req.user && req.user.role === 'student' && complaint.student_id !== req.user.id) {
       return res.status(403).json({
         success: false,
         error: 'Forbidden: You do not have permission to view another resident\'s maintenance ticket.'
       });
     }
 
-    // Fetch chronological timeline logs
-    const timeline = await ComplaintModel.getTimeline(complaint.id);
+    // Fetch feedback info if exists (to show "already rated" on track page)
+    let feedbackRating = null;
+    let feedbackComments = null;
+    try {
+      const fb = await FeedbackModel.findByComplaintId(complaint.id);
+      if (fb) { feedbackRating = fb.rating; feedbackComments = fb.comments; }
+    } catch (_) {}
 
     return res.status(200).json({
       success: true,
       data: {
         ...complaint,
-        timeline
+        feedback_rating: feedbackRating,
+        feedback_comments: feedbackComments
       }
     });
   } catch (error) {
@@ -179,8 +188,8 @@ async function getComplaintTimeline(req, res) {
       });
     }
 
-    // Access control: Student can only view their own ticket timeline
-    if (req.user.role === 'student' && complaint.student_id !== req.user.id) {
+    // Access control: Student can only view their own ticket timeline; guests can view any
+    if (req.user && req.user.role === 'student' && complaint.student_id !== req.user.id) {
       return res.status(403).json({
         success: false,
         error: 'Forbidden: You do not have access to this complaint\'s timeline.'
