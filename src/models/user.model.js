@@ -2,20 +2,45 @@ const db = require('../config/db');
 
 /**
  * User Data Access Model
- * Manages queries for the `users` table.
+ * Manages queries for the `users` table including unique user_id / student ID / staff ID.
  */
 class UserModel {
   /**
-   * Create a new user record with hashed password.
+   * Generate a unique default user code based on role.
+   * e.g., STU-1001 for students, STF-1001 for staff
+   */
+  static generateDefaultUserId(role = 'student') {
+    const prefix = role === 'staff' ? 'STF' : role === 'admin' ? 'ADM' : 'STU';
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    return `${prefix}-${rand}`;
+  }
+
+  /**
+   * Create a new user record with hashed password and unique institutional ID.
    * @param {Object} userData
    * @returns {Promise<Object>} Created user record (without password hash)
    */
-  static async createUser({ name, email, passwordHash, role = 'student', hostel_block = null, room_no = null, phone = null }) {
+  static async createUser({
+    user_id = null,
+    name,
+    email,
+    passwordHash,
+    role = 'student',
+    hostel_block = null,
+    room_no = null,
+    phone = null
+  }) {
+    let finalUserId = user_id ? user_id.trim().toUpperCase() : null;
+    if (!finalUserId) {
+      finalUserId = this.generateDefaultUserId(role);
+    }
+
     const sql = `
-      INSERT INTO users (name, email, password_hash, role, hostel_block, room_no, phone)
-      VALUES (?, ?, ?, ?, ?, ?, ?);
+      INSERT INTO users (user_id, name, email, password_hash, role, hostel_block, room_no, phone)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     `;
     const params = [
+      finalUserId,
       name.trim(),
       email.trim().toLowerCase(),
       passwordHash,
@@ -28,6 +53,7 @@ class UserModel {
     const result = await db.execute(sql, params);
     return {
       id: result.insertId,
+      user_id: finalUserId,
       name: name.trim(),
       email: email.trim().toLowerCase(),
       role,
@@ -38,19 +64,54 @@ class UserModel {
   }
 
   /**
+   * Find user by identifier (either Email Address OR unique User ID / Student ID / Staff ID).
+   * Case-insensitive match on both fields.
+   * @param {string} identifier - e.g. "student@hostelcare.com" or "STU-101" or "STF-101"
+   * @returns {Promise<Object|null>}
+   */
+  static async findByIdentifier(identifier) {
+    if (!identifier) return null;
+    const clean = identifier.trim();
+    const sql = `
+      SELECT id, user_id, name, email, password_hash, role, hostel_block, room_no, phone, created_at, updated_at
+      FROM users
+      WHERE LOWER(email) = LOWER(?) OR UPPER(user_id) = UPPER(?)
+      LIMIT 1;
+    `;
+    const rows = await db.query(sql, [clean, clean]);
+    return rows.length > 0 ? rows[0] : null;
+  }
+
+  /**
    * Find a user by their unique email address.
-   * Includes password_hash for authentication verification.
    * @param {string} email
    * @returns {Promise<Object|null>}
    */
   static async findByEmail(email) {
     const sql = `
-      SELECT id, name, email, password_hash, role, hostel_block, room_no, phone, created_at, updated_at
+      SELECT id, user_id, name, email, password_hash, role, hostel_block, room_no, phone, created_at, updated_at
       FROM users
       WHERE LOWER(email) = LOWER(?)
       LIMIT 1;
     `;
     const rows = await db.query(sql, [email.trim()]);
+    return rows.length > 0 ? rows[0] : null;
+  }
+
+  /**
+   * Find a user by their unique institutional ID (Student ID or Staff ID).
+   * @param {string} userId
+   * @returns {Promise<Object|null>}
+   */
+  static async findByUserId(userId) {
+    if (!userId) return null;
+    const sql = `
+      SELECT id, user_id, name, email, password_hash, role, hostel_block, room_no, phone, created_at, updated_at
+      FROM users
+      WHERE UPPER(user_id) = UPPER(?)
+      LIMIT 1;
+    `;
+    const rows = await db.query(sql, [userId.trim()]);
     return rows.length > 0 ? rows[0] : null;
   }
 
@@ -61,7 +122,7 @@ class UserModel {
    */
   static async findById(id) {
     const sql = `
-      SELECT id, name, email, role, hostel_block, room_no, phone, created_at, updated_at
+      SELECT id, user_id, name, email, role, hostel_block, room_no, phone, created_at, updated_at
       FROM users
       WHERE id = ?
       LIMIT 1;
@@ -71,7 +132,7 @@ class UserModel {
   }
 
   /**
-   * Check if an email is already registered in the system.
+   * Check if an email is already registered.
    * @param {string} email
    * @returns {Promise<boolean>}
    */
@@ -86,12 +147,28 @@ class UserModel {
   }
 
   /**
+   * Check if a user_id is already assigned.
+   * @param {string} userId
+   * @returns {Promise<boolean>}
+   */
+  static async userIdExists(userId) {
+    if (!userId) return false;
+    const sql = `
+      SELECT id FROM users
+      WHERE UPPER(user_id) = UPPER(?)
+      LIMIT 1;
+    `;
+    const rows = await db.query(sql, [userId.trim()]);
+    return rows.length > 0;
+  }
+
+  /**
    * Retrieve all staff and admin accounts.
    * @returns {Promise<Array>}
    */
   static async getAllStaff() {
     const sql = `
-      SELECT id, name, email, role, phone, created_at
+      SELECT id, user_id, name, email, role, phone, created_at
       FROM users
       WHERE role IN ('staff', 'admin')
       ORDER BY name ASC;
@@ -100,7 +177,7 @@ class UserModel {
   }
 
   /**
-   * Delete a user by ID (used primarily for test cleanup and admin management).
+   * Delete a user by ID.
    * @param {number} id
    * @returns {Promise<boolean>}
    */
@@ -112,4 +189,3 @@ class UserModel {
 }
 
 module.exports = UserModel;
-

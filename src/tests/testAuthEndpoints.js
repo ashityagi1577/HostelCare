@@ -65,11 +65,11 @@ async function runAuthTests() {
     }
     console.log(`      ✔ HTTP 409 Conflict: "${dupRes.body.error}"`);
 
-    // Test 3: Login with Valid Credentials
-    console.log('\n[3/7] Testing POST /api/auth/login (Correct Credentials)...');
+    // Test 3: Login with Valid Email Credentials
+    console.log('\n[3/7] Testing POST /api/auth/login (Correct Email)...');
     const loginReq = {
       body: {
-        email: testEmail,
+        identifier: testEmail,
         password: testPassword
       }
     };
@@ -80,7 +80,23 @@ async function runAuthTests() {
       throw new Error(`Login failed: ${JSON.stringify(loginRes.body)}`);
     }
     userToken = loginRes.body.data.token;
-    console.log(`      ✔ HTTP 200 OK: ${loginRes.body.message}`);
+    console.log(`      ✔ HTTP 200 OK: ${loginRes.body.message} [Role: ${loginRes.body.data.user.role}]`);
+
+    // Test 3b: Login with Unique Student ID / User ID
+    const assignedUserId = loginRes.body.data.user.user_id;
+    console.log(`\n[3b/7] Testing POST /api/auth/login with unique Student ID (${assignedUserId})...`);
+    const idLoginReq = {
+      body: {
+        identifier: assignedUserId,
+        password: testPassword
+      }
+    };
+    const idLoginRes = createMockRes();
+    await authController.login(idLoginReq, idLoginRes);
+    if (idLoginRes.statusCode !== 200 || idLoginRes.body.data.user.user_id !== assignedUserId) {
+      throw new Error(`User ID login failed: ${JSON.stringify(idLoginRes.body)}`);
+    }
+    console.log(`      ✔ HTTP 200 OK: User logged in via Student ID '${assignedUserId}'! Role auto-detected: ${idLoginRes.body.data.user.role}`);
 
     // Test 4: Login with Invalid Password
     console.log('\n[4/7] Testing POST /api/auth/login (Invalid Password)...');

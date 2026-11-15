@@ -283,7 +283,7 @@
       color: #cbd5e1;
       transition: color 0.15s ease;
     }
-    .star.active, .star:hover {
+    .star.active, .star:hover, .star.hover {
       color: #f59e0b;
     }
   </style>
@@ -417,12 +417,13 @@
       <p style="color: var(--text-muted); font-size: 0.9rem;">Ticket: <strong id="ratingTicketNo">HC-2026-0000</strong></p>
 
       <div class="star-rating" id="starContainer">
-        <span class="star active" data-val="1" onclick="setRating(1)">★</span>
-        <span class="star active" data-val="2" onclick="setRating(2)">★</span>
-        <span class="star active" data-val="3" onclick="setRating(3)">★</span>
-        <span class="star active" data-val="4" onclick="setRating(4)">★</span>
-        <span class="star active" data-val="5" onclick="setRating(5)">★</span>
+        <span class="star active" data-val="1" onclick="setRating(1)" onmouseover="hoverRating(1)" onmouseout="unhoverRating()">★</span>
+        <span class="star active" data-val="2" onclick="setRating(2)" onmouseover="hoverRating(2)" onmouseout="unhoverRating()">★</span>
+        <span class="star active" data-val="3" onclick="setRating(3)" onmouseover="hoverRating(3)" onmouseout="unhoverRating()">★</span>
+        <span class="star active" data-val="4" onclick="setRating(4)" onmouseover="hoverRating(4)" onmouseout="unhoverRating()">★</span>
+        <span class="star active" data-val="5" onclick="setRating(5)" onmouseover="hoverRating(5)" onmouseout="unhoverRating()">★</span>
       </div>
+      <div id="ratingDescription" style="font-size: 0.88rem; font-weight: 700; color: #047857; margin-bottom: 0.75rem;">5 Stars - Excellent Repair</div>
       <input type="hidden" id="selectedRatingVal" value="5">
 
       <div style="margin: 1rem 0;">
@@ -668,16 +669,58 @@
       document.getElementById(id).classList.remove('active');
     }
 
+    const ratingLabels = {
+      1: '1 Star – Unsatisfactory / Incomplete',
+      2: '2 Stars – Needs Improvement',
+      3: '3 Stars – Satisfactory Repair',
+      4: '4 Stars – Very Good Work & Timely',
+      5: '5 Stars – Excellent Repair & Polite Staff'
+    };
+
     function setRating(val) {
       chosenRating = val;
       document.getElementById('selectedRatingVal').value = val;
+      const desc = document.getElementById('ratingDescription');
+      if (desc) desc.innerText = ratingLabels[val] || `${val} Stars`;
       const stars = document.querySelectorAll('#starContainer .star');
       stars.forEach(s => {
         const starVal = parseInt(s.getAttribute('data-val'), 10);
         if (starVal <= val) s.classList.add('active');
         else s.classList.remove('active');
+        s.classList.remove('hover');
       });
     }
+
+    function hoverRating(val) {
+      const desc = document.getElementById('ratingDescription');
+      if (desc) desc.innerText = ratingLabels[val] || `${val} Stars`;
+      const stars = document.querySelectorAll('#starContainer .star');
+      stars.forEach(s => {
+        const starVal = parseInt(s.getAttribute('data-val'), 10);
+        if (starVal <= val) s.classList.add('hover');
+        else s.classList.remove('hover');
+      });
+    }
+
+    function unhoverRating() {
+      const desc = document.getElementById('ratingDescription');
+      if (desc) desc.innerText = ratingLabels[chosenRating] || `${chosenRating} Stars`;
+      const stars = document.querySelectorAll('#starContainer .star');
+      stars.forEach(s => s.classList.remove('hover'));
+    }
+
+    // Modal backdrop click & ESC to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal('ratingModal');
+        closeModal('photoModal');
+      }
+    });
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-backdrop')) {
+        e.target.classList.remove('active');
+      }
+    });
 
     async function submitFeedbackFromModal() {
       if (!activeRatingComplaintId) return;

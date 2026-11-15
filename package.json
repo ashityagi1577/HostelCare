@@ -15,6 +15,7 @@
     "test:technician": "node src/tests/testTechnicianAPIs.js",
     "test:feedback": "node src/tests/testResolutionFeedbackAPIs.js",
     "test:analytics": "node src/tests/testAnalyticsAPIs.js",
+    "test:e2e": "node src/tests/testEndToEndFlow.js",
     "db:test": "node src/database/testConnection.js",
     "db:init": "node src/database/init.js",
     "seed": "node src/database/seed.js"

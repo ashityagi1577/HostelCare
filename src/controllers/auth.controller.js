@@ -8,7 +8,8 @@ const { generateToken } = require('../utils/jwt.util');
  */
 async function register(req, res) {
   try {
-    const { name, email, password, hostel_block, room_no, phone } = req.body;
+    const { user_id, student_id, name, email, password, hostel_block, room_no, phone } = req.body;
+    const requestedId = (user_id || student_id || '').trim();
 
     // 1. Validation
     if (!name || !email || !password) {
@@ -34,33 +35,45 @@ async function register(req, res) {
       });
     }
 
-    // 2. Check if user already exists
-    const existing = await UserModel.emailExists(email);
-    if (existing) {
+    // 2. Check if email already exists
+    const emailTaken = await UserModel.emailExists(email);
+    if (emailTaken) {
       return res.status(409).json({
         success: false,
         error: 'An account with this email address already exists.'
       });
     }
 
+    // Check if requested user_id is already taken
+    if (requestedId) {
+      const idTaken = await UserModel.userIdExists(requestedId);
+      if (idTaken) {
+        return res.status(409).json({
+          success: false,
+          error: `The Student ID '${requestedId}' is already registered in the system.`
+        });
+      }
+    }
+
     // 3. Hash password & create user record
     const passwordHash = await hashPassword(password);
     const newUser = await UserModel.createUser({
+      user_id: requestedId || null,
       name,
       email,
       passwordHash,
-      role: 'student', // Public registration defaults to student
+      role: 'student', // Public self-registration always assigns student role
       hostel_block: hostel_block || null,
       room_no: room_no || null,
       phone: phone || null
     });
 
-    // 4. Generate JWT token
+    // 4. Generate JWT token (role embedded securely)
     const token = generateToken(newUser);
 
     return res.status(201).json({
       success: true,
-      message: 'Student registration successful. Welcome to HostelCare!',
+      message: `Registration successful! Your unique Student ID is ${newUser.user_id}.`,
       data: {
         user: newUser,
         token
@@ -76,40 +89,43 @@ async function register(req, res) {
 }
 
 /**
- * Authenticate student or staff with email and password.
+ * Universal Authentication for all users (Students, Staff, Wardens, Admins).
+ * Identifies role automatically from the database record.
  * POST /api/auth/login
+ * Body: { identifier (or email), password }
  */
 async function login(req, res) {
   try {
-    const { email, password } = req.body;
+    const identifier = (req.body.identifier || req.body.email || req.body.user_id || req.body.username || '').trim();
+    const password = req.body.password;
 
     // 1. Validation
-    if (!email || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({
         success: false,
-        error: 'Email and password are required.'
+        error: 'Email / User ID and password are required.'
       });
     }
 
-    // 2. Lookup user by email
-    const user = await UserModel.findByEmail(email);
+    // 2. Lookup user by either Email OR User ID / Student ID / Staff ID
+    const user = await UserModel.findByIdentifier(identifier);
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid email or password.'
+        error: 'Invalid credentials. User ID / Email or password incorrect.'
       });
     }
 
-    // 3. Verify password hash
+    // 3. Verify password hash using Bcrypt
     const isPasswordValid = await comparePassword(password, user.password_hash);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid email or password.'
+        error: 'Invalid credentials. User ID / Email or password incorrect.'
       });
     }
 
-    // 4. Generate JWT token
+    // 4. Generate signed JWT token with role locked from database record
     const token = generateToken(user);
 
     // Exclude password hash from response
@@ -164,4 +180,3 @@ module.exports = {
   login,
   getProfile
 };
-

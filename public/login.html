@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
       justify-content: center;
       padding: 2.5rem 1rem;
     }
+
     .auth-card {
       width: 100%;
       max-width: 440px;
@@ -22,64 +24,147 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow-lg);
     }
+
     .auth-header {
       text-align: center;
       margin-bottom: 2rem;
     }
+
     .auth-header h2 {
-      font-size: 1.7rem;
+      font-size: 1.75rem;
       font-weight: 800;
       color: #1e1b4b;
       margin-top: 0.5rem;
     }
+
     .auth-header p {
       color: var(--text-muted);
       font-size: 0.92rem;
+      margin-top: 0.25rem;
     }
-    .role-tabs {
+
+    /* Password input with eye toggle */
+    .password-wrapper {
+      position: relative;
       display: flex;
-      background: #f1f5f9;
-      padding: 0.35rem;
-      border-radius: var(--radius-md);
-      margin-bottom: 1.75rem;
-      gap: 0.25rem;
+      align-items: center;
     }
-    .role-tab {
-      flex: 1;
-      padding: 0.6rem;
-      text-align: center;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-muted);
+
+    .password-wrapper .form-control {
+      padding-right: 2.75rem;
+    }
+
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.75rem;
+      background: none;
       border: none;
-      background: transparent;
-      border-radius: var(--radius-sm);
+      color: var(--text-muted);
       cursor: pointer;
-      transition: var(--transition);
+      font-size: 1.15rem;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
     }
-    .role-tab.active {
-      background: white;
+
+    .password-toggle-btn:hover {
       color: var(--primary);
-      box-shadow: var(--shadow-sm);
     }
+
+    /* Forgot password row */
+    .forgot-link-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .forgot-link-row a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .forgot-link-row a:hover {
+      text-decoration: underline;
+    }
+
     .auth-footer {
       text-align: center;
-      margin-top: 1.5rem;
+      margin-top: 1.75rem;
       padding-top: 1.25rem;
       border-top: 1px solid var(--border);
       font-size: 0.9rem;
       color: var(--text-muted);
     }
+
     .auth-footer a {
       color: var(--primary);
       text-decoration: none;
       font-weight: 600;
     }
+
     .auth-footer a:hover {
       text-decoration: underline;
     }
+
+    /* Demo Credentials Callout */
+    .demo-hint-box {
+      margin-top: 1.5rem;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      font-size: 0.82rem;
+      color: #475569;
+    }
+
+    .demo-hint-box strong {
+      color: #1e1b4b;
+    }
+
+    .demo-hint-item {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.25rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+
+    /* Forgot Password Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.22s ease;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background: white;
+      width: 100%;
+      max-width: 440px;
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Navigation Bar -->
@@ -90,7 +175,7 @@
         <span>HostelCare</span>
       </a>
       <ul class="nav-links" id="navbar-links">
-        <!-- Rendered by auth.js -->
+        <!-- Rendered dynamically by auth.js -->
       </ul>
     </div>
   </nav>
@@ -99,123 +184,182 @@
   <div class="auth-wrapper">
     <div class="auth-card">
       <div class="auth-header">
-        <span style="font-size: 2.2rem;">🔐</span>
-        <h2 id="loginTitle">Resident Sign In</h2>
-        <p id="loginSubtitle">Access your maintenance dashboard and track complaints</p>
+        <span style="font-size: 2.4rem;">🔐</span>
+        <h2>Sign In to HostelCare</h2>
+        <p>Access your dashboard to lodge repairs, track tasks, or manage hostel operations</p>
       </div>
 
-      <!-- Role Selector Tabs -->
-      <div class="role-tabs">
-        <button type="button" class="role-tab active" id="tabStudent" onclick="switchRole('student')">Student</button>
-        <button type="button" class="role-tab" id="tabStaff" onclick="switchRole('staff')">Staff / Warden</button>
-      </div>
-
-      <!-- Sign In Form -->
+      <!-- Single Common Sign In Form for All Users -->
       <form id="loginForm" onsubmit="handleLogin(event)">
+        <!-- Input 1: Email or User ID -->
         <div class="form-group">
-          <label class="form-label" for="email">Email Address</label>
-          <input type="email" id="email" class="form-control" placeholder="your.name@hostel.edu" required autofocus>
+          <label class="form-label" for="identifier">Email Address or User ID</label>
+          <input type="text" id="identifier" class="form-control"
+            placeholder="e.g. STU-101, STF-101, or name@hostel.edu" required autofocus autocomplete="username">
+          <small style="color: var(--text-muted); font-size: 0.78rem;">
+            Students enter Student ID or Email • Staff enter Staff ID or Email
+          </small>
         </div>
 
-        <div class="form-group">
+        <!-- Input 2: Password with Eye Toggle -->
+        <div class="form-group" style="margin-bottom: 0.5rem;">
           <label class="form-label" for="password">Password</label>
-          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+          <div class="password-wrapper">
+            <input type="password" id="password" class="form-control" placeholder="••••••••" required
+              autocomplete="current-password">
+            <button type="button" class="password-toggle-btn" id="passwordToggleBtn"
+              onclick="togglePasswordVisibility()" title="Show / Hide Password" aria-label="Toggle password visibility">
+              👁️
+            </button>
+          </div>
+          <div class="forgot-link-row">
+            <a href="javascript:void(0)" onclick="openForgotModal()">Forgot Password?</a>
+          </div>
         </div>
 
-        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-          Sign In to Portal
+        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem;">
+          Sign In
         </button>
       </form>
 
-      <div class="auth-footer" id="registerPrompt">
-        Don't have an account yet? <a href="/register.html">Register as Student</a>
+      <!-- Separate Registration Link -->
+      <div class="auth-footer">
+        Don't have an account yet? <a href="/register.html">Create an Account</a>
       </div>
+
+      <!-- Quick Reference Demo Credentials -->
+      <div class="demo-hint-box">
+        <div style="font-weight: 700; color: #1e1b4b; margin-bottom: 0.35rem;">💡 Demo Credentials (Pass: password123)
+        </div>
+        <div class="demo-hint-item">
+          <span>Student:</span>
+          <strong>STU-101 &nbsp;or&nbsp; student@hostelcare.com</strong>
+        </div>
+        <div class="demo-hint-item">
+          <span>Staff/Warden:</span>
+          <strong>STF-101 &nbsp;or&nbsp; staff@hostelcare.com</strong>
+        </div>
+        <div class="demo-hint-item">
+          <span>Admin:</span>
+          <strong>ADM-101 &nbsp;or&nbsp; admin@hostelcare.com</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Guidance Modal -->
+  <div class="modal-backdrop" id="forgotModal">
+    <div class="modal-card">
+      <span style="font-size: 2.2rem;">🔑</span>
+      <h3 style="font-size: 1.3rem; color: #1e1b4b; margin: 0.5rem 0 0.4rem;">Reset Your Password</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.25rem;">
+        For security in campus housing, password resets are processed through the Hostel Administration Desk.
+      </p>
+      <div
+        style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; text-align: left; font-size: 0.88rem; color: #334155; margin-bottom: 1.25rem;">
+        <div>🏢 <strong>Warden Office:</strong> Central Hostel Block A Ground Floor</div>
+        <div style="margin-top: 0.35rem;">📞 <strong>Helpline:</strong> +91 98765 43222</div>
+        <div style="margin-top: 0.35rem;">✉️ <strong>Support Email:</strong> admin@hostelcare.com</div>
+        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #64748b;">
+          Please carry your Student / Staff ID card for identity verification.
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" onclick="closeForgotModal()" style="width: 100%;">
+        Understood, Close
+      </button>
     </div>
   </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script>
-    let activeRole = 'student';
-
-    // Check URL parameters for preset role tab (e.g. login.html?role=staff)
     document.addEventListener('DOMContentLoaded', () => {
-      // If user is already logged in, redirect them
+      // If user is already authenticated, redirect them automatically
       const user = getUser();
       if (user) {
-        if (user.role === 'student') window.location.href = '/student-dashboard.html';
-        else window.location.href = '/staff-dashboard.html';
-        return;
-      }
-
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('role') === 'staff') {
-        switchRole('staff');
+        redirectByRole(user.role);
       }
     });
 
-    function switchRole(role) {
-      activeRole = role;
-      const tabStudent = document.getElementById('tabStudent');
-      const tabStaff = document.getElementById('tabStaff');
-      const title = document.getElementById('loginTitle');
-      const subtitle = document.getElementById('loginSubtitle');
-      const registerPrompt = document.getElementById('registerPrompt');
-
-      if (role === 'staff') {
-        tabStudent.classList.remove('active');
-        tabStaff.classList.add('active');
-        title.innerText = 'Staff & Warden Sign In';
-        subtitle.innerText = 'Triage complaints, assign technicians, and view analytics';
-        registerPrompt.style.display = 'none';
+    // Password Visibility (Eye Icon) Toggle
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById('password');
+      const toggleBtn = document.getElementById('passwordToggleBtn');
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        toggleBtn.innerText = '🙈';
+        toggleBtn.title = 'Hide Password';
       } else {
-        tabStaff.classList.remove('active');
-        tabStudent.classList.add('active');
-        title.innerText = 'Resident Sign In';
-        subtitle.innerText = 'Access your maintenance dashboard and track complaints';
-        registerPrompt.style.display = 'block';
+        pwdInput.type = 'password';
+        toggleBtn.innerText = '👁️';
+        toggleBtn.title = 'Show Password';
       }
     }
 
+    // Forgot Password Modal Controls
+    function openForgotModal() {
+      document.getElementById('forgotModal').classList.add('active');
+    }
+    function closeForgotModal() {
+      document.getElementById('forgotModal').classList.remove('active');
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeForgotModal();
+    });
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-backdrop')) {
+        e.target.classList.remove('active');
+      }
+    });
+
+    // Unified Login Submission
     async function handleLogin(e) {
       e.preventDefault();
       const submitBtn = document.getElementById('submitBtn');
-      const email = document.getElementById('email').value.trim();
+      const identifier = document.getElementById('identifier').value.trim();
       const password = document.getElementById('password').value;
 
       submitBtn.disabled = true;
-      submitBtn.innerText = 'Signing in...';
+      submitBtn.innerText = 'Verifying credentials...';
 
       const response = await apiRequest('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ identifier, password })
       });
 
       submitBtn.disabled = false;
-      submitBtn.innerText = 'Sign In to Portal';
+      submitBtn.innerText = 'Sign In';
 
       if (!response.success) {
-        showToast(response.error || 'Invalid credentials. Please try again.', 'error');
+        showToast(response.error || 'Invalid credentials. Please verify your ID and password.', 'error');
         return;
       }
 
       const user = response.data.user;
       const token = response.data.token;
 
-      // Save user session
+      // Secure session storage
       setSession(user, token);
       showToast(response.message || `Welcome, ${user.name}!`, 'success');
 
-      // Redirect according to user role
+      // Automatic Role-Based Redirection (role identified from database record)
       setTimeout(() => {
-        if (user.role === 'student') {
-          window.location.href = '/student-dashboard.html';
-        } else {
-          window.location.href = '/staff-dashboard.html';
-        }
-      }, 700);
+        redirectByRole(user.role);
+      }, 600);
+    }
+
+    function redirectByRole(role) {
+      if (role === 'student') {
+        window.location.href = '/student-dashboard.html';
+      } else if (role === 'admin') {
+        window.location.href = '/admin-dashboard.html';
+      } else if (role === 'staff') {
+        window.location.href = '/staff-dashboard.html';
+      } else {
+        window.location.href = '/index.html';
+      }
     }
   </script>
 </body>
-</html>
 
+</html>

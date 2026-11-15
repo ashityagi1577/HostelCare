@@ -57,6 +57,26 @@
     .auth-footer a:hover {
       text-decoration: underline;
     }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .password-wrapper .form-control {
+      padding-right: 2.5rem;
+    }
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0.25rem;
+    }
+
     @media (max-width: 540px) {
       .form-row {
         grid-template-columns: 1fr;
@@ -94,19 +114,32 @@
           <input type="text" id="name" class="form-control" placeholder="e.g. Priya Sharma" required autofocus>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="email">Student Email Address *</label>
-          <input type="email" id="email" class="form-control" placeholder="priya.sharma@hostel.edu" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="email">Student Email Address *</label>
+            <input type="email" id="email" class="form-control" placeholder="priya.sharma@hostel.edu" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="user_id">Student ID / Roll No</label>
+            <input type="text" id="user_id" class="form-control" placeholder="e.g. STU-105 (or auto)">
+            <small style="color:var(--text-muted); font-size:0.75rem;">Leave blank to auto-generate</small>
+          </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="password">Password *</label>
-            <input type="password" id="password" class="form-control" placeholder="Min. 6 chars" required minlength="6">
+            <div class="password-wrapper">
+              <input type="password" id="password" class="form-control" placeholder="Min. 6 chars" required minlength="6">
+              <button type="button" class="password-toggle-btn" onclick="togglePwd('password', this)" title="Show/Hide">👁️</button>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="confirmPassword">Confirm Password *</label>
-            <input type="password" id="confirmPassword" class="form-control" placeholder="Re-type password" required minlength="6">
+            <div class="password-wrapper">
+              <input type="password" id="confirmPassword" class="form-control" placeholder="Re-type password" required minlength="6">
+              <button type="button" class="password-toggle-btn" onclick="togglePwd('confirmPassword', this)" title="Show/Hide">👁️</button>
+            </div>
           </div>
         </div>
 
@@ -139,7 +172,7 @@
       </form>
 
       <div class="auth-footer">
-        Already registered? <a href="/login.html">Sign in to your account</a>
+        Already have an account? <a href="/login.html">Sign in here</a>
       </div>
     </div>
   </div>
@@ -147,11 +180,23 @@
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script>
+    function togglePwd(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerText = '🙈';
+      } else {
+        input.type = 'password';
+        btn.innerText = '👁️';
+      }
+    }
+
     async function handleRegister(e) {
       e.preventDefault();
       const submitBtn = document.getElementById('submitBtn');
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
+      const user_id = document.getElementById('user_id').value.trim();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const hostel_block = document.getElementById('hostel_block').value;
@@ -169,6 +214,7 @@
       const response = await apiRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({
+          user_id: user_id || null,
           name,
           email,
           password,
@@ -189,15 +235,13 @@
       const user = response.data.user;
       const token = response.data.token;
 
-      // Automatically store session
       setSession(user, token);
-      showToast('Registration successful! Welcome to HostelCare.', 'success');
+      showToast(`Welcome, ${user.name}! Your Student ID is ${user.user_id}.`, 'success');
 
       setTimeout(() => {
         window.location.href = '/student-dashboard.html';
-      }, 700);
+      }, 1000);
     }
   </script>
 </body>
 </html>
-

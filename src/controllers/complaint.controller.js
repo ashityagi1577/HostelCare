@@ -132,6 +132,9 @@ async function getComplaintByTicket(req, res) {
       });
     }
 
+    // Fetch chronological timeline logs
+    const timeline = await ComplaintModel.getTimeline(complaint.id);
+
     // Fetch feedback info if exists (to show "already rated" on track page)
     let feedbackRating = null;
     let feedbackComments = null;
@@ -144,6 +147,7 @@ async function getComplaintByTicket(req, res) {
       success: true,
       data: {
         ...complaint,
+        timeline,
         feedback_rating: feedbackRating,
         feedback_comments: feedbackComments
       }

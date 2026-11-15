@@ -44,6 +44,80 @@ class StaffController {
   }
 
   /**
+   * Export complaints data to CSV file format.
+   * GET /api/staff/complaints/export
+   */
+  static async exportComplaintsCSV(req, res) {
+    try {
+      const { status, category, priority, hostel_block, search } = req.query;
+      const filters = {
+        status: status || null,
+        category: category || null,
+        priority: priority || null,
+        hostel_block: hostel_block || null,
+        search: search || null
+      };
+
+      const complaints = await ComplaintModel.findAll(filters);
+
+      const headers = [
+        'Ticket No',
+        'Resident Name',
+        'Hostel Block',
+        'Room No',
+        'Phone',
+        'Category',
+        'Title',
+        'Description',
+        'Priority',
+        'Status',
+        'Technician',
+        'Estimated Date',
+        'Resolved At',
+        'Rating',
+        'Created At'
+      ];
+
+      const escapeCsv = (val) => {
+        if (val === null || val === undefined) return '""';
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
+      const rows = complaints.map(c => [
+        escapeCsv(c.ticket_no),
+        escapeCsv(c.student_name),
+        escapeCsv(c.hostel_block),
+        escapeCsv(c.room_no),
+        escapeCsv(c.student_phone),
+        escapeCsv(c.category),
+        escapeCsv(c.title),
+        escapeCsv(c.description),
+        escapeCsv(c.priority),
+        escapeCsv(c.status),
+        escapeCsv(c.technician_name || 'Unassigned'),
+        escapeCsv(c.estimated_date ? new Date(c.estimated_date).toISOString().slice(0, 10) : ''),
+        escapeCsv(c.resolved_at ? new Date(c.resolved_at).toISOString() : ''),
+        escapeCsv(c.feedback_rating || ''),
+        escapeCsv(new Date(c.created_at).toISOString())
+      ].join(','));
+
+      const csvData = [headers.join(','), ...rows].join('\r\n');
+      const filename = `HostelCare_Complaints_${new Date().toISOString().slice(0, 10)}.csv`;
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      return res.status(200).send(csvData);
+    } catch (error) {
+      console.error('[Staff exportComplaintsCSV Error]:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to generate complaints CSV export.'
+      });
+    }
+  }
+
+  /**
    * Get single complaint with full administrative detail and stepper timeline.
    * GET /api/staff/complaints/:id
    */

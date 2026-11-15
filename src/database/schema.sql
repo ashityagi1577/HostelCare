@@ -9,6 +9,7 @@
 -- Stores credentials and profiles for Students, Hostel Staff, and Wardens/Admins.
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50) NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone VARCHAR(20) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
     INDEX idx_user_role (role),
     INDEX idx_user_hostel_block (hostel_block)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Centralized Admin Portal – HostelCare</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* ── Executive Admin Header ──────────────────────── */
+    .admin-header {
+      padding: 2.25rem 0 1.5rem;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .admin-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .admin-header h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* ── Executive Tabs ──────────────────────────────── */
+    .admin-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+    .admin-tab-btn {
+      padding: 0.8rem 1.25rem;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .admin-tab-btn:hover {
+      color: var(--primary);
+    }
+    .admin-tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* ── KPI Grid ────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .kpi-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .kpi-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .kpi-val {
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+    .kpi-meta {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 0.45rem;
+    }
+
+    /* ── Visual Meter Bars ───────────────────────────── */
+    .visual-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.75rem;
+    }
+    .visual-card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .meter-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.88rem;
+    }
+    .meter-row:last-child { margin-bottom: 0; }
+    .meter-label {
+      width: 140px;
+      font-weight: 700;
+      color: #334155;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .meter-track {
+      flex: 1;
+      height: 12px;
+      background: #f1f5f9;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      position: relative;
+    }
+    .meter-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.6s ease;
+    }
+    .meter-stat {
+      width: 75px;
+      text-align: right;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #475569;
+    }
+
+    /* ── Occupancy Block Grid ────────────────────────── */
+    .block-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .block-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .block-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .block-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #1e1b4b;
+    }
+    .block-rate {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* ── Data Tables ─────────────────────────────────── */
+    .table-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      background: #f8fafc;
+      padding: 0.85rem 1.15rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 0.95rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: #faf5ff; }
+
+    /* ── Activity Trail ──────────────────────────────── */
+    .activity-feed-box {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .activity-item {
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .activity-item:last-child { border-bottom: none; }
+
+    /* ── Filters Bar ─────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 0.65rem;
+      background: white;
+      padding: 1rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .filter-select {
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      font-size: 0.88rem;
+      background: white;
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .pulse-emergency {
+      animation: pulseAlert 1.6s infinite;
+    }
+    @keyframes pulseAlert {
+      0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Universal Navbar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🏠</span>
+        <span>HostelCare <small style="font-size: 0.72rem; background: #fef3c7; color: #92400e; padding: 0.15rem 0.45rem; border-radius: var(--radius-full); margin-left: 0.4rem; font-weight: 800;">Admin Center</small></span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Rendered dynamically by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Executive Header -->
+  <header class="admin-header">
+    <div class="container admin-header-row">
+      <div>
+        <h1>🏛️ Executive Operations &amp; Facility Oversight</h1>
+        <p id="adminSubtitle" style="color: var(--text-muted); font-size: 0.92rem; margin-top: 0.25rem;">
+          Centralized hostel monitoring: student population, room occupancy, maintenance backlogs, and staff performance
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <button onclick="loadAdminData()" class="btn btn-secondary btn-sm">🔄 Refresh Data</button>
+        <button onclick="exportFullAdminCSV()" class="btn btn-secondary btn-sm" title="Export Complete Dataset">📥 Export System CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="margin-bottom: 4rem;">
+
+    <!-- Navigation Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" id="tabBtnOverview" onclick="switchAdminTab('overview')">
+        📊 Executive Summary
+      </button>
+      <button class="admin-tab-btn" id="tabBtnRooms" onclick="switchAdminTab('rooms')">
+        🚪 Room Management
+      </button>
+      <button class="admin-tab-btn" id="tabBtnComplaints" onclick="switchAdminTab('complaints')">
+        📋 Complaints &amp; Maintenance
+      </button>
+      <button class="admin-tab-btn" id="tabBtnStaff" onclick="switchAdminTab('staff')">
+        👨‍💼 Staff &amp; Technicians
+      </button>
+      <button class="admin-tab-btn" id="tabBtnStudents" onclick="switchAdminTab('students')">
+        🎓 Student Registry
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 1: EXECUTIVE SUMMARY                                              -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div id="tabContentOverview">
+      <!-- 6 High-Impact Executive KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card" style="border-left: 4px solid var(--primary);">
+          <div>
+            <div class="kpi-title">Total Registered Students</div>
+            <div class="kpi-val" id="kpiTotalStudents">0</div>
+          </div>
+          <div class="kpi-meta">Active campus residents</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid #0284c7;">
+          <div>
+            <div class="kpi-title">Hostel Occupancy</div>
+            <div class="kpi-val" id="kpiOccupancyRate">0%</div>
+          </div>
+          <div class="kpi-meta"><span id="kpiOccupiedRooms">0</span> / <span id="kpiTotalCapacity">200</span> Rooms Occupied</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid #7c3aed;">
+          <div>
+            <div class="kpi-title">Staff &amp; Technicians</div>
+            <div class="kpi-val" id="kpiTotalStaff">0</div>
+          </div>
+          <div class="kpi-meta"><span id="kpiWardenCount">0</span> Wardens • <span id="kpiTechCount">0</span> Technicians</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid var(--amber);">
+          <div>
+            <div class="kpi-title">Active Maintenance Backlog</div>
+            <div class="kpi-val" id="kpiActiveBacklog" style="color: #b45309;">0</div>
+          </div>
+          <div class="kpi-meta">Pending triage &amp; in-progress</div>
+        </div>
+
+        <div class="kpi-card" id="kpiEmergencyCard" style="border-left: 4px solid #e11d48; background: #fff1f2;">
+          <div>
+            <div class="kpi-title" style="color: #be123c;">🚨 Emergency Hazards</div>
+            <div class="kpi-val" id="kpiEmergencyPending" style="color: #e11d48;">0</div>
+          </div>
+          <div class="kpi-meta" style="color: #be123c;">Requires immediate attention</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid #10b981;">
+          <div>
+            <div class="kpi-title">Resident Satisfaction</div>
+            <div class="kpi-val" id="kpiSatisfactionScore" style="color: #047857;">—</div>
+          </div>
+          <div class="kpi-meta">Based on verified reviews</div>
+        </div>
+      </div>
+
+      <!-- Occupancy & Maintenance Distribution Visuals -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Hostel Block Occupancy Visual -->
+        <div class="visual-card">
+          <div class="visual-card-title">
+            <span>🚪 Hostel Block Occupancy</span>
+            <small style="font-size:0.8rem; color:var(--text-muted); font-weight:normal;">Live capacity tracking</small>
+          </div>
+          <div id="blockOccupancyBars">
+            <p style="color: var(--text-muted);">Loading occupancy data...</p>
+          </div>
+        </div>
+
+        <!-- Maintenance Category Breakdown Visual -->
+        <div class="visual-card">
+          <div class="visual-card-title">
+            <span>🔧 Complaints by Category</span>
+            <small style="font-size:0.8rem; color:var(--text-muted); font-weight:normal;">Distribution by trade</small>
+          </div>
+          <div id="categoryDistributionBars">
+            <p style="color: var(--text-muted);">Loading category metrics...</p>
+          </div>
+        </div>
+
+        <!-- Urgency & Status Distribution Visual -->
+        <div class="visual-card">
+          <div class="visual-card-title">
+            <span>⚡ Urgency &amp; Status Breakdown</span>
+            <small style="font-size:0.8rem; color:var(--text-muted); font-weight:normal;">Priority distribution</small>
+          </div>
+          <div id="priorityDistributionBars" style="margin-bottom: 1.25rem;">
+            <p style="color: var(--text-muted);">Loading priority metrics...</p>
+          </div>
+          <div style="background: #f8fafc; border-radius: var(--radius-md); padding: 0.85rem 1rem; border: 1px solid var(--border);">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Average Turnaround Time</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #1e1b4b;" id="avgTurnaroundDisplay">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Complaints & System Activities Side-by-Side -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Recent Complaints -->
+        <div class="table-card" style="margin-bottom: 0;">
+          <div style="padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.15rem; color: #1e1b4b; margin: 0;">Latest Maintenance Requests</h3>
+            <button onclick="switchAdminTab('complaints')" class="btn btn-secondary btn-sm">View All →</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Resident &amp; Room</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="overviewRecentComplaintsBody">
+              <tr><td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-muted);">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Recent Audit Trail Feed -->
+        <div class="activity-feed-box">
+          <h3 style="font-size: 1.15rem; color: #1e1b4b; margin-bottom: 1rem;">System Audit Trail</h3>
+          <div id="overviewActivityList">
+            <p style="color: var(--text-muted);">Loading activity feed...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 2: ROOM MANAGEMENT                                                -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div id="tabContentRooms" style="display: none;">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; color: #1e1b4b;">Campus Room Occupancy &amp; Allocation</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Real-time room availability, vacant spaces, and active maintenance faults</p>
+      </div>
+
+      <!-- Block Capacity Cards -->
+      <div class="block-grid" id="blockCardsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Room Directory Table -->
+      <div class="filter-bar">
+        <input type="text" id="roomSearchInput" class="form-control search-input" placeholder="Search by Room number, Occupant name..." oninput="filterRoomsTable()">
+        <select id="roomBlockFilter" class="filter-select" onchange="filterRoomsTable()">
+          <option value="">All Blocks</option>
+          <option value="Block A (Boys)">Block A (Boys)</option>
+          <option value="Block B (Boys)">Block B (Boys)</option>
+          <option value="Block C (Girls)">Block C (Girls)</option>
+          <option value="Block D (Girls)">Block D (Girls)</option>
+        </select>
+        <button onclick="resetRoomFilters()" class="btn btn-secondary btn-sm">Reset</button>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Hostel Block</th>
+              <th>Room No</th>
+              <th>Current Occupant(s)</th>
+              <th>Student ID(s)</th>
+              <th>Occupancy Status</th>
+              <th>Active Maintenance Issues</th>
+            </tr>
+          </thead>
+          <tbody id="roomsTableBody">
+            <tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">Loading room directory...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 3: COMPLAINTS & MAINTENANCE                                       -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div id="tabContentComplaints" style="display: none;">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; color: #1e1b4b;">Campus-Wide Maintenance Triage Monitor</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Complete supervisory visibility into all resident repair tickets and contractor dispatch</p>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <input type="text" id="adminComplaintSearch" class="form-control search-input" placeholder="Search by Ticket ID, Title, Resident, Room..." oninput="filterComplaintsTable()">
+        <select id="adminComplaintStatusFilter" class="filter-select" onchange="filterComplaintsTable()">
+          <option value="">All Statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="Assigned">Assigned</option>
+          <option value="In_Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Closed">Closed</option>
+        </select>
+        <select id="adminComplaintCategoryFilter" class="filter-select" onchange="filterComplaintsTable()">
+          <option value="">All Categories</option>
+          <option value="Electrical">⚡ Electrical</option>
+          <option value="Plumbing">🚰 Plumbing</option>
+          <option value="Carpentry">🪚 Carpentry</option>
+          <option value="Cleaning">🧹 Cleaning</option>
+          <option value="WiFi_Internet">🌐 Wi-Fi</option>
+          <option value="Other">📦 Other</option>
+        </select>
+        <select id="adminComplaintPriorityFilter" class="filter-select" onchange="filterComplaintsTable()">
+          <option value="">All Priorities</option>
+          <option value="Emergency">🚨 Emergency</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        <button onclick="resetComplaintFilters()" class="btn btn-secondary btn-sm">Reset</button>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Resident &amp; Room</th>
+              <th>Category &amp; Title</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Technician</th>
+              <th>Lodged</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminComplaintsTableBody">
+            <tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Loading complaints monitor...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 4: STAFF & TECHNICIANS                                            -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div id="tabContentStaff" style="display: none;">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; color: #1e1b4b;">Staff &amp; Field Technicians Oversight</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Monitor warden triage efficiency, contractor workload distribution, and task completions</p>
+      </div>
+
+      <!-- Technicians Directory -->
+      <h3 style="font-size: 1.15rem; color: #1e1b4b; margin-bottom: 1rem;">🔧 Campus Maintenance Contractors</h3>
+      <div class="table-card" style="margin-bottom: 2rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Technician Name</th>
+              <th>Specialty Trade</th>
+              <th>Phone</th>
+              <th>Availability</th>
+              <th>Active Tasks</th>
+              <th>Completed Tasks</th>
+            </tr>
+          </thead>
+          <tbody id="adminTechsTableBody">
+            <tr><td colspan="6" style="text-align:center; padding:1.5rem; color:var(--text-muted);">Loading technicians...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Wardens & Admin Directory -->
+      <h3 style="font-size: 1.15rem; color: #1e1b4b; margin-bottom: 1rem;">🏢 Hostel Wardens &amp; Supervisory Staff</h3>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Phone</th>
+              <th>Triage Actions Logged</th>
+              <th>Registered On</th>
+            </tr>
+          </thead>
+          <tbody id="adminStaffTableBody">
+            <tr><td colspan="7" style="text-align:center; padding:1.5rem; color:var(--text-muted);">Loading staff...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 5: STUDENT REGISTRY                                               -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div id="tabContentStudents" style="display: none;">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; color: #1e1b4b;">Student Resident Registry</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Directory of all registered residents across campus housing</p>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="studentSearchInput" class="form-control search-input" placeholder="Search by Student ID, Name, Email, Room..." oninput="filterStudentsTable()">
+        <select id="studentBlockFilter" class="filter-select" onchange="filterStudentsTable()">
+          <option value="">All Blocks</option>
+          <option value="Block A (Boys)">Block A (Boys)</option>
+          <option value="Block B (Boys)">Block B (Boys)</option>
+          <option value="Block C (Girls)">Block C (Girls)</option>
+          <option value="Block D (Girls)">Block D (Girls)</option>
+        </select>
+        <button onclick="resetStudentFilters()" class="btn btn-secondary btn-sm">Reset</button>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Full Name</th>
+              <th>Email Address</th>
+              <th>Hostel Block</th>
+              <th>Room No</th>
+              <th>Phone</th>
+              <th>Complaints Filed</th>
+              <th>Registered Date</th>
+            </tr>
+          </thead>
+          <tbody id="adminStudentsTableBody">
+            <tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Loading student registry...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let adminOverviewData = null;
+    let adminComplaintsList = [];
+    let adminRoomsList = [];
+    let adminStudentsList = [];
+    let currentAdminTab = 'overview';
+
+    // ── On Page Load & Role Guard ─────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNavbar();
+
+      const user = getUser();
+      if (!user) {
+        showToast('Administrator credentials required.', 'warning');
+        setTimeout(() => window.location.href = '/login.html', 700);
+        return;
+      }
+      if (user.role !== 'admin') {
+        showToast('Access Denied: Only administrators have central oversight access.', 'error');
+        setTimeout(() => {
+          if (user.role === 'staff') window.location.href = '/staff-dashboard.html';
+          else window.location.href = '/student-dashboard.html';
+        }, 1000);
+        return;
+      }
+
+      document.getElementById('adminSubtitle').innerText =
+        `Logged in as ${user.name} (${user.user_id || 'ADM-101'}) • Central Campus Management`;
+
+      // Handle hash navigation
+      handleHash();
+      window.addEventListener('hashchange', handleHash);
+
+      loadAdminData();
+    });
+
+    function handleHash() {
+      const hash = window.location.hash.toLowerCase().replace('#', '');
+      if (['rooms', 'complaints', 'staff', 'students'].includes(hash)) {
+        switchAdminTab(hash);
+      } else {
+        switchAdminTab('overview');
+      }
+    }
+
+    // ── Tab Switcher ──────────────────────────────────────────
+    function switchAdminTab(tab) {
+      currentAdminTab = tab;
+      const tabs = ['overview', 'rooms', 'complaints', 'staff', 'students'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tabBtn${capitalize(t)}`);
+        const content = document.getElementById(`tabContent${capitalize(t)}`);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (content) content.style.display = t === tab ? 'block' : 'none';
+      });
+
+      // Lazy load tab specific data
+      if (tab === 'rooms' && adminRoomsList.length === 0) loadRoomsData();
+      if (tab === 'complaints' && adminComplaintsList.length === 0) loadComplaintsData();
+      if (tab === 'staff') loadStaffData();
+      if (tab === 'students' && adminStudentsList.length === 0) loadStudentsData();
+    }
+
+    // ── Load Master Overview Data ─────────────────────────────
+    async function loadAdminData() {
+      const res = await apiRequest('/api/admin/overview');
+      if (!res.success || !res.data) {
+        showToast(res.error || 'Failed to load administrative overview.', 'error');
+        return;
+      }
+
+      adminOverviewData = res.data;
+      renderKPIs(adminOverviewData);
+      renderOccupancyBars(adminOverviewData.room_stats);
+      renderCategoryBars(adminOverviewData.charts.by_category);
+      renderPriorityBars(adminOverviewData.charts.by_priority, adminOverviewData.complaint_stats.avg_resolution_hours);
+      renderOverviewRecentComplaints(adminOverviewData.recent_complaints);
+      renderOverviewRecentActivity(adminOverviewData.recent_activities);
+      renderBlockCards(adminOverviewData.room_stats.blocks);
+    }
+
+    // ── Render KPI Cards ──────────────────────────────────────
+    function renderKPIs(d) {
+      const sys = d.system_stats || {};
+      const room = d.room_stats || {};
+      const comp = d.complaint_stats || {};
+
+      document.getElementById('kpiTotalStudents').innerText = sys.total_students || 0;
+      document.getElementById('kpiOccupancyRate').innerText = `${room.occupancy_rate || 0}%`;
+      document.getElementById('kpiOccupiedRooms').innerText = room.occupied_rooms || 0;
+      document.getElementById('kpiTotalCapacity').innerText = room.total_capacity || 200;
+
+      document.getElementById('kpiTotalStaff').innerText = (sys.total_staff || 0) + (sys.total_technicians || 0);
+      document.getElementById('kpiWardenCount').innerText = sys.total_staff || 0;
+      document.getElementById('kpiTechCount').innerText = sys.total_technicians || 0;
+
+      document.getElementById('kpiActiveBacklog').innerText =
+        (comp.pending || 0) + (comp.assigned || 0) + (comp.in_progress || 0);
+
+      document.getElementById('kpiEmergencyPending').innerText = comp.emergency_pending || 0;
+      const emergCard = document.getElementById('kpiEmergencyCard');
+      if (comp.emergency_pending > 0) {
+        emergCard.classList.add('pulse-emergency');
+      } else {
+        emergCard.classList.remove('pulse-emergency');
+      }
+
+      document.getElementById('kpiSatisfactionScore').innerText =
+        comp.satisfaction_score ? `⭐ ${comp.satisfaction_score} / 5` : 'No ratings yet';
+    }
+
+    // ── Render Block Occupancy Bars ───────────────────────────
+    function renderOccupancyBars(roomStats) {
+      const container = document.getElementById('blockOccupancyBars');
+      const blocks = roomStats.blocks || [];
+      if (blocks.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No block occupancy data.</p>';
+        return;
+      }
+
+      container.innerHTML = blocks.map(b => `
+        <div class="meter-row">
+          <div class="meter-label" title="${b.block}">${b.block}</div>
+          <div class="meter-track">
+            <div class="meter-fill" style="width: ${b.occupancy_rate}%; background: var(--primary);"></div>
+          </div>
+          <div class="meter-stat">${b.occupied_rooms}/${b.capacity} (${b.occupancy_rate}%)</div>
+        </div>
+      `).join('');
+    }
+
+    // ── Render Category Bars ──────────────────────────────────
+    function renderCategoryBars(categories) {
+      const container = document.getElementById('categoryDistributionBars');
+      if (!categories || categories.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No category data.</p>';
+        return;
+      }
+      const maxCount = Math.max(...categories.map(c => c.count), 1);
+
+      container.innerHTML = categories.map(c => {
+        const pct = Math.round((c.count / maxCount) * 100);
+        return `
+          <div class="meter-row">
+            <div class="meter-label">${c.category}</div>
+            <div class="meter-track">
+              <div class="meter-fill" style="width: ${pct}%; background: #6366f1;"></div>
+            </div>
+            <div class="meter-stat">${c.count} tasks</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── Render Priority Bars ──────────────────────────────────
+    function renderPriorityBars(priorities, avgHours) {
+      const container = document.getElementById('priorityDistributionBars');
+      if (!priorities || priorities.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No priority data.</p>';
+        return;
+      }
+      const maxCount = Math.max(...priorities.map(p => p.count), 1);
+
+      container.innerHTML = priorities.map(p => {
+        const pct = Math.round((p.count / maxCount) * 100);
+        const color = p.priority === 'Emergency' ? '#e11d48' : p.priority === 'High' ? '#f59e0b' : '#3b82f6';
+        return `
+          <div class="meter-row">
+            <div class="meter-label">${p.priority}</div>
+            <div class="meter-track">
+              <div class="meter-fill" style="width: ${pct}%; background: ${color};"></div>
+            </div>
+            <div class="meter-stat">${p.count}</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('avgTurnaroundDisplay').innerText =
+        avgHours ? `${avgHours} Hours` : 'N/A';
+    }
+
+    // ── Render Overview Recent Complaints ─────────────────────
+    function renderOverviewRecentComplaints(list) {
+      const tbody = document.getElementById('overviewRecentComplaintsBody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-muted);">No complaints recorded yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(c => `
+        <tr>
+          <td><a href="/track.html?ticket=${c.ticket_no}" class="ticket-cell" target="_blank">${c.ticket_no}</a></td>
+          <td><strong>${escapeHtml(c.student_name)}</strong><br><small style="color:#64748b;">${c.hostel_block || ''} • ${c.room_no || ''}</small></td>
+          <td>${c.category}</td>
+          <td><span class="badge badge-${c.priority.toLowerCase()}">${c.priority}</span></td>
+          <td><span class="badge badge-${c.status.toLowerCase().replace(' ', '-')}">${c.status.replace('_', ' ')}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Render Overview Recent Activity ───────────────────────
+    function renderOverviewRecentActivity(list) {
+      const container = document.getElementById('overviewActivityList');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No activity recorded.</p>';
+        return;
+      }
+
+      container.innerHTML = list.map(a => `
+        <div class="activity-item">
+          <div>
+            <strong style="color:#1e1b4b; font-size:0.9rem;">${escapeHtml(a.action)}</strong>
+            <span style="font-size:0.8rem; color:var(--text-muted);">on <a href="/track.html?ticket=${a.ticket_no}" class="ticket-cell" target="_blank">${a.ticket_no}</a></span>
+            <div style="font-size:0.82rem; color:#64748b; margin-top:0.2rem;">${a.remarks ? escapeHtml(a.remarks) : ''}</div>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">
+            ${new Date(a.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── Render Block Cards ────────────────────────────────────
+    function renderBlockCards(blocks) {
+      const container = document.getElementById('blockCardsGrid');
+      if (!blocks) return;
+
+      container.innerHTML = blocks.map(b => `
+        <div class="block-card">
+          <div class="block-card-header">
+            <span class="block-name">${b.block}</span>
+            <span class="block-rate">${b.occupancy_rate}%</span>
+          </div>
+          <div class="meter-track" style="margin-bottom: 0.85rem;">
+            <div class="meter-fill" style="width: ${b.occupancy_rate}%; background: var(--primary);"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#475569;">
+            <span>Occupied: <strong>${b.occupied_rooms}</strong></span>
+            <span>Vacant: <strong style="color:#059669;">${b.vacant_rooms}</strong></span>
+            <span>Capacity: <strong>${b.capacity}</strong></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── Load Rooms Data (Tab 2) ───────────────────────────────
+    async function loadRoomsData() {
+      const res = await apiRequest('/api/admin/rooms');
+      if (res.success) {
+        adminRoomsList = res.data || [];
+        renderRoomsTable(adminRoomsList);
+      }
+    }
+
+    function renderRoomsTable(list) {
+      const tbody = document.getElementById('roomsTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">No rooms found matching filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(r => {
+        const isOccupied = r.occupant_count > 0;
+        const occBadge = isOccupied 
+          ? `<span class="badge" style="background:#d1fae5; color:#065f46;">Occupied (${r.occupant_count})</span>`
+          : `<span class="badge" style="background:#f1f5f9; color:#64748b;">Vacant</span>`;
+        
+        const faultBadge = r.active_faults_count > 0
+          ? `<span class="badge" style="background:#fee2e2; color:#b91c1c;">⚠️ ${r.active_faults_count} Active Issue(s)</span>`
+          : `<span class="badge" style="background:#ecfdf5; color:#047857;">✔ No Faults</span>`;
+
+        return `
+          <tr>
+            <td><strong>${escapeHtml(r.hostel_block)}</strong></td>
+            <td><strong style="color:var(--primary); font-family:monospace; font-size:0.95rem;">${escapeHtml(r.room_no)}</strong></td>
+            <td>${escapeHtml(r.occupants || 'None')}</td>
+            <td><small style="font-family:monospace; color:#64748b;">${escapeHtml(r.student_ids || '—')}</small></td>
+            <td>${occBadge}</td>
+            <td>${faultBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterRoomsTable() {
+      const q = document.getElementById('roomSearchInput').value.trim().toLowerCase();
+      const block = document.getElementById('roomBlockFilter').value;
+
+      const filtered = adminRoomsList.filter(r => {
+        const matchesQ = !q || 
+          r.room_no.toLowerCase().includes(q) ||
+          (r.occupants && r.occupants.toLowerCase().includes(q)) ||
+          (r.student_ids && r.student_ids.toLowerCase().includes(q));
+        const matchesBlock = !block || r.hostel_block === block;
+        return matchesQ && matchesBlock;
+      });
+
+      renderRoomsTable(filtered);
+    }
+
+    function resetRoomFilters() {
+      document.getElementById('roomSearchInput').value = '';
+      document.getElementById('roomBlockFilter').value = '';
+      renderRoomsTable(adminRoomsList);
+    }
+
+    // ── Load Complaints Data (Tab 3) ──────────────────────────
+    async function loadComplaintsData() {
+      const res = await apiRequest('/api/staff/complaints');
+      if (res.success) {
+        adminComplaintsList = res.data || [];
+        renderAdminComplaintsTable(adminComplaintsList);
+      }
+    }
+
+    function renderAdminComplaintsTable(list) {
+      const tbody = document.getElementById('adminComplaintsTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No complaints match filter criteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(c => `
+        <tr>
+          <td><a href="/track.html?ticket=${c.ticket_no}" class="ticket-cell" target="_blank">${c.ticket_no}</a></td>
+          <td><strong>${escapeHtml(c.student_name)}</strong><br><small style="color:#64748b;">${c.hostel_block || ''} • Rm ${c.room_no || 'N/A'}</small></td>
+          <td><strong>${escapeHtml(c.title)}</strong><br><small style="color:#64748b;">${c.category}</small></td>
+          <td><span class="badge badge-${c.priority.toLowerCase()}">${c.priority}</span></td>
+          <td><span class="badge badge-${c.status.toLowerCase().replace(' ', '-')}">${c.status.replace('_', ' ')}</span></td>
+          <td>${c.technician_name ? `<strong>${escapeHtml(c.technician_name)}</strong>` : '<span style="color:#94a3b8; font-style:italic;">Unassigned</span>'}</td>
+          <td style="color:#64748b; font-size:0.85rem;">${new Date(c.created_at).toLocaleDateString()}</td>
+          <td>
+            <div style="display:flex; gap:0.35rem;">
+              <a href="/track.html?ticket=${c.ticket_no}" class="btn btn-secondary btn-sm" target="_blank">Track</a>
+              <a href="/work-order.html?ticket=${c.ticket_no}" class="btn btn-secondary btn-sm" target="_blank">Slip</a>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterComplaintsTable() {
+      const q = document.getElementById('adminComplaintSearch').value.trim().toLowerCase();
+      const status = document.getElementById('adminComplaintStatusFilter').value;
+      const category = document.getElementById('adminComplaintCategoryFilter').value;
+      const priority = document.getElementById('adminComplaintPriorityFilter').value;
+
+      const filtered = adminComplaintsList.filter(c => {
+        const matchesQ = !q ||
+          c.ticket_no.toLowerCase().includes(q) ||
+          c.title.toLowerCase().includes(q) ||
+          c.student_name.toLowerCase().includes(q) ||
+          (c.room_no && c.room_no.toLowerCase().includes(q));
+        const matchesStatus = !status || c.status === status;
+        const matchesCategory = !category || c.category === category;
+        const matchesPriority = !priority || c.priority === priority;
+        return matchesQ && matchesStatus && matchesCategory && matchesPriority;
+      });
+
+      renderAdminComplaintsTable(filtered);
+    }
+
+    function resetComplaintFilters() {
+      document.getElementById('adminComplaintSearch').value = '';
+      document.getElementById('adminComplaintStatusFilter').value = '';
+      document.getElementById('adminComplaintCategoryFilter').value = '';
+      document.getElementById('adminComplaintPriorityFilter').value = '';
+      renderAdminComplaintsTable(adminComplaintsList);
+    }
+
+    // ── Load Staff Data (Tab 4) ───────────────────────────────
+    async function loadStaffData() {
+      const [techRes, staffRes] = await Promise.all([
+        apiRequest('/api/staff/technicians'),
+        apiRequest('/api/admin/staff')
+      ]);
+
+      if (techRes.success) {
+        const tbody = document.getElementById('adminTechsTableBody');
+        tbody.innerHTML = (techRes.data || []).map(t => `
+          <tr>
+            <td><strong>${escapeHtml(t.name)}</strong></td>
+            <td><span class="badge" style="background:#ede9fe; color:#6d28d9;">${t.trade}</span></td>
+            <td><a href="tel:${t.phone}" style="color:var(--primary); font-weight:600;">${t.phone}</a></td>
+            <td>${t.is_available ? '<span class="badge" style="background:#d1fae5; color:#065f46;">Available</span>' : '<span class="badge" style="background:#fee2e2; color:#b91c1c;">Busy</span>'}</td>
+            <td><strong>${t.active_tasks_count}</strong> active</td>
+            <td style="color:#64748b;">Maintenance Staff</td>
+          </tr>
+        `).join('');
+      }
+
+      if (staffRes.success) {
+        const tbody = document.getElementById('adminStaffTableBody');
+        tbody.innerHTML = (staffRes.data || []).map(s => `
+          <tr>
+            <td><strong style="font-family:monospace; color:var(--primary);">${s.user_id || 'STF-—'}</strong></td>
+            <td><strong>${escapeHtml(s.name)}</strong></td>
+            <td>${escapeHtml(s.email)}</td>
+            <td><span class="badge" style="background:#fef3c7; color:#92400e; text-transform:uppercase;">${s.role}</span></td>
+            <td>${s.phone || 'N/A'}</td>
+            <td><strong>${s.actions_taken_count}</strong> actions</td>
+            <td style="color:#64748b; font-size:0.85rem;">${new Date(s.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // ── Load Students Data (Tab 5) ────────────────────────────
+    async function loadStudentsData() {
+      const res = await apiRequest('/api/admin/students');
+      if (res.success) {
+        adminStudentsList = res.data || [];
+        renderStudentsTable(adminStudentsList);
+      }
+    }
+
+    function renderStudentsTable(list) {
+      const tbody = document.getElementById('adminStudentsTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No students found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(s => `
+        <tr>
+          <td><strong style="font-family:monospace; color:var(--primary);">${s.user_id || 'STU-—'}</strong></td>
+          <td><strong>${escapeHtml(s.name)}</strong></td>
+          <td>${escapeHtml(s.email)}</td>
+          <td>${escapeHtml(s.hostel_block || 'N/A')}</td>
+          <td><strong style="color:#0f172a;">${escapeHtml(s.room_no || 'N/A')}</strong></td>
+          <td>${s.phone || 'N/A'}</td>
+          <td>
+            <strong>${s.total_complaints}</strong> total
+            ${s.active_complaints > 0 ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; margin-left:0.3rem;">${s.active_complaints} active</span>` : ''}
+          </td>
+          <td style="color:#64748b; font-size:0.85rem;">${new Date(s.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    function filterStudentsTable() {
+      const q = document.getElementById('studentSearchInput').value.trim().toLowerCase();
+      const block = document.getElementById('studentBlockFilter').value;
+
+      const filtered = adminStudentsList.filter(s => {
+        const matchesQ = !q ||
+          s.name.toLowerCase().includes(q) ||
+          s.email.toLowerCase().includes(q) ||
+          (s.user_id && s.user_id.toLowerCase().includes(q)) ||
+          (s.room_no && s.room_no.toLowerCase().includes(q));
+        const matchesBlock = !block || s.hostel_block === block;
+        return matchesQ && matchesBlock;
+      });
+
+      renderStudentsTable(filtered);
+    }
+
+    function resetStudentFilters() {
+      document.getElementById('studentSearchInput').value = '';
+      document.getElementById('studentBlockFilter').value = '';
+      renderStudentsTable(adminStudentsList);
+    }
+
+    // ── Export Full System CSV ────────────────────────────────
+    async function exportFullAdminCSV() {
+      try {
+        const token = getToken();
+        showToast('Generating complete administrative CSV export...', 'info');
+
+        const response = await fetch('/api/staff/complaints/export', {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `HostelCare_Institutional_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+          showToast('Administrative report downloaded successfully! 📄', 'success');
+        } else {
+          showToast('Export failed.', 'error');
+        }
+      } catch (err) {
+        showToast('Network error during export.', 'error');
+      }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
+

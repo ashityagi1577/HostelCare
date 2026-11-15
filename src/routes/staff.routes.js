@@ -10,6 +10,7 @@ router.use(requireRoles('staff', 'admin'));
 /**
  * Staff Triage & Assignment Endpoints
  */
+router.get('/complaints/export', StaffController.exportComplaintsCSV);
 router.get('/complaints', StaffController.getAllComplaints);
 router.get('/complaints/:id', StaffController.getComplaintById);
 router.patch('/complaints/:id/status', StaffController.updateStatus);

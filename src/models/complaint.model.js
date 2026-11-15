@@ -82,10 +82,13 @@ class ComplaintModel {
         u.phone AS student_phone,
         t.name AS technician_name,
         t.trade AS technician_trade,
-        t.phone AS technician_phone
+        t.phone AS technician_phone,
+        f.rating AS feedback_rating,
+        f.comments AS feedback_comments
       FROM complaints c
       JOIN users u ON c.student_id = u.id
       LEFT JOIN technicians t ON c.assigned_tech_id = t.id
+      LEFT JOIN feedback f ON c.id = f.complaint_id
       WHERE c.ticket_no = ?
       LIMIT 1;
     `;
@@ -110,10 +113,13 @@ class ComplaintModel {
         u.phone AS student_phone,
         t.name AS technician_name,
         t.trade AS technician_trade,
-        t.phone AS technician_phone
+        t.phone AS technician_phone,
+        f.rating AS feedback_rating,
+        f.comments AS feedback_comments
       FROM complaints c
       JOIN users u ON c.student_id = u.id
       LEFT JOIN technicians t ON c.assigned_tech_id = t.id
+      LEFT JOIN feedback f ON c.id = f.complaint_id
       WHERE c.id = ?
       LIMIT 1;
     `;
@@ -135,6 +141,7 @@ class ComplaintModel {
         t.name AS technician_name,
         t.trade AS technician_trade,
         f.rating AS feedback_rating,
+        f.comments AS feedback_comments,
         f.comments AS feedback_comments
       FROM complaints c
       LEFT JOIN technicians t ON c.assigned_tech_id = t.id
@@ -172,7 +179,8 @@ class ComplaintModel {
         u.phone AS student_phone,
         t.name AS technician_name,
         t.trade AS technician_trade,
-        f.rating AS feedback_rating
+        f.rating AS feedback_rating,
+        f.comments AS feedback_comments
       FROM complaints c
       JOIN users u ON c.student_id = u.id
       LEFT JOIN technicians t ON c.assigned_tech_id = t.id

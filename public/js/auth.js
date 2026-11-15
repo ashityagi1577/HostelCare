@@ -72,8 +72,24 @@ function renderNavbar() {
       </li>
       <li><button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button></li>
     `;
+  } else if (user.role === 'admin') {
+    // Centralized Admin Monitoring Links
+    navContainer.innerHTML = `
+      <li><a href="/admin-dashboard.html" class="${currentPath === '/admin-dashboard.html' ? 'active' : ''}">Executive Overview</a></li>
+      <li><a href="/admin-dashboard.html#rooms" class="">Rooms</a></li>
+      <li><a href="/admin-dashboard.html#complaints" class="">Complaints</a></li>
+      <li><a href="/admin-dashboard.html#staff" class="">Staff &amp; Techs</a></li>
+      <li><a href="/admin-dashboard.html#students" class="">Students</a></li>
+      <li>
+        <div class="user-badge">
+          <span>${user.name.split(' ')[0]}</span>
+          <span class="role-pill" style="background:#fef3c7; color:#92400e; font-weight:700;">Admin</span>
+        </div>
+      </li>
+      <li><button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button></li>
+    `;
   } else {
-    // Staff / Admin Links
+    // Staff / Warden Links (Unchanged)
     navContainer.innerHTML = `
       <li><a href="/staff-dashboard.html" class="${currentPath === '/staff-dashboard.html' ? 'active' : ''}">Complaints Triage</a></li>
       <li><a href="/staff-dashboard.html#technicians" class="">Technicians</a></li>
