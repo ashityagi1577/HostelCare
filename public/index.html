@@ -3,77 +3,388 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HostelCare – Hostel Maintenance & Complaint Portal</title>
+  <title>HostelCare – Smart Campus Maintenance & Facility Management Portal</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    /* ── Hero Section ─────────────────────────────────── */
     .hero {
-      padding: 4.5rem 0 3.5rem 0;
+      padding: 5rem 0 4rem 0;
       text-align: center;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      background: radial-gradient(circle at top, #ffffff 0%, #f1f5f9 100%);
       border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #eef2ff;
+      color: var(--primary);
+      border: 1px solid #c7d2fe;
+      padding: 0.4rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
     }
     .hero h1 {
-      font-size: 2.8rem;
-      font-weight: 800;
-      color: #1e1b4b;
-      margin-bottom: 1rem;
-      letter-spacing: -0.5px;
+      font-size: 3.1rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 1.25rem;
+      letter-spacing: -1px;
+      line-height: 1.15;
     }
     .hero h1 span {
-      color: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, #0284c7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .hero p {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      max-width: 650px;
-      margin: 0 auto 2rem auto;
-      line-height: 1.6;
+      font-size: 1.2rem;
+      color: #475569;
+      max-width: 780px;
+      margin: 0 auto 2.25rem auto;
+      line-height: 1.65;
     }
-    .hero-actions {
+    .hero-cta-box {
       display: flex;
       justify-content: center;
       gap: 1rem;
       margin-bottom: 2.5rem;
-      flex-wrap: wrap;
     }
-    .quick-track-box {
-      max-width: 520px;
-      margin: 0 auto;
-      background: white;
-      padding: 0.75rem;
+    .hero-highlights-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      color: #64748b;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .hero-highlight-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* ── Section Header Components ────────────────────── */
+    .section-wrap {
+      padding: 5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-wrap.bg-alt {
+      background-color: #ffffff;
+    }
+    .section-header {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 3.5rem auto;
+    }
+    .section-tag {
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .section-header h2 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.85rem;
+    }
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    /* ── About & Purpose Comparison ──────────────────── */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .comp-card {
+      padding: 2.25rem;
       border-radius: var(--radius-lg);
       border: 1px solid var(--border);
-      box-shadow: var(--shadow-md);
-      display: flex;
-      gap: 0.5rem;
+      background: white;
+      box-shadow: var(--shadow-sm);
     }
-    .features-grid {
+    .comp-card.traditional {
+      background: #fffafa;
+      border-color: #fecdd3;
+    }
+    .comp-card.hostelcare {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    .comp-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+    .comp-card.traditional .comp-title { color: #991b1b; }
+    .comp-card.hostelcare .comp-title { color: #166534; }
+    .comp-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .comp-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .comp-bullet {
+      flex-shrink: 0;
+      font-size: 1.1rem;
+      margin-top: 0.1rem;
+    }
+
+    /* ── How It Works (Workflow Lifecycle) ───────────── */
+    .lifecycle-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 1.5rem;
-      margin: 4rem 0;
+      position: relative;
     }
-    .feature-card {
-      text-align: left;
-      padding: 2rem;
+    .step-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 1.75rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
     }
-    .feature-icon {
-      font-size: 2rem;
+    .step-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-light);
+    }
+    .step-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+    }
+    .step-card h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.75rem;
+    }
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      flex: 1;
+    }
+    .step-tag {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* ── The 4 User Roles ────────────────────────────── */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.75rem;
+    }
+    .role-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      border-top: 4px solid var(--primary);
+    }
+    .role-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .role-card.role-student { border-top-color: #3b82f6; }
+    .role-card.role-warden { border-top-color: #f59e0b; }
+    .role-card.role-technician { border-top-color: #10b981; }
+    .role-card.role-admin { border-top-color: #8b5cf6; }
+
+    .role-icon-box {
+      font-size: 2.2rem;
       margin-bottom: 1rem;
       display: inline-block;
-      padding: 0.6rem;
-      background: var(--primary-light);
+    }
+    .role-card h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.4rem;
+    }
+    .role-subtitle {
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .role-desc {
+      font-size: 0.92rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      flex: 1;
+    }
+    .role-features-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .role-features-list li {
+      font-size: 0.85rem;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    /* ── Features Grid ───────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+    }
+    .feature-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .feature-icon-circle {
+      width: 50px;
+      height: 50px;
       border-radius: var(--radius-md);
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 1.25rem;
     }
     .feature-card h3 {
       font-size: 1.15rem;
-      font-weight: 700;
+      font-weight: 800;
+      color: #0f172a;
       margin-bottom: 0.5rem;
     }
     .feature-card p {
       color: var(--text-muted);
       font-size: 0.92rem;
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+
+    /* ── Metrics Banner ──────────────────────────────── */
+    .impact-stats-card {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: 3.5rem 2.5rem;
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+      margin: 3rem 0;
+    }
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin-top: 2.5rem;
+    }
+    .impact-item-val {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #38bdf8;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .impact-item-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    /* ── Call To Action Banner ───────────────────────── */
+    .cta-banner {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 3.5rem 2rem;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .cta-banner h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.75rem;
+    }
+    .cta-banner p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.3rem; }
+      .comparison-grid { grid-template-columns: 1fr; }
+      .section-wrap { padding: 3.5rem 0; }
     }
   </style>
 </head>
@@ -84,82 +395,370 @@
     <div class="container nav-container">
       <a href="/index.html" class="brand">
         <span class="brand-icon">🏠</span>
-        <span>HostelCare</span>
+        <span>Hostel<span style="color: var(--primary);">Care</span></span>
       </a>
       <ul class="nav-links" id="navbar-links">
-        <!-- Injected dynamically by auth.js -->
+        <!-- Rendered by auth.js (shows only Login) -->
       </ul>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero">
+  <!-- 1. Hero Section -->
+  <header class="hero">
     <div class="container">
-      <span class="badge badge-assigned" style="margin-bottom: 1rem;">Campus Facility Management Portal</span>
-      <h1>Fast, Transparent <span>Hostel Maintenance</span></h1>
-      <p>Report room repairs, plumbing leaks, electrical faults, or cleaning issues with photo proof. Follow live technician progress from assignment to resolution.</p>
-
-      <div class="hero-actions">
-        <a href="/login.html" class="btn btn-primary btn-lg">Student Login</a>
-        <a href="/register.html" class="btn btn-secondary btn-lg">Register Account</a>
-        <a href="/login.html?role=staff" class="btn btn-secondary btn-lg" style="color: var(--amber-text); border-color: #fde68a;">Staff & Warden Portal</a>
+      <div class="hero-badge">
+        <span>🏛️</span>
+        <span>Institutional Hostel &amp; Facility Management Platform</span>
       </div>
 
-      <!-- Quick Ticket Tracker -->
-      <form class="quick-track-box" onsubmit="handleQuickTrack(event)">
-        <input type="text" id="quickTicketInput" class="form-control" placeholder="Enter Ticket Number (e.g. HC-2026-0001)" required style="border: none; box-shadow: none;">
-        <button type="submit" class="btn btn-primary">Track Ticket</button>
-      </form>
+      <h1>Smart, Transparent &amp; Accountable<br><span>Hostel Maintenance</span></h1>
+
+      <p>
+        Eliminating paper registers, delayed repairs, and communication bottlenecks. 
+        HostelCare seamlessly connects students, hostel wardens, certified maintenance technicians, 
+        and administrative leadership in one unified, auditable digital workflow.
+      </p>
+
+      <div class="hero-cta-box">
+        <a href="/login.html" class="btn btn-primary btn-lg" style="padding: 0.85rem 2.25rem; font-size: 1.05rem; font-weight: 700;">
+          Access Portal &rarr;
+        </a>
+      </div>
+
+      <div class="hero-highlights-row">
+        <div class="hero-highlight-item"><span>⚡</span> <span>Instant Trade Routing</span></div>
+        <span>•</span>
+        <div class="hero-highlight-item"><span>📸</span> <span>Photo Proof Validation</span></div>
+        <span>•</span>
+        <div class="hero-highlight-item"><span>⏱️</span> <span>5-Stage Audit Stepper</span></div>
+        <span>•</span>
+        <div class="hero-highlight-item"><span>🌐</span> <span>Bilingual Technician Desk</span></div>
+        <span>•</span>
+        <div class="hero-highlight-item"><span>🔒</span> <span>Role-Based Access</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. About HostelCare & Core Purpose -->
+  <section class="section-wrap bg-alt">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">About The Platform</div>
+        <h2>Why HostelCare? Purpose &amp; Vision</h2>
+        <p>
+          HostelCare transforms traditional university accommodation maintenance into an efficient, 
+          transparent, and data-driven residential support system.
+        </p>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="comp-card traditional">
+          <div class="comp-title">
+            <span>❌</span>
+            <span>The Traditional Hostel Challenge</span>
+          </div>
+          <ul class="comp-list">
+            <li>
+              <span class="comp-bullet">⚠️</span>
+              <span><strong>Paper Complaint Registers:</strong> Requests handwritten in office notebooks get misplaced, smudged, or overlooked.</span>
+            </li>
+            <li>
+              <span class="comp-bullet">⚠️</span>
+              <span><strong>No Progress Visibility:</strong> Students have no way of knowing whether an electrician or plumber has been dispatched.</span>
+            </li>
+            <li>
+              <span class="comp-bullet">⚠️</span>
+              <span><strong>Misdiagnosed Faults:</strong> Verbal descriptions cause technicians to arrive without the proper spare parts or tools.</span>
+            </li>
+            <li>
+              <span class="comp-bullet">⚠️</span>
+              <span><strong>Lack of Accountability:</strong> No formal completion timestamps or quality checks prior to marking complaints resolved.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="comp-card hostelcare">
+          <div class="comp-title">
+            <span>✔</span>
+            <span>The HostelCare Modern Solution</span>
+          </div>
+          <ul class="comp-list">
+            <li>
+              <span class="comp-bullet">✅</span>
+              <span><strong>Digital Ticket Lifecycle:</strong> Unique tracking tickets (e.g. HC-2026-0001) generated immediately with permanent records.</span>
+            </li>
+            <li>
+              <span class="comp-bullet">✅</span>
+              <span><strong>Live 5-Stage Stepper:</strong> Real-time status tracker from Submitted ➔ Assigned ➔ In Progress ➔ Resolved ➔ Closed.</span>
+            </li>
+            <li>
+              <span class="comp-bullet">✅</span>
+              <span><strong>Photographic Verification:</strong> Students attach high-resolution photos directly so technicians inspect the exact issue.</span>
+            </li>
+            <li>
+              <span class="comp-bullet">✅</span>
+              <span><strong>Resident Quality Sign-Off:</strong> Repairs are only finalized after students test the fix and submit a 1-to-5 star quality rating.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Features Grid -->
-  <main class="container">
-    <div class="features-grid">
-      <div class="card feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Category Triage</h3>
-        <p>Specific classification for Electrical, Plumbing, Carpentry, Cleaning, and Wi-Fi issues to alert the right technicians immediately.</p>
+  <!-- 3. How It Works (Workflow Lifecycle) -->
+  <section class="section-wrap">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">End-to-End Operational Workflow</div>
+        <h2>How HostelCare Resolves Maintenance</h2>
+        <p>
+          From the moment a resident notices a fault to the final verification sign-off, 
+          every action is tracked with timestamped precision.
+        </p>
       </div>
 
-      <div class="card feature-card">
-        <div class="feature-icon">📸</div>
-        <h3>Photo Proof Upload</h3>
-        <p>Attach clear photographs of the repair issue directly from your phone or laptop to avoid miscommunication.</p>
-      </div>
+      <div class="lifecycle-grid">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-badge">1</div>
+          <h3>Student Lodges Request</h3>
+          <p>
+            Resident logs in to their dashboard, chooses the exact discipline (Electrical, Plumbing, Carpentry, Cleaning, or Wi-Fi), 
+            provides room details, and uploads a photo of the damaged fixture.
+          </p>
+          <div class="step-tag"><span>📱</span> <span>Student Dashboard</span></div>
+        </div>
 
-      <div class="card feature-card">
-        <div class="feature-icon">⏱️</div>
-        <h3>5-Stage Stepper Tracker</h3>
-        <p>Live progress visibility: Submitted ➔ Assigned ➔ In Progress ➔ Resolved ➔ Closed, with timestamped audit notes.</p>
-      </div>
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-badge">2</div>
+          <h3>Warden Triage &amp; Assign</h3>
+          <p>
+            The hostel warden reviews the submission on the staff triage desk, sets priority level 
+            (Low, Medium, High, or Emergency), estimates turnaround time, and dispatches an available specialist technician.
+          </p>
+          <div class="step-tag"><span>🛡️</span> <span>Warden Triage Desk</span></div>
+        </div>
 
-      <div class="card feature-card">
-        <div class="feature-icon">⭐</div>
-        <h3>Rating & Quality Sign-Off</h3>
-        <p>Rate completed repairs with a 1-to-5 star review to ensure hostel maintenance staff adhere to high standards.</p>
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-badge">3</div>
+          <h3>Technician Field Repair</h3>
+          <p>
+            The technician accesses their dedicated panel in English or Hindi, marks the job "In Progress", 
+            executes on-site repairs, records work remarks/parts replaced, and updates status to "Resolved".
+          </p>
+          <div class="step-tag"><span>🔧</span> <span>Technician Panel</span></div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card">
+          <div class="step-badge">4</div>
+          <h3>Verification &amp; Feedback</h3>
+          <p>
+            The student inspects the repair. Once fully verified, the resident signs off with a 1-to-5 star review 
+            and qualitative feedback, permanently closing the complaint.
+          </p>
+          <div class="step-tag"><span>⭐</span> <span>Quality Assurance</span></div>
+        </div>
       </div>
     </div>
-  </main>
+  </section>
+
+  <!-- 4. Four Specialized User Roles -->
+  <section class="section-wrap bg-alt">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Role-Based Access Control</div>
+        <h2>Four Dedicated User Roles</h2>
+        <p>
+          HostelCare enforces strict separation of responsibilities so every stakeholder operates in an optimized, 
+          focused workspace.
+        </p>
+      </div>
+
+      <div class="roles-grid">
+        <!-- Role 1: Student -->
+        <div class="role-card role-student">
+          <div class="role-icon-box">🎓</div>
+          <h3>Student Resident</h3>
+          <div class="role-subtitle">Resident Resident User</div>
+          <p class="role-desc">
+            Empowers hostel boarders to report room infrastructure faults swiftly with full transparency on repair schedules.
+          </p>
+          <ul class="role-features-list">
+            <li><span>✔</span> <span>Lodge complaints with photo upload</span></li>
+            <li><span>✔</span> <span>Real-time 5-stage progress tracking</span></li>
+            <li><span>✔</span> <span>Personal maintenance history</span></li>
+            <li><span>✔</span> <span>1-to-5 star rating and quality sign-off</span></li>
+          </ul>
+        </div>
+
+        <!-- Role 2: Warden / Staff -->
+        <div class="role-card role-warden">
+          <div class="role-icon-box">🛡️</div>
+          <h3>Hostel Warden / Staff</h3>
+          <div class="role-subtitle">Facility Operations &amp; Triage</div>
+          <p class="role-desc">
+            Equips residential wardens with a central triage desk to prioritize urgent hazards and dispatch qualified staff.
+          </p>
+          <ul class="role-features-list">
+            <li><span>✔</span> <span>Priority queue (Emergency / High / Med / Low)</span></li>
+            <li><span>✔</span> <span>Automated technician workload assignment</span></li>
+            <li><span>✔</span> <span>Hostel block inspection records</span></li>
+            <li><span>✔</span> <span>Staff resolution audit log oversight</span></li>
+          </ul>
+        </div>
+
+        <!-- Role 3: Technician -->
+        <div class="role-card role-technician">
+          <div class="role-icon-box">🔧</div>
+          <h3>Maintenance Technician</h3>
+          <div class="role-subtitle">Field Operations &amp; Repairs</div>
+          <p class="role-desc">
+            A clean, streamlined mobile-friendly panel tailored for ground technicians to execute repairs and document work notes.
+          </p>
+          <ul class="role-features-list">
+            <li><span>✔</span> <span>Bilingual language switch (English | हिंदी)</span></li>
+            <li><span>✔</span> <span>Personal assigned job list with room &amp; phone</span></li>
+            <li><span>✔</span> <span>1-click status update (In Progress / Resolved)</span></li>
+            <li><span>✔</span> <span>Work remarks &amp; parts replacement logger</span></li>
+          </ul>
+        </div>
+
+        <!-- Role 4: Admin -->
+        <div class="role-card role-admin">
+          <div class="role-icon-box">🏛️</div>
+          <h3>Hostel Administrator</h3>
+          <div class="role-subtitle">Executive Governance &amp; Oversight</div>
+          <p class="role-desc">
+            High-level campus oversight monitoring overall occupancy, room availability, technician performance, and system user provisioning.
+          </p>
+          <ul class="role-features-list">
+            <li><span>✔</span> <span>Campus-wide KPI &amp; resolution analytics</span></li>
+            <li><span>✔</span> <span>Room inventory &amp; vacancy tracking (Blocks A-D)</span></li>
+            <li><span>✔</span> <span>Staff &amp; technician performance metrics</span></li>
+            <li><span>✔</span> <span>Exclusive user account registration control</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Main Features & Benefits Grid -->
+  <section class="section-wrap">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Enterprise Capabilities</div>
+        <h2>Engineered for Campus Housing Excellence</h2>
+        <p>
+          Built with modern engineering standards to ensure high availability, data security, and seamless user experiences.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-circle">⚡</div>
+          <h3>Trade-Specific Routing</h3>
+          <p>Instant categorical triage for Electrical, Plumbing, Carpentry, Cleaning, and Wi-Fi ensures tasks reach the correct specialized technicians without confusion.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle">📸</div>
+          <h3>Photographic Evidence</h3>
+          <p>Allows residents to attach clear photos directly from their phone, preventing misdiagnosis and ensuring technicians carry the right replacement components.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle">⏱️</div>
+          <h3>Immutable Audit Trail</h3>
+          <p>Every ticket status mutation is timestamped and recorded in the audit logs, preserving full accountability for who dispatched, repaired, and approved the job.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle">🌐</div>
+          <h3>Bilingual Field Operations</h3>
+          <p>Technicians can toggle seamlessly between English and Hindi, ensuring ground workers understand job details and record resolution remarks comfortably.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle">📊</div>
+          <h3>Real-Time SLA Analytics</h3>
+          <p>Automated computation of average turnaround time, emergency resolution speed, and block-wise defect distributions for continuous facility improvement.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-circle">🔒</div>
+          <h3>Role-Based Data Isolation</h3>
+          <p>Signed JSON Web Tokens (JWT) and database-level role verification ensure students, wardens, technicians, and administrators access only their authorized views.</p>
+        </div>
+      </div>
+
+      <!-- Campus Housing Impact Banner -->
+      <div class="impact-stats-card">
+        <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">HostelCare Campus Impact</h3>
+        <p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">Standardizing campus facility maintenance across all university residential blocks.</p>
+        
+        <div class="impact-grid">
+          <div>
+            <div class="impact-item-val">100%</div>
+            <div class="impact-item-label">Paperless Audit Trail</div>
+          </div>
+          <div>
+            <div class="impact-item-val">&lt; 24h</div>
+            <div class="impact-item-label">Emergency Response Target</div>
+          </div>
+          <div>
+            <div class="impact-item-val">4</div>
+            <div class="impact-item-label">Hostel Blocks Supported</div>
+          </div>
+          <div>
+            <div class="impact-item-val">5</div>
+            <div class="impact-item-label">Certified Maintenance Trades</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Call To Action & Access -->
+  <section class="section-wrap bg-alt">
+    <div class="container">
+      <div class="cta-banner">
+        <h2>Ready to Access the Portal?</h2>
+        <p>
+          Sign in with your registered institutional credentials to lodge repair requests, 
+          manage triage assignments, or inspect facility performance.
+        </p>
+        <a href="/login.html" class="btn btn-primary btn-lg" style="padding: 0.85rem 2.5rem; font-size: 1.05rem; font-weight: 700;">
+          Sign In to HostelCare &rarr;
+        </a>
+        <div style="margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+          🔒 New accounts are provisioned exclusively through the Hostel Administration Desk.
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p>HostelCare – Campus Maintenance & Facility Portal &copy; 2026. Built for Project-Based Learning (PBL).</p>
+  <footer style="background: white; border-top: 1px solid var(--border); padding: 3rem 0; margin-top: auto;">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+      <div>
+        <div style="font-weight: 800; font-size: 1.15rem; color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
+          <span>🏠</span> <span>Hostel<span style="color: var(--primary);">Care</span></span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.35rem;">
+          Campus Housing Maintenance &amp; Facility Operations Platform &copy; 2026.
+        </p>
+      </div>
+      <div style="font-size: 0.88rem; color: var(--text-muted); text-align: right;">
+        <div>🏢 <strong>Administration:</strong> Central Hostel Block A Ground Floor</div>
+        <div>📞 <strong>Support Desk:</strong> +91 98765 43222 &bull; <strong>Email:</strong> admin@hostelcare.com</div>
+      </div>
     </div>
   </footer>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
-  <script>
-    function handleQuickTrack(e) {
-      e.preventDefault();
-      const ticketNo = document.getElementById('quickTicketInput').value.trim();
-      if (ticketNo) {
-        window.location.href = `/track.html?ticket=${encodeURIComponent(ticketNo)}`;
-      }
-    }
-  </script>
 </body>
 </html>
-

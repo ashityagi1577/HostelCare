@@ -304,6 +304,7 @@
         </p>
       </div>
       <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <button onclick="openRegisterUserModal()" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.35rem;">➕ Register User</button>
         <button onclick="loadAdminData()" class="btn btn-secondary btn-sm">🔄 Refresh Data</button>
         <button onclick="exportFullAdminCSV()" class="btn btn-secondary btn-sm" title="Export Complete Dataset">📥 Export System CSV</button>
       </div>
@@ -328,6 +329,9 @@
       </button>
       <button class="admin-tab-btn" id="tabBtnStudents" onclick="switchAdminTab('students')">
         🎓 Student Registry
+      </button>
+      <button class="admin-tab-btn" id="tabBtnRegister" onclick="switchAdminTab('register')">
+        👤 Register Users
       </button>
     </div>
 
@@ -659,7 +663,191 @@
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 6: REGISTER USERS (ACCOUNT PROVISIONING)                          -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div id="tabContentRegister" style="display: none;">
+      <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+        <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+          <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span>👤</span> Institutional User Registration &amp; Account Provisioning
+          </h2>
+          <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+            Create verified institutional logins for <strong>Students</strong>, <strong>Staff / Wardens</strong>, and <strong>Technicians</strong>. Self-registration is restricted; all accounts must be provisioned here.
+          </p>
+        </div>
+
+        <form id="inlineRegisterUserForm" onsubmit="handleInlineCreateUser(event)" style="max-width: 800px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Account Role *</label>
+              <select id="inlineUserRole" class="form-control" onchange="toggleInlineRoleFields()" required style="background: white; font-weight: 600;">
+                <option value="student">Student Resident</option>
+                <option value="staff">Hostel Staff / Warden</option>
+                <option value="technician">Maintenance Technician</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Institutional / User ID</label>
+              <input type="text" id="inlineUserId" class="form-control" placeholder="e.g. STU-105 (or leave empty to auto-generate)">
+              <small style="color:var(--text-muted); font-size:0.75rem;">Leave blank to auto-generate ID prefix</small>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Full Name *</label>
+              <input type="text" id="inlineUserName" class="form-control" placeholder="e.g. Aditi Sharma" required>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Email Address *</label>
+              <input type="email" id="inlineUserEmail" class="form-control" placeholder="aditi@hostelcare.com" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Contact Phone Number</label>
+              <input type="tel" id="inlineUserPhone" class="form-control" placeholder="9876543210">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Default Password *</label>
+              <input type="password" id="inlineUserPassword" class="form-control" value="password123" required minlength="6">
+              <small style="color:var(--text-muted); font-size:0.75rem;">Default: password123. Users can update later.</small>
+            </div>
+          </div>
+
+          <!-- Dynamic Student Fields -->
+          <div id="inlineStudentFields" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Hostel Block</label>
+              <select id="inlineUserBlock" class="form-control">
+                <option value="Block A (Boys)">Block A (Boys)</option>
+                <option value="Block B (Boys)">Block B (Boys)</option>
+                <option value="Block C (Girls)">Block C (Girls)</option>
+                <option value="Block D (Girls)">Block D (Girls)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Room Number</label>
+              <input type="text" id="inlineUserRoom" class="form-control" placeholder="e.g. A-205">
+            </div>
+          </div>
+
+          <!-- Dynamic Technician Fields -->
+          <div id="inlineTechnicianFields" style="margin-bottom: 1.25rem; display: none;">
+            <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Trade / Specialization *</label>
+            <select id="inlineUserTrade" class="form-control" style="max-width: 380px;">
+              <option value="Electrical">Electrical</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Carpentry">Carpentry</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="WiFi_Internet">WiFi &amp; Internet</option>
+              <option value="General">General Maintenance</option>
+            </select>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <button type="submit" class="btn btn-primary" id="btnInlineSubmitUser" style="padding: 0.75rem 2rem; font-weight: 700;">
+              ➕ Register &amp; Activate Account
+            </button>
+            <button type="reset" class="btn btn-secondary" onclick="document.getElementById('inlineUserPassword').value='password123'; toggleInlineRoleFields();">
+              Clear Form
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </main>
+
+  <!-- ── REGISTER NEW USER MODAL ───────────────────────── -->
+  <div class="modal-overlay" id="registerUserModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: white; border-radius: var(--radius-lg); width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); padding: 1.75rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          <span>👤</span> Provision Institutional Account
+        </h3>
+        <button type="button" onclick="closeRegisterUserModal()" style="background:none; border:none; font-size: 1.4rem; cursor:pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+      </div>
+
+      <form id="registerUserForm" onsubmit="handleAdminCreateUser(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Role *</label>
+            <select id="newUserRole" class="form-control" onchange="toggleRoleFields()" required>
+              <option value="student">Student Resident</option>
+              <option value="staff">Hostel Staff / Warden</option>
+              <option value="technician">Maintenance Technician</option>
+              <option value="admin">Chief Administrator</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">User / Institutional ID</label>
+            <input type="text" id="newUserId" class="form-control" placeholder="e.g. STU-105 (or auto)">
+            <small style="color:var(--text-muted); font-size:0.75rem;">Leave empty to auto-generate</small>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Full Name *</label>
+          <input type="text" id="newUserName" class="form-control" placeholder="e.g. Aditi Sharma" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Email Address *</label>
+            <input type="email" id="newUserEmail" class="form-control" placeholder="aditi@hostelcare.com" required>
+          </div>
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Phone Number</label>
+            <input type="tel" id="newUserPhone" class="form-control" placeholder="9876543210">
+          </div>
+        </div>
+
+        <!-- Student Specific Fields -->
+        <div id="studentFieldsBox" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Hostel Block</label>
+            <select id="newUserBlock" class="form-control">
+              <option value="Block A (Boys)">Block A (Boys)</option>
+              <option value="Block B (Boys)">Block B (Boys)</option>
+              <option value="Block C (Girls)">Block C (Girls)</option>
+              <option value="Block D (Girls)">Block D (Girls)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Room Number</label>
+            <input type="text" id="newUserRoom" class="form-control" placeholder="e.g. A-205">
+          </div>
+        </div>
+
+        <!-- Technician Specific Fields -->
+        <div id="technicianFieldsBox" style="margin-bottom: 1rem; display: none;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Trade / Specialization *</label>
+          <select id="newUserTrade" class="form-control">
+            <option value="Electrical">Electrical</option>
+            <option value="Plumbing">Plumbing</option>
+            <option value="Carpentry">Carpentry</option>
+            <option value="Cleaning">Cleaning</option>
+            <option value="WiFi_Internet">WiFi &amp; Internet</option>
+            <option value="General">General Maintenance</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Initial Password *</label>
+          <input type="password" id="newUserPassword" class="form-control" value="password123" required minlength="6">
+          <small style="color:var(--text-muted); font-size:0.75rem;">Default is password123. The user can log in with this password.</small>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem; border-top:1px solid var(--border); padding-top:1rem;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeRegisterUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitUser">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
@@ -701,7 +889,7 @@
 
     function handleHash() {
       const hash = window.location.hash.toLowerCase().replace('#', '');
-      if (['rooms', 'complaints', 'staff', 'students'].includes(hash)) {
+      if (['rooms', 'complaints', 'staff', 'students', 'register'].includes(hash)) {
         switchAdminTab(hash);
       } else {
         switchAdminTab('overview');
@@ -711,7 +899,7 @@
     // ── Tab Switcher ──────────────────────────────────────────
     function switchAdminTab(tab) {
       currentAdminTab = tab;
-      const tabs = ['overview', 'rooms', 'complaints', 'staff', 'students'];
+      const tabs = ['overview', 'rooms', 'complaints', 'staff', 'students', 'register'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tabBtn${capitalize(t)}`);
         const content = document.getElementById(`tabContent${capitalize(t)}`);
@@ -719,11 +907,15 @@
         if (content) content.style.display = t === tab ? 'block' : 'none';
       });
 
+      const navReg = document.getElementById('adminNavLinkRegister');
+      if (navReg) navReg.classList.toggle('active', tab === 'register');
+
       // Lazy load tab specific data
       if (tab === 'rooms' && adminRoomsList.length === 0) loadRoomsData();
       if (tab === 'complaints' && adminComplaintsList.length === 0) loadComplaintsData();
       if (tab === 'staff') loadStaffData();
       if (tab === 'students' && adminStudentsList.length === 0) loadStudentsData();
+      if (tab === 'register') toggleInlineRoleFields();
     }
 
     // ── Load Master Overview Data ─────────────────────────────
@@ -1154,6 +1346,90 @@
         showToast('Network error during export.', 'error');
       }
     }
+
+    // ── Register User Modal Handlers ─────────────────────────
+    function openRegisterUserModal() {
+      document.getElementById('registerUserModal').style.display = 'flex';
+      toggleRoleFields();
+    }
+
+    function closeRegisterUserModal() {
+      document.getElementById('registerUserModal').style.display = 'none';
+      document.getElementById('registerUserForm').reset();
+      document.getElementById('newUserPassword').value = 'password123';
+    }
+
+    function toggleRoleFields() {
+      const role = document.getElementById('newUserRole').value;
+      const studentBox = document.getElementById('studentFieldsBox');
+      const techBox = document.getElementById('technicianFieldsBox');
+
+      studentBox.style.display = (role === 'student') ? 'grid' : 'none';
+      techBox.style.display = (role === 'technician') ? 'block' : 'none';
+
+      const idInput = document.getElementById('newUserId');
+      if (role === 'student') idInput.placeholder = 'e.g. STU-105 (or auto)';
+      else if (role === 'staff') idInput.placeholder = 'e.g. STF-102 (or auto)';
+      else if (role === 'technician') idInput.placeholder = 'e.g. TECH-106 (or auto)';
+      else if (role === 'admin') idInput.placeholder = 'e.g. ADM-102 (or auto)';
+    }
+
+    async function handleAdminCreateUser(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('btnSubmitUser');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Creating account...';
+
+      const role = document.getElementById('newUserRole').value;
+      const payload = {
+        role,
+        user_id: document.getElementById('newUserId').value.trim() || undefined,
+        name: document.getElementById('newUserName').value.trim(),
+        email: document.getElementById('newUserEmail').value.trim(),
+        phone: document.getElementById('newUserPhone').value.trim() || undefined,
+        password: document.getElementById('newUserPassword').value,
+        hostel_block: role === 'student' ? document.getElementById('newUserBlock').value : undefined,
+        room_no: role === 'student' ? document.getElementById('newUserRoom').value.trim() : undefined,
+        trade: role === 'technician' ? document.getElementById('newUserTrade').value : undefined
+      };
+
+      try {
+        const res = await apiRequest('/api/admin/users', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Create Account';
+
+        if (res.success) {
+          showToast(res.message || 'Account provisioned successfully! 🎉', 'success');
+          closeRegisterUserModal();
+          // Refresh datasets
+          loadAdminData();
+          if (currentAdminTab === 'students') loadStudentsData();
+          if (currentAdminTab === 'staff') loadStaffData();
+        } else {
+          showToast(res.error || 'Failed to create user account.', 'error');
+        }
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Create Account';
+        showToast('Network error while provisioning user.', 'error');
+      }
+    }
+
+    // Modal click-outside dismissal
+    window.addEventListener('click', (e) => {
+      const modal = document.getElementById('registerUserModal');
+      if (e.target === modal) {
+        closeRegisterUserModal();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeRegisterUserModal();
+    });
 
     // ── Helpers ───────────────────────────────────────────────
     function capitalize(str) {

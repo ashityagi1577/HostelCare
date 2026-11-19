@@ -24,6 +24,11 @@ function isStaff() {
   return user && (user.role === 'staff' || user.role === 'admin');
 }
 
+function isTechnician() {
+  const user = getUser();
+  return user && user.role === 'technician';
+}
+
 function logout() {
   localStorage.removeItem('hostelcare_token');
   localStorage.removeItem('hostelcare_user');
@@ -51,12 +56,9 @@ function renderNavbar() {
   const user = getUser();
 
   if (!user) {
-    // Guest Links
+    // Guest Links: Show only Login option, Register completely removed
     navContainer.innerHTML = `
-      <li><a href="/index.html" class="${currentPath === '/' || currentPath === '/index.html' ? 'active' : ''}">Home</a></li>
-      <li><a href="/track.html" class="${currentPath === '/track.html' ? 'active' : ''}">Track Ticket</a></li>
-      <li><a href="/login.html" class="btn btn-secondary btn-sm">Sign In</a></li>
-      <li><a href="/register.html" class="btn btn-primary btn-sm">Register</a></li>
+      <li><a href="/login.html" class="btn btn-primary btn-sm">Login</a></li>
     `;
   } else if (user.role === 'student') {
     // Student Links
@@ -73,13 +75,9 @@ function renderNavbar() {
       <li><button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button></li>
     `;
   } else if (user.role === 'admin') {
-    // Centralized Admin Monitoring Links
+    // Admin Links: Executive Overview, Rooms, Complaints, Staff & Techs, Students removed. Only Register Users displayed.
     navContainer.innerHTML = `
-      <li><a href="/admin-dashboard.html" class="${currentPath === '/admin-dashboard.html' ? 'active' : ''}">Executive Overview</a></li>
-      <li><a href="/admin-dashboard.html#rooms" class="">Rooms</a></li>
-      <li><a href="/admin-dashboard.html#complaints" class="">Complaints</a></li>
-      <li><a href="/admin-dashboard.html#staff" class="">Staff &amp; Techs</a></li>
-      <li><a href="/admin-dashboard.html#students" class="">Students</a></li>
+      <li><a href="/admin-dashboard.html#register" id="adminNavLinkRegister" class="${window.location.hash === '#register' ? 'active' : ''}">Register Users</a></li>
       <li>
         <div class="user-badge">
           <span>${user.name.split(' ')[0]}</span>
@@ -88,16 +86,25 @@ function renderNavbar() {
       </li>
       <li><button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button></li>
     `;
-  } else {
-    // Staff / Warden Links (Unchanged)
+  } else if (user.role === 'technician') {
+    // Technician Links
     navContainer.innerHTML = `
-      <li><a href="/staff-dashboard.html" class="${currentPath === '/staff-dashboard.html' ? 'active' : ''}">Complaints Triage</a></li>
-      <li><a href="/staff-dashboard.html#technicians" class="">Technicians</a></li>
-      <li><a href="/staff-dashboard.html#analytics" class="">Analytics</a></li>
+      <li><a href="/technician-dashboard.html" class="${currentPath === '/technician-dashboard.html' ? 'active' : ''}">Assigned Jobs</a></li>
       <li>
         <div class="user-badge">
           <span>${user.name.split(' ')[0]}</span>
-          <span class="role-pill role-staff">${user.role}</span>
+          <span class="role-pill" style="background:#e0e7ff; color:#3730a3; font-weight:700;">Technician</span>
+        </div>
+      </li>
+      <li><button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button></li>
+    `;
+  } else {
+    // Staff / Warden Links: Complaints Triage, Technicians, Analytics removed from navigation bar only.
+    navContainer.innerHTML = `
+      <li>
+        <div class="user-badge">
+          <span>${user.name.split(' ')[0]}</span>
+          <span class="role-pill role-staff">${user.role === 'staff' ? 'Warden' : user.role}</span>
         </div>
       </li>
       <li><button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button></li>

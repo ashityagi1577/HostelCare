@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('student', 'staff', 'admin') NOT NULL DEFAULT 'student',
+    role ENUM('student', 'staff', 'admin', 'technician') NOT NULL DEFAULT 'student',
+    tech_id INT NULL,
     hostel_block VARCHAR(50) NULL,
     room_no VARCHAR(20) NULL,
     phone VARCHAR(20) NULL,
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id),
     INDEX idx_user_role (role),
+    INDEX idx_user_tech_id (tech_id),
     INDEX idx_user_hostel_block (hostel_block)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

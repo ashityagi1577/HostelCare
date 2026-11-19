@@ -95,28 +95,45 @@ async function seedDatabase() {
 
     // 2. Seed Technicians
     const technicians = [
-      { name: 'Ramesh Patel', trade: 'Electrical', phone: '9822334455' },
-      { name: 'Dinesh Kumar', trade: 'Plumbing', phone: '9833445566' },
-      { name: 'Suresh Mistry', trade: 'Carpentry', phone: '9844556677' },
-      { name: 'Sunita Bai', trade: 'Cleaning', phone: '9855667788' },
-      { name: 'Vikram Joshi', trade: 'WiFi_Internet', phone: '9866778899' }
+      { name: 'Ramesh Patel', trade: 'Electrical', phone: '9822334455', email: 'tech.ramesh@hostelcare.com', user_id: 'TECH-101' },
+      { name: 'Dinesh Kumar', trade: 'Plumbing', phone: '9833445566', email: 'tech.dinesh@hostelcare.com', user_id: 'TECH-102' },
+      { name: 'Suresh Mistry', trade: 'Carpentry', phone: '9844556677', email: 'tech.suresh@hostelcare.com', user_id: 'TECH-103' },
+      { name: 'Sunita Bai', trade: 'Cleaning', phone: '9855667788', email: 'tech.sunita@hostelcare.com', user_id: 'TECH-104' },
+      { name: 'Vikram Joshi', trade: 'WiFi_Internet', phone: '9866778899', email: 'tech.vikram@hostelcare.com', user_id: 'TECH-105' }
     ];
 
-    console.log('\n2. Inserting Technicians...');
+    console.log('\n2. Inserting Technicians and Accounts...');
     const techMap = {};
     for (const t of technicians) {
+      let techDbId;
       const [existing] = await pool.query('SELECT id FROM technicians WHERE phone = ? LIMIT 1;', [t.phone]);
       if (existing.length === 0) {
         const [result] = await pool.execute(
           'INSERT INTO technicians (name, trade, phone, is_available) VALUES (?, ?, ?, 1);',
           [t.name, t.trade, t.phone]
         );
-        techMap[t.trade] = result.insertId;
-        console.log(`   ✔ Technician created: ${t.name.padEnd(18)} (${t.trade}) (ID: ${result.insertId})`);
+        techDbId = result.insertId;
+        console.log(`   ✔ Technician created: ${t.name.padEnd(18)} (${t.trade}) (ID: ${techDbId})`);
       } else {
-        techMap[t.trade] = existing[0].id;
-        console.log(`   ✔ Technician exists : ${t.name.padEnd(18)} (${t.trade}) (ID: ${existing[0].id})`);
+        techDbId = existing[0].id;
+        console.log(`   ✔ Technician exists : ${t.name.padEnd(18)} (${t.trade}) (ID: ${techDbId})`);
       }
+      techMap[t.trade] = techDbId;
+
+      // Ensure technician login user account exists
+      const techUserSql = `
+        INSERT INTO users (user_id, name, email, password_hash, role, tech_id, phone)
+        VALUES (?, ?, ?, ?, 'technician', ?, ?)
+        ON DUPLICATE KEY UPDATE
+          user_id = VALUES(user_id),
+          name = VALUES(name),
+          password_hash = VALUES(password_hash),
+          role = 'technician',
+          tech_id = VALUES(tech_id),
+          phone = VALUES(phone);
+      `;
+      await pool.execute(techUserSql, [t.user_id, t.name, t.email, passwordHash, techDbId, t.phone]);
+      console.log(`   ✔ Technician user   : ${t.user_id.padEnd(8)} | ${t.email.padEnd(28)} [TECHNICIAN -> TechID ${techDbId}]`);
     }
 
     // 3. Seed Diverse Complaints
@@ -220,6 +237,48 @@ async function seedDatabase() {
         resolution_notes: null,
         resolved_at: null,
         created_at: new Date(Date.now() - 3600000 * 1) // 1 hour ago
+      },
+      {
+        ticket_no: 'HC-2026-0008',
+        student_email: 'student@hostelcare.com',
+        category: 'Electrical',
+        title: 'Study desk power socket not supplying power in A-204',
+        description: 'The right side modular power socket on the study desk has no power output. Charger sparks intermittently.',
+        priority: 'Medium',
+        status: 'In_Progress',
+        tech_trade: 'Electrical',
+        estimated_date: new Date(Date.now() + 86400000),
+        resolution_notes: null,
+        resolved_at: null,
+        created_at: new Date(Date.now() - 3600000 * 8)
+      },
+      {
+        ticket_no: 'HC-2026-0009',
+        student_email: 'rahul@hostelcare.com',
+        category: 'Electrical',
+        title: 'Exhaust fan humming loudly and not spinning in B-112 bathroom',
+        description: 'Bathroom exhaust fan motor is jammed and buzzing loudly without spinning.',
+        priority: 'Low',
+        status: 'Resolved',
+        tech_trade: 'Electrical',
+        estimated_date: new Date(Date.now() - 3600000 * 12),
+        resolution_notes: 'Replaced faulty capacitor and lubricated motor bearings. Fan tested and operating normally at 1400 RPM.',
+        resolved_at: new Date(Date.now() - 3600000 * 6),
+        created_at: new Date(Date.now() - 3600000 * 36)
+      },
+      {
+        ticket_no: 'HC-2026-0010',
+        student_email: 'priya@hostelcare.com',
+        category: 'Electrical',
+        title: 'Corridor emergency light battery replacement',
+        description: 'Emergency LED unit outside Room C-105 is dead during power changeover.',
+        priority: 'Medium',
+        status: 'Closed',
+        tech_trade: 'Electrical',
+        estimated_date: new Date(Date.now() - 3600000 * 48),
+        resolution_notes: 'Replaced 12V 7Ah lead-acid backup battery and verified charging circuit output at 13.8V.',
+        resolved_at: new Date(Date.now() - 3600000 * 30),
+        created_at: new Date(Date.now() - 3600000 * 72)
       }
     ];
 
@@ -260,7 +319,13 @@ async function seedDatabase() {
         console.log(`   ✔ Complaint created : ${c.ticket_no} [${c.status}] - ${c.title.slice(0, 35)}...`);
       } else {
         complaintId = existing[0].id;
-        console.log(`   ✔ Complaint exists  : ${c.ticket_no} (ID: ${complaintId})`);
+        if (techId) {
+          await pool.execute(
+            'UPDATE complaints SET assigned_tech_id = ?, status = ? WHERE id = ?;',
+            [techId, c.status, complaintId]
+          );
+        }
+        console.log(`   ✔ Complaint updated : ${c.ticket_no} (ID: ${complaintId}) [${c.status}] -> Tech ID ${techId}`);
       }
 
       // 4. Seed Audit Logs for Timeline Stepper

@@ -10,7 +10,7 @@ class UserModel {
    * e.g., STU-1001 for students, STF-1001 for staff
    */
   static generateDefaultUserId(role = 'student') {
-    const prefix = role === 'staff' ? 'STF' : role === 'admin' ? 'ADM' : 'STU';
+    const prefix = role === 'staff' ? 'STF' : role === 'admin' ? 'ADM' : role === 'technician' ? 'TECH' : 'STU';
     const rand = Math.floor(1000 + Math.random() * 9000);
     return `${prefix}-${rand}`;
   }
@@ -73,7 +73,7 @@ class UserModel {
     if (!identifier) return null;
     const clean = identifier.trim();
     const sql = `
-      SELECT id, user_id, name, email, password_hash, role, hostel_block, room_no, phone, created_at, updated_at
+      SELECT id, user_id, name, email, password_hash, role, tech_id, hostel_block, room_no, phone, created_at, updated_at
       FROM users
       WHERE LOWER(email) = LOWER(?) OR UPPER(user_id) = UPPER(?)
       LIMIT 1;
@@ -89,7 +89,7 @@ class UserModel {
    */
   static async findByEmail(email) {
     const sql = `
-      SELECT id, user_id, name, email, password_hash, role, hostel_block, room_no, phone, created_at, updated_at
+      SELECT id, user_id, name, email, password_hash, role, tech_id, hostel_block, room_no, phone, created_at, updated_at
       FROM users
       WHERE LOWER(email) = LOWER(?)
       LIMIT 1;
@@ -106,7 +106,7 @@ class UserModel {
   static async findByUserId(userId) {
     if (!userId) return null;
     const sql = `
-      SELECT id, user_id, name, email, password_hash, role, hostel_block, room_no, phone, created_at, updated_at
+      SELECT id, user_id, name, email, password_hash, role, tech_id, hostel_block, room_no, phone, created_at, updated_at
       FROM users
       WHERE UPPER(user_id) = UPPER(?)
       LIMIT 1;
@@ -122,7 +122,7 @@ class UserModel {
    */
   static async findById(id) {
     const sql = `
-      SELECT id, user_id, name, email, role, hostel_block, room_no, phone, created_at, updated_at
+      SELECT id, user_id, name, email, role, tech_id, hostel_block, room_no, phone, created_at, updated_at
       FROM users
       WHERE id = ?
       LIMIT 1;

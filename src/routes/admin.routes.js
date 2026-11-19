@@ -15,5 +15,10 @@ router.get('/students', AdminController.getStudentsDirectory);
 router.get('/staff',    AdminController.getStaffDirectory);
 router.get('/rooms',    AdminController.getRoomsDirectory);
 
+/**
+ * Account Provisioning: Admin registers users (Student, Staff, Technician, Admin)
+ */
+router.post('/users',   AdminController.registerUser);
+
 module.exports = router;
 

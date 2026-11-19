@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technician Panel – HostelCare Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* ── Layout & Sidebar Structure ─────────────────── */
+    .tech-layout {
+      display: flex;
+      min-height: calc(100vh - 70px);
+      background-color: var(--bg-main);
+    }
+
+    .tech-sidebar {
+      width: 260px;
+      background: white;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+
+    .tech-sidebar-brand {
+      padding: 1.5rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tech-sidebar-brand h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #1e1b4b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tech-sidebar-nav {
+      list-style: none;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+    }
+
+    .tech-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.92rem;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .tech-nav-item:hover {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .tech-nav-item.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .tech-nav-item.active .badge-pill {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+    }
+
+    .tech-sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text-subtle);
+    }
+
+    .tech-main-content {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      overflow-y: auto;
+      max-width: 1300px;
+    }
+
+    /* ── Top Panel Header ───────────────────────────── */
+    .tech-header-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tech-profile-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .tech-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, #4f46e5, #0284c7);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+    }
+
+    .tech-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .tech-meta {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Language Switcher Component ─────────────────── */
+    .lang-switcher-box {
+      display: flex;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 0.3rem;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      gap: 0.25rem;
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      padding: 0.45rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .lang-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Metric Cards ───────────────────────────────── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.35rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .metric-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .metric-card.card-total::before { background: var(--primary); }
+    .metric-card.card-pending::before { background: var(--amber); }
+    .metric-card.card-progress::before { background: var(--sky); }
+    .metric-card.card-completed::before { background: var(--emerald); }
+
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+
+    .metric-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .metric-icon {
+      font-size: 1.35rem;
+    }
+
+    .metric-num {
+      font-size: 2.15rem;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.45rem;
+    }
+
+    /* ── Section Cards & Tables ──────────────────────── */
+    .content-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .content-card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .content-card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      padding: 0.45rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      min-width: 220px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Table styling */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .tech-table th {
+      background: #f8fafc;
+      padding: 0.85rem 1.25rem;
+      font-weight: 700;
+      color: #475569;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tech-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      color: #1e293b;
+      vertical-align: middle;
+    }
+
+    .tech-table tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    /* Badges */
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .badge-assigned {
+      background: var(--amber-bg);
+      color: var(--amber-text);
+      border: 1px solid #fde68a;
+    }
+
+    .badge-inprogress {
+      background: var(--sky-bg);
+      color: var(--sky-text);
+      border: 1px solid #bae6fd;
+    }
+
+    .badge-resolved, .badge-closed {
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+      border: 1px solid #a7f3d0;
+    }
+
+    .prio-pill {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .prio-emergency { background: #fee2e2; color: #991b1b; }
+    .prio-high { background: #ffedd5; color: #9a3412; }
+    .prio-medium { background: #fef3c7; color: #92400e; }
+    .prio-low { background: #f1f5f9; color: #475569; }
+
+    /* Action Buttons in Rows */
+    .action-btn-group {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-action-start {
+      background: var(--sky-bg);
+      color: var(--sky-text);
+      border: 1px solid #bae6fd;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: var(--transition);
+    }
+
+    .btn-action-start:hover {
+      background: var(--sky);
+      color: white;
+    }
+
+    .btn-action-resolve {
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+      border: 1px solid #a7f3d0;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: var(--transition);
+    }
+
+    .btn-action-resolve:hover {
+      background: var(--emerald);
+      color: white;
+    }
+
+    .btn-action-view {
+      background: white;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: var(--transition);
+    }
+
+    .btn-action-view:hover {
+      background: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    /* ── Modals ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl);
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #1e1b4b;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: var(--text-subtle);
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 0.85rem;
+      font-size: 0.92rem;
+    }
+
+    .detail-label {
+      width: 150px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .detail-value {
+      color: #0f172a;
+      flex: 1;
+    }
+
+    .desc-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #334155;
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .tech-layout {
+        flex-direction: column;
+      }
+      .tech-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .tech-sidebar-nav {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+      .tech-main-content {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Global Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand">
+        <span class="brand-icon">🔧</span>
+        <span>Hostel<span style="color: var(--primary);">Care</span></span>
+      </a>
+      <ul class="nav-links" id="navbar-links">
+        <!-- Rendered by auth.js -->
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Technician Portal Container -->
+  <div class="tech-layout">
+    <!-- Sidebar -->
+    <aside class="tech-sidebar">
+      <div class="tech-sidebar-brand">
+        <h3><span style="font-size: 1.2rem;">🛠️</span> <span data-i18n="tech_panel_title">Technician Workspace</span></h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;" data-i18n="tech_panel_subtitle">Field Operations &amp; Repairs</p>
+      </div>
+
+      <ul class="tech-sidebar-nav">
+        <li>
+          <button type="button" class="tech-nav-item active" id="navBtnDashboard" onclick="switchView('dashboard')">
+            <span>📊</span>
+            <span data-i18n="nav_dashboard">Dashboard</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="tech-nav-item" id="navBtnAssigned" onclick="switchView('assigned')">
+            <span>📋</span>
+            <span data-i18n="nav_assigned">My Assigned Jobs</span>
+            <span class="badge-pill badge-assigned" id="sidebarPendingCount" style="margin-left: auto;">0</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="tech-nav-item" id="navBtnHistory" onclick="switchView('history')">
+            <span>📜</span>
+            <span data-i18n="nav_history">Work History</span>
+            <span class="badge-pill badge-resolved" id="sidebarCompletedCount" style="margin-left: auto;">0</span>
+          </button>
+        </li>
+      </ul>
+
+      <div class="tech-sidebar-footer">
+        <div style="font-weight: 700; color: #334155;" id="sidebarTechTrade">Trade: General</div>
+        <div style="margin-top: 0.25rem;" id="sidebarTechId">ID: TECH-000</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="tech-main-content">
+      <!-- Profile & Language Switcher Header -->
+      <header class="tech-header-card">
+        <div class="tech-profile-row">
+          <div class="tech-avatar" id="avatarInitial">T</div>
+          <div>
+            <div class="tech-name">
+              <span data-i18n="greeting_welcome">Welcome,</span> <span id="technicianNameDisplay">Technician</span>
+            </div>
+            <div class="tech-meta">
+              <span>🏷️ <strong id="technicianTradeDisplay">Electrical</strong> <span data-i18n="meta_specialist">Specialist</span></span>
+              <span>•</span>
+              <span>📞 <span id="technicianPhoneDisplay">+91 00000 00000</span></span>
+              <span>•</span>
+              <span class="badge-pill badge-resolved" style="background:#ecfdf5; color:#065f46;" data-i18n="status_on_duty">● Active On-Duty</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language Switcher: English / Hindi -->
+        <div class="lang-switcher-box">
+          <span style="font-size: 0.85rem; margin-left: 0.5rem; margin-right: 0.25rem;">🌐</span>
+          <button type="button" class="lang-btn active" id="langBtnEn" onclick="setLanguage('en')">English</button>
+          <button type="button" class="lang-btn" id="langBtnHi" onclick="setLanguage('hi')">हिंदी</button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: DASHBOARD OVERVIEW -->
+      <div id="viewDashboard">
+        <!-- Metric Cards -->
+        <div class="metric-grid">
+          <div class="metric-card card-total" onclick="switchView('assigned');" style="cursor: pointer;">
+            <div class="metric-top">
+              <span class="metric-title" data-i18n="card_total_assigned">Total Assigned</span>
+              <span class="metric-icon">📦</span>
+            </div>
+            <div class="metric-num" id="statTotalAssigned">0</div>
+            <div class="metric-sub" data-i18n="sub_all_tasks">All allotted jobs</div>
+          </div>
+
+          <div class="metric-card card-pending" onclick="switchView('assigned', 'Assigned');" style="cursor: pointer;">
+            <div class="metric-top">
+              <span class="metric-title" data-i18n="card_pending">Pending / Assigned</span>
+              <span class="metric-icon">⏳</span>
+            </div>
+            <div class="metric-num" id="statPending">0</div>
+            <div class="metric-sub" data-i18n="sub_ready_to_start">Awaiting inspection</div>
+          </div>
+
+          <div class="metric-card card-progress" onclick="switchView('assigned', 'In_Progress');" style="cursor: pointer;">
+            <div class="metric-top">
+              <span class="metric-title" data-i18n="card_in_progress">In Progress</span>
+              <span class="metric-icon">⚡</span>
+            </div>
+            <div class="metric-num" id="statInProgress">0</div>
+            <div class="metric-sub" data-i18n="sub_active_repairs">Repairs underway</div>
+          </div>
+
+          <div class="metric-card card-completed" onclick="switchView('history');" style="cursor: pointer;">
+            <div class="metric-top">
+              <span class="metric-title" data-i18n="card_completed">Completed</span>
+              <span class="metric-icon">✅</span>
+            </div>
+            <div class="metric-num" id="statCompleted">0</div>
+            <div class="metric-sub" data-i18n="sub_fixed_closed">Resolved &amp; verified</div>
+          </div>
+        </div>
+
+        <!-- Priority / Action Needed Table -->
+        <section class="content-card">
+          <div class="content-card-header">
+            <h2 class="content-card-title">
+              <span>⚡</span> <span data-i18n="title_immediate_tasks">Active Jobs Requiring Action</span>
+            </h2>
+            <button class="btn btn-secondary btn-sm" onclick="switchView('assigned')">
+              <span data-i18n="btn_view_all_assigned">View Full List →</span>
+            </button>
+          </div>
+          <div class="table-container">
+            <table class="tech-table">
+              <thead>
+                <tr>
+                  <th data-i18n="th_ticket">Ticket No</th>
+                  <th data-i18n="th_student_room">Resident &amp; Room</th>
+                  <th data-i18n="th_issue">Issue Title</th>
+                  <th data-i18n="th_priority">Priority</th>
+                  <th data-i18n="th_status">Status</th>
+                  <th data-i18n="th_action">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="overviewActiveTableBody">
+                <tr>
+                  <td colspan="6" class="empty-state">
+                    <div class="empty-state-icon">⏳</div>
+                    <div data-i18n="loading_assigned">Loading assigned complaints...</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 2: MY ASSIGNED COMPLAINTS -->
+      <div id="viewAssigned" style="display: none;">
+        <section class="content-card">
+          <div class="content-card-header">
+            <h2 class="content-card-title">
+              <span>📋</span> <span data-i18n="title_my_assigned">My Assigned Complaints</span>
+            </h2>
+            <div class="filter-bar">
+              <select id="assignedStatusFilter" class="search-input" style="min-width: 150px;" onchange="loadAssignedComplaints()">
+                <option value="active" data-i18n="opt_all_active">All Active Jobs</option>
+                <option value="Assigned" data-i18n="opt_pending_assigned">Pending (Assigned)</option>
+                <option value="In_Progress" data-i18n="opt_in_progress">In Progress</option>
+              </select>
+              <input type="text" id="assignedSearchInput" class="search-input" placeholder="Search ticket, room, issue..." oninput="filterAssignedTable()" data-i18n-ph="ph_search_jobs">
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="tech-table">
+              <thead>
+                <tr>
+                  <th data-i18n="th_ticket">Ticket No</th>
+                  <th data-i18n="th_student_room">Resident &amp; Room</th>
+                  <th data-i18n="th_category">Category</th>
+                  <th data-i18n="th_issue">Problem Description</th>
+                  <th data-i18n="th_priority">Priority</th>
+                  <th data-i18n="th_status">Status</th>
+                  <th data-i18n="th_date">Assigned Date</th>
+                  <th data-i18n="th_action">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="assignedTableBody">
+                <tr>
+                  <td colspan="8" class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div data-i18n="loading_assigned">Loading complaints...</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 3: COMPLAINT HISTORY -->
+      <div id="viewHistory" style="display: none;">
+        <section class="content-card">
+          <div class="content-card-header">
+            <h2 class="content-card-title">
+              <span>📜</span> <span data-i18n="title_work_history">Completed Work History</span>
+            </h2>
+            <div class="filter-bar">
+              <input type="text" id="historySearchInput" class="search-input" placeholder="Search past tickets..." oninput="filterHistoryTable()" data-i18n-ph="ph_search_history">
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="tech-table">
+              <thead>
+                <tr>
+                  <th data-i18n="th_ticket">Ticket No</th>
+                  <th data-i18n="th_student_room">Resident &amp; Room</th>
+                  <th data-i18n="th_category">Category</th>
+                  <th data-i18n="th_issue">Title</th>
+                  <th data-i18n="th_remarks">Work Remarks</th>
+                  <th data-i18n="th_resolved_at">Completed Date</th>
+                  <th data-i18n="th_status">Final Status</th>
+                  <th data-i18n="th_action">Details</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <tr>
+                  <td colspan="8" class="empty-state">
+                    <div class="empty-state-icon">📜</div>
+                    <div data-i18n="loading_history">Loading history records...</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── MODAL 1: UPDATE STATUS & WORK REMARKS ──────────── -->
+  <div class="modal-overlay" id="statusUpdateModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 data-i18n="modal_update_title">Update Complaint Status &amp; Remarks</h3>
+        <button type="button" class="modal-close-btn" onclick="closeStatusModal()">&times;</button>
+      </div>
+      <form id="statusUpdateForm" onsubmit="handleStatusSubmit(event)">
+        <input type="hidden" id="modalComplaintId">
+        <div class="modal-body">
+          <div class="detail-row">
+            <span class="detail-label" data-i18n="th_ticket">Ticket:</span>
+            <span class="detail-value" id="modalTicketNo" style="font-weight: 700; color: var(--primary);">HC-0000</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label" data-i18n="th_issue">Issue:</span>
+            <span class="detail-value" id="modalIssueTitle">Issue Title</span>
+          </div>
+
+          <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label" for="modalStatusSelect" data-i18n="lbl_select_status">Select New Status *</label>
+            <select id="modalStatusSelect" class="form-select" required>
+              <option value="Assigned" data-i18n="opt_status_assigned">Assigned (Awaiting Action)</option>
+              <option value="In_Progress" data-i18n="opt_status_inprogress">In Progress (Work Underway)</option>
+              <option value="Resolved" data-i18n="opt_status_resolved">Resolved (Work Completed)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modalRemarksInput" data-i18n="lbl_work_remarks">Add Work Remarks / Notes</label>
+            <textarea id="modalRemarksInput" class="form-textarea" rows="3" placeholder="Describe the repairs performed, replacement parts used, or inspection details..." data-i18n-ph="ph_work_remarks"></textarea>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;" data-i18n="note_remarks_logged">
+              These remarks will be permanently recorded in the resolution report and audit logs.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeStatusModal()" data-i18n="btn_cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="modalSubmitBtn" data-i18n="btn_save_status">Save Status</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── MODAL 2: COMPLAINT DETAILS VIEW ────────────────── -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 data-i18n="modal_details_title">Complaint Specification</h3>
+        <button type="button" class="modal-close-btn" onclick="closeDetailsModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="detailsModalBody">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeDetailsModal()" data-i18n="btn_close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    /* ==========================================================================
+       BILINGUAL DICTIONARY (English & Hindi)
+       Translates UI labels, buttons, headers, statuses, and toast alerts.
+       Complaint descriptions remain intact.
+       ========================================================================== */
+    const i18n = {
+      en: {
+        tech_panel_title: "Technician Workspace",
+        tech_panel_subtitle: "Field Operations & Repairs",
+        nav_dashboard: "Dashboard",
+        nav_assigned: "My Assigned Jobs",
+        nav_history: "Work History",
+        greeting_welcome: "Welcome,",
+        meta_specialist: "Technician",
+        status_on_duty: "● Active On-Duty",
+        card_total_assigned: "Total Assigned",
+        card_pending: "Pending / Assigned",
+        card_in_progress: "In Progress",
+        card_completed: "Completed",
+        sub_all_tasks: "All allotted jobs",
+        sub_ready_to_start: "Awaiting inspection",
+        sub_active_repairs: "Repairs underway",
+        sub_fixed_closed: "Resolved & verified",
+        title_immediate_tasks: "Active Jobs Requiring Action",
+        btn_view_all_assigned: "View Full List →",
+        title_my_assigned: "My Assigned Complaints",
+        title_work_history: "Completed Work History",
+        th_ticket: "Ticket No",
+        th_student_room: "Resident & Room",
+        th_category: "Category",
+        th_issue: "Issue Title",
+        th_priority: "Priority",
+        th_status: "Status",
+        th_date: "Assigned Date",
+        th_action: "Actions",
+        th_remarks: "Work Remarks",
+        th_resolved_at: "Completed Date",
+        opt_all_active: "All Active Jobs",
+        opt_pending_assigned: "Pending (Assigned)",
+        opt_in_progress: "In Progress",
+        ph_search_jobs: "Search ticket, room, issue...",
+        ph_search_history: "Search past tickets...",
+        modal_update_title: "Update Complaint Status & Remarks",
+        lbl_select_status: "Select New Status *",
+        opt_status_assigned: "Assigned (Awaiting Action)",
+        opt_status_inprogress: "In Progress (Work Underway)",
+        opt_status_resolved: "Resolved (Work Completed)",
+        lbl_work_remarks: "Add Work Remarks / Notes",
+        ph_work_remarks: "Describe the repairs performed, replacement parts used, or inspection details...",
+        note_remarks_logged: "These remarks will be permanently recorded in the resolution report and audit logs.",
+        btn_cancel: "Cancel",
+        btn_save_status: "Save Status",
+        modal_details_title: "Complaint Details",
+        btn_close: "Close",
+        btn_start_work: "▶ Start Work",
+        btn_resolve_work: "✔ Resolve Work",
+        btn_view_details: "👁 Details",
+        btn_update: "✏️ Update",
+        status_Assigned: "Assigned",
+        status_In_Progress: "In Progress",
+        status_Resolved: "Resolved",
+        status_Closed: "Closed",
+        prio_Emergency: "Emergency",
+        prio_High: "High",
+        prio_Medium: "Medium",
+        prio_Low: "Low",
+        loading_assigned: "Loading assigned complaints...",
+        loading_history: "Loading history records...",
+        no_active_jobs: "Great work! No pending complaints requiring attention.",
+        no_history_records: "No completed jobs on record yet.",
+        toast_status_saved: "Status updated successfully!",
+        toast_work_started: "Work commenced. Status marked In Progress.",
+        resident_phone_label: "Phone:",
+        resident_room_label: "Room:"
+      },
+      hi: {
+        tech_panel_title: "तकनीशियन कार्यक्षेत्र",
+        tech_panel_subtitle: "फील्ड संचालन एवं मरम्मत कार्य",
+        nav_dashboard: "डैशबोर्ड",
+        nav_assigned: "असाइन किए गए कार्य",
+        nav_history: "कार्य इतिहास",
+        greeting_welcome: "नमस्ते,",
+        meta_specialist: "तकनीशियन",
+        status_on_duty: "● ड्यूटी पर सक्रिय",
+        card_total_assigned: "कुल सौंपे गए कार्य",
+        card_pending: "लंबित / असाइन",
+        card_in_progress: "प्रगति में",
+        card_completed: "पूर्ण किए गए",
+        sub_all_tasks: "सभी सौंपे गए कार्य",
+        sub_ready_to_start: "निरीक्षण की प्रतीक्षा में",
+        sub_active_repairs: "मरम्मत कार्य चालू है",
+        sub_fixed_closed: "सफल समाधान एवं सत्यापित",
+        title_immediate_tasks: "तत्काल ध्यान देने योग्य कार्य",
+        btn_view_all_assigned: "पूरी सूची देखें →",
+        title_my_assigned: "मेरी असाइन की गई शिकायतें",
+        title_work_history: "पूरा हुआ कार्य इतिहास",
+        th_ticket: "टिकट संख्या",
+        th_student_room: "छात्र एवं कमरा",
+        th_category: "श्रेणी",
+        th_issue: "समस्या का विवरण",
+        th_priority: "प्राथमिकता",
+        th_status: "स्थिति",
+        th_date: "सौंपने की तिथि",
+        th_action: "कार्रवाई",
+        th_remarks: "कार्य विवरण / टिप्पणी",
+        th_resolved_at: "पूर्ण होने की तिथि",
+        opt_all_active: "सभी सक्रिय कार्य",
+        opt_pending_assigned: "लंबित (असाइन)",
+        opt_in_progress: "प्रगति में (In Progress)",
+        ph_search_jobs: "टिकट, कमरा या समस्या खोजें...",
+        ph_search_history: "पुराने टिकट खोजें...",
+        modal_update_title: "शिकायत की स्थिति एवं कार्य विवरण अपडेट करें",
+        lbl_select_status: "नई स्थिति चुनें *",
+        opt_status_assigned: "Assigned (कार्य प्रारंभ प्रतीक्षित)",
+        opt_status_inprogress: "In Progress (मरम्मत प्रगति में)",
+        opt_status_resolved: "Resolved (कार्य सफलतापूर्वक पूरा हुआ)",
+        lbl_work_remarks: "कार्य का विवरण / तकनीकी टिप्पणी जोड़ें",
+        ph_work_remarks: "किए गए मरम्मत कार्य, बदले गए पुर्जे या तकनीकी विवरण यहाँ लिखें...",
+        note_remarks_logged: "यह टिप्पणी स्थायी रूप से रिज़ॉल्यूशन रिपोर्ट और ऑडिट लॉग में सुरक्षित की जाएगी।",
+        btn_cancel: "रद्द करें",
+        btn_save_status: "स्थिति सुरक्षित करें",
+        modal_details_title: "शिकायत का पूर्ण विवरण",
+        btn_close: "बंद करें",
+        btn_start_work: "▶ कार्य शुरू करें",
+        btn_resolve_work: "✔ पूर्ण करें",
+        btn_view_details: "👁 विवरण",
+        btn_update: "✏️ अपडेट करें",
+        status_Assigned: "असाइन किया गया",
+        status_In_Progress: "प्रगति में",
+        status_Resolved: "हल हो गया",
+        status_Closed: "बंद हुआ",
+        prio_Emergency: "आपातकालीन",
+        prio_High: "उच्च",
+        prio_Medium: "मध्यम",
+        prio_Low: "सामान्य",
+        loading_assigned: "शिकायतें लोड हो रही हैं...",
+        loading_history: "इतिहास रिकॉर्ड लोड हो रहे हैं...",
+        no_active_jobs: "शानदार! वर्तमान में कोई लंबित शिकायत नहीं है।",
+        no_history_records: "अभी तक कोई पूर्ण कार्य रिकॉर्ड नहीं है।",
+        toast_status_saved: "शिकायत की स्थिति सफलतापूर्वक अपडेट हो गई!",
+        toast_work_started: "कार्य शुरू हुआ। स्थिति 'प्रगति में' दर्ज की गई।",
+        resident_phone_label: "फोन:",
+        resident_room_label: "कमरा:"
+      }
+    };
+
+    // State Variables
+    let currentLang = localStorage.getItem('hostelcare_lang') || 'en';
+    let assignedComplaintsList = [];
+    let historyComplaintsList = [];
+    let currentTechnicianInfo = null;
+
+    /* ── Initialize ────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Authentication Check
+      const user = getUser();
+      if (!user || user.role !== 'technician') {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      // 2. Set Language
+      applyLanguage(currentLang);
+
+      // 3. Load Overview & Data
+      await loadTechnicianOverview();
+      await loadAssignedComplaints();
+    });
+
+    /* ── Language Switcher Handler ─────────────────────── */
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('hostelcare_lang', lang);
+      applyLanguage(lang);
+      // Re-render table badges and texts
+      renderOverviewTable();
+      renderAssignedTable(assignedComplaintsList);
+      renderHistoryTable(historyComplaintsList);
+    }
+
+    function applyLanguage(lang) {
+      const dict = i18n[lang] || i18n.en;
+
+      // Toggle active button style
+      document.getElementById('langBtnEn').classList.toggle('active', lang === 'en');
+      document.getElementById('langBtnHi').classList.toggle('active', lang === 'hi');
+
+      // Update static text elements with data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.innerText = dict[key];
+        }
+      });
+
+      // Update placeholders with data-i18n-ph
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        if (dict[key]) {
+          el.placeholder = dict[key];
+        }
+      });
+    }
+
+    function t(key) {
+      return (i18n[currentLang] && i18n[currentLang][key]) || (i18n.en && i18n.en[key]) || key;
+    }
+
+    /* ── Navigation / View Switching ───────────────────── */
+    function switchView(viewName, filterVal) {
+      document.getElementById('viewDashboard').style.display = viewName === 'dashboard' ? 'block' : 'none';
+      document.getElementById('viewAssigned').style.display = viewName === 'assigned' ? 'block' : 'none';
+      document.getElementById('viewHistory').style.display = viewName === 'history' ? 'block' : 'none';
+
+      document.getElementById('navBtnDashboard').classList.toggle('active', viewName === 'dashboard');
+      document.getElementById('navBtnAssigned').classList.toggle('active', viewName === 'assigned');
+      document.getElementById('navBtnHistory').classList.toggle('active', viewName === 'history');
+
+      if (viewName === 'assigned') {
+        if (filterVal) {
+          document.getElementById('assignedStatusFilter').value = filterVal;
+        }
+        loadAssignedComplaints();
+      } else if (viewName === 'history') {
+        loadComplaintHistory();
+      }
+    }
+
+    /* ── API Data Loaders ───────────────────────────────── */
+    async function loadTechnicianOverview() {
+      const res = await apiRequest('/api/technician/overview');
+      if (!res.success) {
+        showToast(res.error || 'Failed to fetch technician profile', 'error');
+        return;
+      }
+
+      const { technician, stats } = res.data;
+      currentTechnicianInfo = technician;
+
+      // Profile Header
+      document.getElementById('technicianNameDisplay').innerText = technician.name;
+      document.getElementById('technicianTradeDisplay').innerText = technician.trade;
+      document.getElementById('technicianPhoneDisplay').innerText = technician.phone;
+      document.getElementById('avatarInitial').innerText = technician.name ? technician.name[0].toUpperCase() : 'T';
+
+      // Sidebar Footer
+      document.getElementById('sidebarTechTrade').innerText = `Trade: ${technician.trade}`;
+      document.getElementById('sidebarTechId').innerText = `Tech ID: #${technician.id}`;
+
+      // Stat Counters
+      document.getElementById('statTotalAssigned').innerText = stats.total_assigned;
+      document.getElementById('statPending').innerText = stats.pending;
+      document.getElementById('statInProgress').innerText = stats.in_progress;
+      document.getElementById('statCompleted').innerText = stats.completed;
+
+      // Sidebar Badges
+      document.getElementById('sidebarPendingCount').innerText = stats.pending;
+      document.getElementById('sidebarCompletedCount').innerText = stats.completed;
+    }
+
+    async function loadAssignedComplaints() {
+      const status = document.getElementById('assignedStatusFilter').value;
+      const res = await apiRequest(`/api/technician/complaints?status=${encodeURIComponent(status)}`);
+      if (!res.success) {
+        showToast(res.error || 'Error loading complaints', 'error');
+        return;
+      }
+
+      assignedComplaintsList = res.data || [];
+      renderAssignedTable(assignedComplaintsList);
+      renderOverviewTable();
+    }
+
+    async function loadComplaintHistory() {
+      const res = await apiRequest('/api/technician/complaints?status=history');
+      if (!res.success) {
+        showToast(res.error || 'Error loading history', 'error');
+        return;
+      }
+
+      historyComplaintsList = res.data || [];
+      renderHistoryTable(historyComplaintsList);
+    }
+
+    /* ── Render Functions ──────────────────────────────── */
+    function getStatusBadge(status) {
+      const label = t(`status_${status}`) || status.replace('_', ' ');
+      let cls = 'badge-assigned';
+      if (status === 'In_Progress') cls = 'badge-inprogress';
+      else if (status === 'Resolved' || status === 'Closed') cls = 'badge-resolved';
+      return `<span class="badge-pill ${cls}">${label}</span>`;
+    }
+
+    function getPriorityBadge(priority) {
+      const label = t(`prio_${priority}`) || priority;
+      const cls = `prio-${priority.toLowerCase()}`;
+      return `<span class="prio-pill ${cls}">${label}</span>`;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-IN', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    // 1. Overview Table (Top 5 active tasks)
+    function renderOverviewTable() {
+      const tbody = document.getElementById('overviewActiveTableBody');
+      const activeJobs = assignedComplaintsList.filter(c => c.status === 'Assigned' || c.status === 'In_Progress');
+
+      if (activeJobs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div class="empty-state-icon">🎉</div>
+              <div>${t('no_active_jobs')}</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = activeJobs.slice(0, 5).map(c => `
+        <tr>
+          <td>
+            <strong style="color: var(--primary); font-family: monospace;">${c.ticket_no}</strong>
+          </td>
+          <td>
+            <div style="font-weight: 700;">${c.student_name}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">${c.hostel_block || ''} • Room ${c.room_no || 'N/A'}</div>
+          </td>
+          <td>
+            <div style="font-weight: 600; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(c.title)}">
+              ${escapeHtml(c.title)}
+            </div>
+          </td>
+          <td>${getPriorityBadge(c.priority)}</td>
+          <td>${getStatusBadge(c.status)}</td>
+          <td>
+            <div class="action-btn-group">
+              ${c.status === 'Assigned' ? `
+                <button class="btn-action-start" onclick="quickStartWork(${c.id}, '${c.ticket_no}')">
+                  ${t('btn_start_work')}
+                </button>
+              ` : `
+                <button class="btn-action-resolve" onclick="openStatusModal(${c.id}, '${c.ticket_no}', '${escapeHtml(c.title)}', 'Resolved')">
+                  ${t('btn_resolve_work')}
+                </button>
+              `}
+              <button class="btn-action-view" onclick="openDetailsModal(${c.id})">
+                ${t('btn_view_details')}
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 2. My Assigned Complaints Table
+    function renderAssignedTable(items) {
+      const tbody = document.getElementById('assignedTableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div>${t('no_active_jobs')}</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = items.map(c => `
+        <tr>
+          <td><strong style="color: var(--primary); font-family: monospace;">${c.ticket_no}</strong></td>
+          <td>
+            <div style="font-weight: 700;">${c.student_name}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">${c.hostel_block || ''} • Room ${c.room_no || 'N/A'}</div>
+            <div style="font-size: 0.8rem; color: #64748b;">📞 ${c.student_phone || 'N/A'}</div>
+          </td>
+          <td>
+            <span style="font-weight: 600; font-size: 0.85rem; color: #475569;">${c.category}</span>
+          </td>
+          <td>
+            <div style="font-weight: 700; color: #0f172a; margin-bottom: 0.2rem;">${escapeHtml(c.title)}</div>
+            <div style="font-size: 0.84rem; color: #475569; max-width: 320px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+              ${escapeHtml(c.description)}
+            </div>
+          </td>
+          <td>${getPriorityBadge(c.priority)}</td>
+          <td>${getStatusBadge(c.status)}</td>
+          <td style="font-size: 0.85rem; color: #64748b;">${formatDate(c.created_at)}</td>
+          <td>
+            <div class="action-btn-group">
+              ${c.status === 'Assigned' ? `
+                <button class="btn-action-start" onclick="quickStartWork(${c.id}, '${c.ticket_no}')">
+                  ${t('btn_start_work')}
+                </button>
+              ` : ''}
+              ${c.status === 'In_Progress' ? `
+                <button class="btn-action-resolve" onclick="openStatusModal(${c.id}, '${c.ticket_no}', '${escapeHtml(c.title)}', 'Resolved')">
+                  ${t('btn_resolve_work')}
+                </button>
+              ` : ''}
+              <button class="btn-action-view" onclick="openStatusModal(${c.id}, '${c.ticket_no}', '${escapeHtml(c.title)}', '${c.status}')">
+                ${t('btn_update')}
+              </button>
+              <button class="btn-action-view" onclick="openDetailsModal(${c.id})">
+                ${t('btn_view_details')}
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 3. History Table
+    function renderHistoryTable(items) {
+      const tbody = document.getElementById('historyTableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <div class="empty-state-icon">📜</div>
+              <div>${t('no_history_records')}</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = items.map(c => `
+        <tr>
+          <td><strong style="color: var(--primary); font-family: monospace;">${c.ticket_no}</strong></td>
+          <td>
+            <div style="font-weight: 700;">${c.student_name}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">${c.hostel_block || ''} • Room ${c.room_no || 'N/A'}</div>
+          </td>
+          <td>${c.category}</td>
+          <td style="font-weight: 600;">${escapeHtml(c.title)}</td>
+          <td>
+            <div style="font-size: 0.85rem; color: #334155; font-style: ${c.resolution_notes ? 'normal' : 'italic'};">
+              ${c.resolution_notes ? escapeHtml(c.resolution_notes) : '— No notes recorded —'}
+            </div>
+          </td>
+          <td style="font-size: 0.85rem; color: #64748b;">${formatDate(c.resolved_at || c.updated_at)}</td>
+          <td>${getStatusBadge(c.status)}</td>
+          <td>
+            <button class="btn-action-view" onclick="openDetailsModal(${c.id})">
+              ${t('btn_view_details')}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    /* ── Search & Filter ────────────────────────────────── */
+    function filterAssignedTable() {
+      const q = document.getElementById('assignedSearchInput').value.toLowerCase().trim();
+      if (!q) {
+        renderAssignedTable(assignedComplaintsList);
+        return;
+      }
+      const filtered = assignedComplaintsList.filter(c =>
+        c.ticket_no.toLowerCase().includes(q) ||
+        (c.student_name && c.student_name.toLowerCase().includes(q)) ||
+        (c.room_no && c.room_no.toLowerCase().includes(q)) ||
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.description && c.description.toLowerCase().includes(q))
+      );
+      renderAssignedTable(filtered);
+    }
+
+    function filterHistoryTable() {
+      const q = document.getElementById('historySearchInput').value.toLowerCase().trim();
+      if (!q) {
+        renderHistoryTable(historyComplaintsList);
+        return;
+      }
+      const filtered = historyComplaintsList.filter(c =>
+        c.ticket_no.toLowerCase().includes(q) ||
+        (c.student_name && c.student_name.toLowerCase().includes(q)) ||
+        (c.room_no && c.room_no.toLowerCase().includes(q)) ||
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.resolution_notes && c.resolution_notes.toLowerCase().includes(q))
+      );
+      renderHistoryTable(filtered);
+    }
+
+    /* ── Quick Action: Start Work ───────────────────────── */
+    async function quickStartWork(complaintId, ticketNo) {
+      const submit = confirm(
+        currentLang === 'hi' 
+          ? `क्या आप टिकट ${ticketNo} पर कार्य शुरू करना चाहते हैं? स्थिति 'प्रगति में' हो जाएगी।`
+          : `Commence repair work on ${ticketNo}? Status will change to In Progress.`
+      );
+      if (!submit) return;
+
+      const res = await apiRequest(`/api/technician/complaints/${complaintId}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          status: 'In_Progress',
+          remarks: currentLang === 'hi' 
+            ? 'तकनीशियन साइट पर उपस्थित हुआ एवं मरम्मत कार्य शुरू किया।' 
+            : 'Technician reached the room and commenced repair inspection.'
+        })
+      });
+
+      if (res.success) {
+        showToast(t('toast_work_started'), 'success');
+        await loadTechnicianOverview();
+        await loadAssignedComplaints();
+      } else {
+        showToast(res.error || 'Failed to update status', 'error');
+      }
+    }
+
+    /* ── Status Modal Actions ───────────────────────────── */
+    function openStatusModal(complaintId, ticketNo, title, initialStatus) {
+      document.getElementById('modalComplaintId').value = complaintId;
+      document.getElementById('modalTicketNo').innerText = ticketNo;
+      document.getElementById('modalIssueTitle').innerText = title;
+
+      const select = document.getElementById('modalStatusSelect');
+      select.value = initialStatus || 'In_Progress';
+      document.getElementById('modalRemarksInput').value = '';
+
+      document.getElementById('statusUpdateModal').classList.add('active');
+    }
+
+    function closeStatusModal() {
+      document.getElementById('statusUpdateModal').classList.remove('active');
+    }
+
+    async function handleStatusSubmit(e) {
+      e.preventDefault();
+      const complaintId = document.getElementById('modalComplaintId').value;
+      const status = document.getElementById('modalStatusSelect').value;
+      const remarks = document.getElementById('modalRemarksInput').value;
+      const submitBtn = document.getElementById('modalSubmitBtn');
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = currentLang === 'hi' ? 'सुरक्षित हो रहा है...' : 'Saving...';
+
+      const res = await apiRequest(`/api/technician/complaints/${complaintId}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status, remarks })
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.innerText = t('btn_save_status');
+
+      if (res.success) {
+        showToast(t('toast_status_saved'), 'success');
+        closeStatusModal();
+        await loadTechnicianOverview();
+        await loadAssignedComplaints();
+      } else {
+        showToast(res.error || 'Failed to update status', 'error');
+      }
+    }
+
+    /* ── Details Modal Actions ──────────────────────────── */
+    async function openDetailsModal(complaintId) {
+      const modal = document.getElementById('detailsModal');
+      const body = document.getElementById('detailsModalBody');
+      body.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">⏳</div>
+          <div>${currentLang === 'hi' ? 'विवरण लोड हो रहा है...' : 'Loading full complaint dossier...'}</div>
+        </div>
+      `;
+      modal.classList.add('active');
+
+      const res = await apiRequest(`/api/technician/complaints/${complaintId}`);
+      if (!res.success) {
+        body.innerHTML = `<div class="empty-state" style="color:var(--rose);">${res.error || 'Failed to load details'}</div>`;
+        return;
+      }
+
+      const c = res.data;
+
+      body.innerHTML = `
+        <div class="detail-row">
+          <span class="detail-label">${t('th_ticket')}:</span>
+          <span class="detail-value"><strong style="color:var(--primary); font-family:monospace; font-size:1.05rem;">${c.ticket_no}</strong></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">${t('th_status')}:</span>
+          <span class="detail-value">${getStatusBadge(c.status)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">${t('th_priority')}:</span>
+          <span class="detail-value">${getPriorityBadge(c.priority)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">${t('th_category')}:</span>
+          <span class="detail-value"><strong>${c.category}</strong></span>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border); margin:1rem 0;">
+        <div class="detail-row">
+          <span class="detail-label">${currentLang === 'hi' ? 'छात्र विवरण:' : 'Resident:'}</span>
+          <span class="detail-value">
+            <strong>${c.student_name}</strong> (${c.hostel_block || ''}, Room ${c.room_no || 'N/A'})
+            <div style="font-size:0.85rem; color:#64748b; margin-top:0.25rem;">📞 ${c.student_phone || 'N/A'}</div>
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">${currentLang === 'hi' ? 'दर्ज करने की तिथि:' : 'Submitted:'}</span>
+          <span class="detail-value">${formatDate(c.created_at)}</span>
+        </div>
+        <div style="margin-top:1.25rem;">
+          <strong style="color:#0f172a; font-size:0.95rem;">${escapeHtml(c.title)}</strong>
+          <div class="desc-box">${escapeHtml(c.description)}</div>
+        </div>
+
+        ${c.resolution_notes ? `
+          <div style="margin-top:1.25rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:var(--radius-md); padding:1rem;">
+            <div style="font-weight:700; color:#065f46; margin-bottom:0.35rem;">
+              ✔ ${t('th_remarks')}
+            </div>
+            <div style="font-size:0.9rem; color:#064e3b; line-height:1.5;">${escapeHtml(c.resolution_notes)}</div>
+            ${c.resolved_at ? `<div style="font-size:0.8rem; color:#047857; margin-top:0.4rem;">Completed on: ${formatDate(c.resolved_at)}</div>` : ''}
+          </div>
+        ` : ''}
+
+        ${c.logs && c.logs.length > 0 ? `
+          <div style="margin-top:1.5rem;">
+            <strong style="font-size:0.9rem; color:#334155;">${currentLang === 'hi' ? 'स्थिति का इतिहास (Audit Trail):' : 'Status Progression Trail:'}</strong>
+            <div style="margin-top:0.75rem; border-left: 2px solid var(--border); padding-left: 1rem; display:flex; flex-direction:column; gap:0.75rem;">
+              ${c.logs.map(log => `
+                <div style="font-size:0.85rem;">
+                  <strong style="color:var(--text-main);">${escapeHtml(log.action)}</strong>
+                  <span style="color:var(--text-muted); font-size:0.8rem;"> — ${formatDate(log.created_at)}</span>
+                  ${log.remarks ? `<div style="color:#64748b; font-size:0.82rem; margin-top:0.15rem;">${escapeHtml(log.remarks)}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function closeDetailsModal() {
+      document.getElementById('detailsModal').classList.remove('active');
+    }
+
+    // Modal click-outside dismissal
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('active');
+      }
+    });
+
+    // Escape key listener
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeStatusModal();
+        closeDetailsModal();
+      }
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+
+</html>

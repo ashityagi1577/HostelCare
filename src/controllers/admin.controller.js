@@ -1,5 +1,7 @@
 const db = require('../config/db');
 const FeedbackModel = require('../models/feedback.model');
+const UserModel = require('../models/user.model');
+const { hashPassword } = require('../utils/password.util');
 
 /**
  * Admin Controller
@@ -362,6 +364,123 @@ class AdminController {
       return res.status(500).json({
         success: false,
         error: 'Failed to retrieve rooms directory.'
+      });
+    }
+  }
+
+  /**
+   * Institutional User Provisioning: Admin registers any role (Student, Staff, Technician, Admin)
+   * POST /api/admin/users
+   */
+  static async registerUser(req, res) {
+    try {
+      const { user_id, name, email, password, role, hostel_block, room_no, phone, trade } = req.body;
+
+      if (!name || !email || !password || !role) {
+        return res.status(400).json({
+          success: false,
+          error: 'Name, email, password, and role are required fields.'
+        });
+      }
+
+      const validRoles = ['student', 'staff', 'technician', 'admin'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({
+          success: false,
+          error: `Invalid role specified. Must be one of: ${validRoles.join(', ')}.`
+        });
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please provide a valid email address.'
+        });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          error: 'Password must be at least 6 characters long.'
+        });
+      }
+
+      // Check if email already registered
+      const emailTaken = await UserModel.emailExists(email);
+      if (emailTaken) {
+        return res.status(409).json({
+          success: false,
+          error: `An account with email '${email}' already exists.`
+        });
+      }
+
+      // Check or generate user_id
+      let finalUserId = (user_id || '').trim().toUpperCase();
+      if (finalUserId) {
+        const idTaken = await UserModel.userIdExists(finalUserId);
+        if (idTaken) {
+          return res.status(409).json({
+            success: false,
+            error: `Institutional ID '${finalUserId}' is already assigned.`
+          });
+        }
+      } else {
+        finalUserId = UserModel.generateDefaultUserId(role);
+      }
+
+      const passwordHash = await hashPassword(password);
+      let techId = null;
+
+      // If technician, create or find technician record
+      if (role === 'technician') {
+        const validTrades = ['Electrical', 'Plumbing', 'Carpentry', 'Cleaning', 'WiFi_Internet', 'General'];
+        const assignedTrade = validTrades.includes(trade) ? trade : 'General';
+
+        const [techRes] = await db.execute(
+          'INSERT INTO technicians (name, trade, phone, is_available) VALUES (?, ?, ?, 1);',
+          [name.trim(), assignedTrade, phone ? phone.trim() : '']
+        );
+        techId = techRes.insertId;
+      }
+
+      const insertSql = `
+        INSERT INTO users (user_id, name, email, password_hash, role, tech_id, hostel_block, room_no, phone)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+      `;
+
+      const result = await db.execute(insertSql, [
+        finalUserId,
+        name.trim(),
+        email.trim().toLowerCase(),
+        passwordHash,
+        role,
+        techId,
+        hostel_block ? hostel_block.trim() : null,
+        room_no ? room_no.trim() : null,
+        phone ? phone.trim() : null
+      ]);
+
+      return res.status(201).json({
+        success: true,
+        message: `Account created successfully for ${name.trim()} (${role.toUpperCase()}) with ID ${finalUserId}.`,
+        data: {
+          id: result.insertId,
+          user_id: finalUserId,
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          role,
+          tech_id: techId,
+          hostel_block: hostel_block || null,
+          room_no: room_no || null,
+          phone: phone || null
+        }
+      });
+    } catch (error) {
+      console.error('[Admin registerUser Error]:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to create user account.'
       });
     }
   }

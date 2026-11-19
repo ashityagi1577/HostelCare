@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resident Registration – HostelCare Portal</title>
+  <title>Account Provisioning – HostelCare Portal</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .auth-wrapper {
@@ -15,72 +15,35 @@
     }
     .auth-card {
       width: 100%;
-      max-width: 520px;
+      max-width: 480px;
       padding: 2.5rem;
       background: white;
       border-radius: var(--radius-lg);
       border: 1px solid var(--border);
       box-shadow: var(--shadow-lg);
-    }
-    .auth-header {
       text-align: center;
-      margin-bottom: 2rem;
     }
-    .auth-header h2 {
-      font-size: 1.7rem;
+    .auth-card h2 {
+      font-size: 1.55rem;
       font-weight: 800;
       color: #1e1b4b;
       margin-top: 0.5rem;
     }
-    .auth-header p {
+    .auth-card p {
       color: var(--text-muted);
       font-size: 0.92rem;
+      line-height: 1.6;
+      margin-top: 0.5rem;
     }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    .auth-footer {
-      text-align: center;
-      margin-top: 1.5rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid var(--border);
+    .info-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: left;
       font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-    .auth-footer a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .auth-footer a:hover {
-      text-decoration: underline;
-    }
-
-    .password-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .password-wrapper .form-control {
-      padding-right: 2.5rem;
-    }
-    .password-toggle-btn {
-      position: absolute;
-      right: 0.75rem;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 1.1rem;
-      padding: 0.25rem;
-    }
-
-    @media (max-width: 540px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
+      color: #334155;
+      margin: 1.5rem 0;
     }
   </style>
 </head>
@@ -99,149 +62,29 @@
     </div>
   </nav>
 
-  <!-- Registration Form Section -->
+  <!-- Account Provisioning Notice -->
   <div class="auth-wrapper">
     <div class="auth-card">
-      <div class="auth-header">
-        <span style="font-size: 2.2rem;">📝</span>
-        <h2>Resident Registration</h2>
-        <p>Create your student account to lodge repairs and track maintenance</p>
+      <span style="font-size: 3rem;">🏛️</span>
+      <h2>Institutional Account Provisioning</h2>
+      <p>
+        Public self-registration is closed. Resident student, staff, and technician accounts are provisioned exclusively through the <strong>Hostel Administration Desk</strong>.
+      </p>
+
+      <div class="info-box">
+        <div>🏢 <strong>Warden &amp; Admin Office:</strong> Central Hostel Block A Ground Floor</div>
+        <div style="margin-top: 0.4rem;">📞 <strong>Desk Helpline:</strong> +91 98765 43222</div>
+        <div style="margin-top: 0.4rem;">✉️ <strong>Support Email:</strong> admin@hostelcare.com</div>
+        <div style="margin-top: 0.6rem; font-size: 0.82rem; color: #64748b;">
+          Please present your college admission/ID card to the administration officer to receive your assigned Student/Staff ID credentials.
+        </div>
       </div>
 
-      <form id="registerForm" onsubmit="handleRegister(event)">
-        <div class="form-group">
-          <label class="form-label" for="name">Full Name *</label>
-          <input type="text" id="name" class="form-control" placeholder="e.g. Priya Sharma" required autofocus>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="email">Student Email Address *</label>
-            <input type="email" id="email" class="form-control" placeholder="priya.sharma@hostel.edu" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="user_id">Student ID / Roll No</label>
-            <input type="text" id="user_id" class="form-control" placeholder="e.g. STU-105 (or auto)">
-            <small style="color:var(--text-muted); font-size:0.75rem;">Leave blank to auto-generate</small>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="password">Password *</label>
-            <div class="password-wrapper">
-              <input type="password" id="password" class="form-control" placeholder="Min. 6 chars" required minlength="6">
-              <button type="button" class="password-toggle-btn" onclick="togglePwd('password', this)" title="Show/Hide">👁️</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="confirmPassword">Confirm Password *</label>
-            <div class="password-wrapper">
-              <input type="password" id="confirmPassword" class="form-control" placeholder="Re-type password" required minlength="6">
-              <button type="button" class="password-toggle-btn" onclick="togglePwd('confirmPassword', this)" title="Show/Hide">👁️</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="hostel_block">Hostel Block *</label>
-            <select id="hostel_block" class="form-control" required>
-              <option value="">Select Block...</option>
-              <option value="Block A (Boys)">Block A (Boys)</option>
-              <option value="Block B (Boys)">Block B (Boys)</option>
-              <option value="Block C (Girls)">Block C (Girls)</option>
-              <option value="Block D (Girls)">Block D (Girls)</option>
-              <option value="PG / International Hostel">PG / International Hostel</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="room_no">Room Number *</label>
-            <input type="text" id="room_no" class="form-control" placeholder="e.g. A-204" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="phone">Mobile / Contact Number</label>
-          <input type="tel" id="phone" class="form-control" placeholder="e.g. 9876543210">
-        </div>
-
-        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-          Complete Registration
-        </button>
-      </form>
-
-      <div class="auth-footer">
-        Already have an account? <a href="/login.html">Sign in here</a>
-      </div>
+      <a href="/login.html" class="btn btn-primary" style="width: 100%;">Sign In to Your Account</a>
     </div>
   </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
-  <script>
-    function togglePwd(inputId, btn) {
-      const input = document.getElementById(inputId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.innerText = '🙈';
-      } else {
-        input.type = 'password';
-        btn.innerText = '👁️';
-      }
-    }
-
-    async function handleRegister(e) {
-      e.preventDefault();
-      const submitBtn = document.getElementById('submitBtn');
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const user_id = document.getElementById('user_id').value.trim();
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const hostel_block = document.getElementById('hostel_block').value;
-      const room_no = document.getElementById('room_no').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-
-      if (password !== confirmPassword) {
-        showToast('Passwords do not match. Please verify.', 'error');
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Creating account...';
-
-      const response = await apiRequest('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          user_id: user_id || null,
-          name,
-          email,
-          password,
-          hostel_block,
-          room_no,
-          phone: phone || null
-        })
-      });
-
-      submitBtn.disabled = false;
-      submitBtn.innerText = 'Complete Registration';
-
-      if (!response.success) {
-        showToast(response.error || 'Registration failed.', 'error');
-        return;
-      }
-
-      const user = response.data.user;
-      const token = response.data.token;
-
-      setSession(user, token);
-      showToast(`Welcome, ${user.name}! Your Student ID is ${user.user_id}.`, 'success');
-
-      setTimeout(() => {
-        window.location.href = '/student-dashboard.html';
-      }, 1000);
-    }
-  </script>
 </body>
 </html>

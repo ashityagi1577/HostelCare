@@ -20,9 +20,11 @@ function generateToken(user, customOptions = {}) {
 
   const payload = {
     id: user.id,
+    user_id: user.user_id || null,
     name: user.name,
     email: user.email,
     role: user.role,
+    tech_id: user.tech_id || null,
     hostel_block: user.hostel_block || null,
     room_no: user.room_no || null
   };

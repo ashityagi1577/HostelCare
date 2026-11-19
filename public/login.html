@@ -110,28 +110,7 @@
       text-decoration: underline;
     }
 
-    /* Demo Credentials Callout */
-    .demo-hint-box {
-      margin-top: 1.5rem;
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: var(--radius-md);
-      padding: 0.85rem 1rem;
-      font-size: 0.82rem;
-      color: #475569;
-    }
 
-    .demo-hint-box strong {
-      color: #1e1b4b;
-    }
-
-    .demo-hint-item {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 0.25rem;
-      font-family: monospace;
-      font-size: 0.8rem;
-    }
 
     /* Forgot Password Modal */
     .modal-backdrop {
@@ -195,9 +174,9 @@
         <div class="form-group">
           <label class="form-label" for="identifier">Email Address or User ID</label>
           <input type="text" id="identifier" class="form-control"
-            placeholder="e.g. STU-101, STF-101, or name@hostel.edu" required autofocus autocomplete="username">
+            placeholder="Enter your User ID or Email Address" required autofocus autocomplete="username">
           <small style="color: var(--text-muted); font-size: 0.78rem;">
-            Students enter Student ID or Email • Staff enter Staff ID or Email
+            Enter your assigned institutional ID or registered email address
           </small>
         </div>
 
@@ -222,27 +201,9 @@
         </button>
       </form>
 
-      <!-- Separate Registration Link -->
-      <div class="auth-footer">
-        Don't have an account yet? <a href="/register.html">Create an Account</a>
-      </div>
-
-      <!-- Quick Reference Demo Credentials -->
-      <div class="demo-hint-box">
-        <div style="font-weight: 700; color: #1e1b4b; margin-bottom: 0.35rem;">💡 Demo Credentials (Pass: password123)
-        </div>
-        <div class="demo-hint-item">
-          <span>Student:</span>
-          <strong>STU-101 &nbsp;or&nbsp; student@hostelcare.com</strong>
-        </div>
-        <div class="demo-hint-item">
-          <span>Staff/Warden:</span>
-          <strong>STF-101 &nbsp;or&nbsp; staff@hostelcare.com</strong>
-        </div>
-        <div class="demo-hint-item">
-          <span>Admin:</span>
-          <strong>ADM-101 &nbsp;or&nbsp; admin@hostelcare.com</strong>
-        </div>
+      <!-- Institutional Access Notice -->
+      <div class="auth-footer" style="color: var(--text-muted); font-size: 0.84rem;">
+        🔒 Institutional access only. Accounts are provisioned by the Hostel Administration.
       </div>
     </div>
   </div>
@@ -355,6 +316,8 @@
         window.location.href = '/admin-dashboard.html';
       } else if (role === 'staff') {
         window.location.href = '/staff-dashboard.html';
+      } else if (role === 'technician') {
+        window.location.href = '/technician-dashboard.html';
       } else {
         window.location.href = '/index.html';
       }
