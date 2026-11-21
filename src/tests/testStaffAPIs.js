@@ -146,10 +146,36 @@ async function testStaffAPIs() {
     }
     console.log(`      ✔ HTTP 200 OK: ${statusRes.body.message}`);
 
+    // Staff may close only tickets that have been resolved.
+    statusReq.body.status = 'Closed';
+    const invalidCloseRes = createMockRes();
+    await StaffController.updateStatus(statusReq, invalidCloseRes);
+    if (invalidCloseRes.statusCode !== 400) {
+      throw new Error(`Expected closing an in-progress ticket to fail, got HTTP ${invalidCloseRes.statusCode}`);
+    }
+
+    statusReq.body.status = 'Resolved';
+    const resolveRes = createMockRes();
+    await StaffController.updateStatus(statusReq, resolveRes);
+    if (resolveRes.statusCode !== 200 || resolveRes.body.data.status !== 'Resolved') {
+      throw new Error(`Failed to mark test ticket resolved: ${JSON.stringify(resolveRes.body)}`);
+    }
+
+    statusReq.body.status = 'Closed';
+    statusReq.body.action = 'Ticket Closed by Warden';
+    statusReq.body.remarks = 'Resolved ticket closed by hostel staff.';
+    const closeRes = createMockRes();
+    await StaffController.updateStatus(statusReq, closeRes);
+    if (closeRes.statusCode !== 200 || closeRes.body.data.status !== 'Closed') {
+      throw new Error(`Failed to close resolved test ticket: ${JSON.stringify(closeRes.body)}`);
+    }
+    console.log('      ✔ Resolved tickets can be closed; in-progress tickets cannot.');
+
     // Verify audit log entry was written
     const logs = await ComplaintModel.getTimeline(c1.id);
-    const latestLog = logs[logs.length - 1];
-    console.log(`      ✔ Audit Log Recorded: [${latestLog.action}] remarks: "${latestLog.remarks}"`);
+    const closeLog = logs.find(log => log.action === 'Ticket Closed by Warden' && log.new_status === 'Closed');
+    if (!closeLog) throw new Error('Closing a resolved ticket did not create an audit log entry.');
+    console.log(`      ✔ Audit Log Recorded: [${closeLog.action}] remarks: "${closeLog.remarks}"`);
 
     // 6. Test Single Detail View with Timeline
     console.log('\n[6/6] Testing GET /api/staff/complaints/:id (with Stepper)...');

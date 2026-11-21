@@ -190,6 +190,13 @@ class StaffController {
         });
       }
 
+      if (status === 'Closed' && complaint.status !== 'Resolved') {
+        return res.status(400).json({
+          success: false,
+          error: 'Only resolved complaints can be closed.'
+        });
+      }
+
       const updatedComplaint = await ComplaintModel.updateStatus(complaintId, {
         newStatus: status,
         action: action || `Status updated to ${status}`,

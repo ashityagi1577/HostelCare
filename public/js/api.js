@@ -15,7 +15,13 @@ function showToast(message, type = 'info', duration = 4000) {
   toast.className = `toast toast-${type}`;
   
   const icon = type === 'success' ? '✔' : type === 'error' ? '✖' : type === 'warning' ? '⚠' : 'ℹ';
-  toast.innerHTML = `<span style="font-weight: 700; font-size: 1.1rem;">${icon}</span><span>${message}</span>`;
+  const iconElement = document.createElement('span');
+  iconElement.style.fontWeight = '700';
+  iconElement.style.fontSize = '1.1rem';
+  iconElement.textContent = icon;
+  const messageElement = document.createElement('span');
+  messageElement.textContent = message;
+  toast.append(iconElement, messageElement);
 
   container.appendChild(toast);
 
@@ -56,7 +62,12 @@ async function apiRequest(endpoint, options = {}) {
     if (response.status === 401 && !endpoint.includes('/api/auth/login')) {
       localStorage.removeItem('hostelcare_token');
       localStorage.removeItem('hostelcare_user');
-      showToast('Session expired. Please log in again.', 'warning');
+      showToast(
+        localStorage.getItem('hostelcare_lang') === 'hi'
+          ? 'सत्र समाप्त हो गया है। कृपया फिर से लॉग इन करें।'
+          : 'Session expired. Please log in again.',
+        'warning'
+      );
       setTimeout(() => {
         window.location.href = '/login.html';
       }, 1200);
@@ -71,8 +82,17 @@ async function apiRequest(endpoint, options = {}) {
     return { success: true, ...data };
   } catch (err) {
     console.error(`[API Network Error] ${endpoint}:`, err);
-    showToast('Network error. Unable to reach server.', 'error');
-    return { success: false, error: 'Network error. Please check your connection.' };
+    const isHindi = localStorage.getItem('hostelcare_lang') === 'hi';
+    const message = isHindi
+      ? 'नेटवर्क त्रुटि। सर्वर से संपर्क नहीं हो सका।'
+      : 'Network error. Unable to reach server.';
+    showToast(message, 'error');
+    return {
+      success: false,
+      error: isHindi
+        ? 'नेटवर्क त्रुटि। कृपया अपना कनेक्शन जाँचें।'
+        : 'Network error. Please check your connection.'
+    };
   }
 }
 

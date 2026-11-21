@@ -54,11 +54,12 @@ function renderNavbar() {
 
   const currentPath = window.location.pathname;
   const user = getUser();
+  const isHindi = localStorage.getItem('hostelcare_lang') === 'hi';
 
   if (!user) {
     // Guest Links: Show only Login option, Register completely removed
     navContainer.innerHTML = `
-      <li><a href="/login.html" class="btn btn-primary btn-sm">Login</a></li>
+      <li><a href="/login.html" class="btn btn-primary btn-sm nav-login">Login</a></li>
     `;
   } else if (user.role === 'student') {
     // Student Links
@@ -89,7 +90,7 @@ function renderNavbar() {
   } else if (user.role === 'technician') {
     // Technician Links
     navContainer.innerHTML = `
-      <li><a href="/technician-dashboard.html" class="${currentPath === '/technician-dashboard.html' ? 'active' : ''}">Assigned Jobs</a></li>
+      <li><a href="/technician-dashboard.html" class="${currentPath === '/technician-dashboard.html' ? 'active' : ''}">${isHindi ? 'असाइन की गई शिकायतें' : 'My Assigned Complaints'}</a></li>
       <li>
         <div class="user-badge">
           <span>${user.name.split(' ')[0]}</span>

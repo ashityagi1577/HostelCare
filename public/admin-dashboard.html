@@ -272,6 +272,16 @@
     .pulse-emergency {
       animation: pulseAlert 1.6s infinite;
     }
+    .registration-feedback {
+      min-height: 1.5rem;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    @media (max-width: 600px) {
+      .admin-tabs { overflow: visible; }
+      .admin-tab-btn { width: 100%; justify-content: center; }
+      .registration-card { padding: 1.25rem !important; }
+    }
     @keyframes pulseAlert {
       0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
       70% { box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); }
@@ -298,13 +308,12 @@
   <header class="admin-header">
     <div class="container admin-header-row">
       <div>
-        <h1>🏛️ Executive Operations &amp; Facility Oversight</h1>
+        <h1 data-i18n="admin_title">🏛️ Admin Dashboard</h1>
         <p id="adminSubtitle" style="color: var(--text-muted); font-size: 0.92rem; margin-top: 0.25rem;">
-          Centralized hostel monitoring: student population, room occupancy, maintenance backlogs, and staff performance
+          Provision student, staff, and technician accounts for HostelCare.
         </p>
       </div>
       <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-        <button onclick="openRegisterUserModal()" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.35rem;">➕ Register User</button>
         <button onclick="loadAdminData()" class="btn btn-secondary btn-sm">🔄 Refresh Data</button>
         <button onclick="exportFullAdminCSV()" class="btn btn-secondary btn-sm" title="Export Complete Dataset">📥 Export System CSV</button>
       </div>
@@ -316,22 +325,10 @@
     <!-- Navigation Tabs -->
     <div class="admin-tabs">
       <button class="admin-tab-btn active" id="tabBtnOverview" onclick="switchAdminTab('overview')">
-        📊 Executive Summary
-      </button>
-      <button class="admin-tab-btn" id="tabBtnRooms" onclick="switchAdminTab('rooms')">
-        🚪 Room Management
-      </button>
-      <button class="admin-tab-btn" id="tabBtnComplaints" onclick="switchAdminTab('complaints')">
-        📋 Complaints &amp; Maintenance
-      </button>
-      <button class="admin-tab-btn" id="tabBtnStaff" onclick="switchAdminTab('staff')">
-        👨‍💼 Staff &amp; Technicians
-      </button>
-      <button class="admin-tab-btn" id="tabBtnStudents" onclick="switchAdminTab('students')">
-        🎓 Student Registry
+        📊 Dashboard
       </button>
       <button class="admin-tab-btn" id="tabBtnRegister" onclick="switchAdminTab('register')">
-        👤 Register Users
+        👥 User Management
       </button>
     </div>
 
@@ -339,54 +336,70 @@
     <!-- TAB 1: EXECUTIVE SUMMARY                                              -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <div id="tabContentOverview">
-      <!-- 6 High-Impact Executive KPI Cards -->
+      <!-- Dashboard Complaint and User Counts -->
       <div class="kpi-grid">
         <div class="kpi-card" style="border-left: 4px solid var(--primary);">
           <div>
-            <div class="kpi-title">Total Registered Students</div>
-            <div class="kpi-val" id="kpiTotalStudents">0</div>
+            <div class="kpi-title">Total Complaints</div>
+            <div class="kpi-val" id="kpiTotalComplaints">0</div>
           </div>
-          <div class="kpi-meta">Active campus residents</div>
+          <div class="kpi-meta">All registered complaints</div>
         </div>
 
         <div class="kpi-card" style="border-left: 4px solid #0284c7;">
           <div>
-            <div class="kpi-title">Hostel Occupancy</div>
-            <div class="kpi-val" id="kpiOccupancyRate">0%</div>
+            <div class="kpi-title">Open Complaints</div>
+            <div class="kpi-val" id="kpiOpenComplaints">0</div>
           </div>
-          <div class="kpi-meta"><span id="kpiOccupiedRooms">0</span> / <span id="kpiTotalCapacity">200</span> Rooms Occupied</div>
+          <div class="kpi-meta">Complaints awaiting action</div>
         </div>
 
         <div class="kpi-card" style="border-left: 4px solid #7c3aed;">
           <div>
-            <div class="kpi-title">Staff &amp; Technicians</div>
-            <div class="kpi-val" id="kpiTotalStaff">0</div>
+            <div class="kpi-title">In Progress</div>
+            <div class="kpi-val" id="kpiInProgress">0</div>
           </div>
-          <div class="kpi-meta"><span id="kpiWardenCount">0</span> Wardens • <span id="kpiTechCount">0</span> Technicians</div>
-        </div>
-
-        <div class="kpi-card" style="border-left: 4px solid var(--amber);">
-          <div>
-            <div class="kpi-title">Active Maintenance Backlog</div>
-            <div class="kpi-val" id="kpiActiveBacklog" style="color: #b45309;">0</div>
-          </div>
-          <div class="kpi-meta">Pending triage &amp; in-progress</div>
-        </div>
-
-        <div class="kpi-card" id="kpiEmergencyCard" style="border-left: 4px solid #e11d48; background: #fff1f2;">
-          <div>
-            <div class="kpi-title" style="color: #be123c;">🚨 Emergency Hazards</div>
-            <div class="kpi-val" id="kpiEmergencyPending" style="color: #e11d48;">0</div>
-          </div>
-          <div class="kpi-meta" style="color: #be123c;">Requires immediate attention</div>
+          <div class="kpi-meta">Complaints currently being handled</div>
         </div>
 
         <div class="kpi-card" style="border-left: 4px solid #10b981;">
           <div>
-            <div class="kpi-title">Resident Satisfaction</div>
-            <div class="kpi-val" id="kpiSatisfactionScore" style="color: #047857;">—</div>
+            <div class="kpi-title">Resolved</div>
+            <div class="kpi-val" id="kpiResolved">0</div>
           </div>
-          <div class="kpi-meta">Based on verified reviews</div>
+          <div class="kpi-meta">Problems fixed</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid #64748b;">
+          <div>
+            <div class="kpi-title">Closed</div>
+            <div class="kpi-val" id="kpiClosed">0</div>
+          </div>
+          <div class="kpi-meta">Completed complaint records</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid #f59e0b;">
+          <div>
+            <div class="kpi-title">Total Students</div>
+            <div class="kpi-val" id="kpiTotalStudents">0</div>
+          </div>
+          <div class="kpi-meta">Registered student accounts</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid #0ea5e9;">
+          <div>
+            <div class="kpi-title">Total Wardens</div>
+            <div class="kpi-val" id="kpiTotalWardens">0</div>
+          </div>
+          <div class="kpi-meta">Registered wardens</div>
+        </div>
+
+        <div class="kpi-card" style="border-left: 4px solid #8b5cf6;">
+          <div>
+            <div class="kpi-title">Total Technicians</div>
+            <div class="kpi-val" id="kpiTotalTechnicians">0</div>
+          </div>
+          <div class="kpi-meta">Registered technicians</div>
         </div>
       </div>
 
@@ -667,187 +680,98 @@
     <!-- TAB 6: REGISTER USERS (ACCOUNT PROVISIONING)                          -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <div id="tabContentRegister" style="display: none;">
-      <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+      <div class="registration-card" style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
         <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
           <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
-            <span>👤</span> Institutional User Registration &amp; Account Provisioning
+            <span>👤</span> <span data-i18n="registration_title">User Management</span>
           </h2>
-          <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
-            Create verified institutional logins for <strong>Students</strong>, <strong>Staff / Wardens</strong>, and <strong>Technicians</strong>. Self-registration is restricted; all accounts must be provisioned here.
+          <p data-i18n="registration_intro" style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+            Manage students, wardens, and technicians. Register student, warden, and technician accounts here.
           </p>
         </div>
 
-        <form id="inlineRegisterUserForm" onsubmit="handleInlineCreateUser(event)" style="max-width: 800px;">
+        <form id="inlineRegisterUserForm" onsubmit="handleInlineCreateUser(event)" style="max-width: 800px;" novalidate>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Account Role *</label>
+              <label class="form-label" for="inlineUserRole" data-i18n="label_role">Account Type *</label>
               <select id="inlineUserRole" class="form-control" onchange="toggleInlineRoleFields()" required style="background: white; font-weight: 600;">
-                <option value="student">Student Resident</option>
-                <option value="staff">Hostel Staff / Warden</option>
-                <option value="technician">Maintenance Technician</option>
+                <option value="student" data-i18n="role_student">Student</option>
+                <option value="staff" data-i18n="role_staff">Staff / Warden</option>
+                <option value="technician" data-i18n="role_technician">Technician</option>
               </select>
             </div>
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Institutional / User ID</label>
-              <input type="text" id="inlineUserId" class="form-control" placeholder="e.g. STU-105 (or leave empty to auto-generate)">
-              <small style="color:var(--text-muted); font-size:0.75rem;">Leave blank to auto-generate ID prefix</small>
+              <label class="form-label" for="inlineUserId" data-i18n="label_user_id">User ID *</label>
+              <input type="text" id="inlineUserId" class="form-control" placeholder="e.g. STU-105" data-i18n-ph="placeholder_user_id" maxlength="50" required>
             </div>
           </div>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Full Name *</label>
-              <input type="text" id="inlineUserName" class="form-control" placeholder="e.g. Aditi Sharma" required>
+              <label class="form-label" for="inlineUserName" data-i18n="label_name">Full Name *</label>
+              <input type="text" id="inlineUserName" class="form-control" placeholder="e.g. Aditi Sharma" data-i18n-ph="placeholder_name" maxlength="100" required>
             </div>
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Email Address *</label>
-              <input type="email" id="inlineUserEmail" class="form-control" placeholder="aditi@hostelcare.com" required>
+              <label class="form-label" for="inlineUserEmail" data-i18n="label_email">Email Address *</label>
+              <input type="email" id="inlineUserEmail" class="form-control" placeholder="name@hostelcare.com" data-i18n-ph="placeholder_email" maxlength="150" required>
             </div>
           </div>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Contact Phone Number</label>
-              <input type="tel" id="inlineUserPhone" class="form-control" placeholder="9876543210">
+              <label class="form-label" for="inlineUserPhone" data-i18n="label_phone">Contact Number (Optional)</label>
+              <input type="tel" id="inlineUserPhone" class="form-control" placeholder="9876543210" data-i18n-ph="placeholder_phone" maxlength="20">
             </div>
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Default Password *</label>
-              <input type="password" id="inlineUserPassword" class="form-control" value="password123" required minlength="6">
-              <small style="color:var(--text-muted); font-size:0.75rem;">Default: password123. Users can update later.</small>
+              <label class="form-label" for="inlineUserPassword" data-i18n="label_password">Password *</label>
+              <input type="password" id="inlineUserPassword" class="form-control" placeholder="At least 6 characters" data-i18n-ph="placeholder_password" required minlength="6" autocomplete="new-password">
             </div>
           </div>
 
           <!-- Dynamic Student Fields -->
           <div id="inlineStudentFields" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Hostel Block</label>
+              <label class="form-label" for="inlineUserBlock" data-i18n="label_block">Hostel Block</label>
               <select id="inlineUserBlock" class="form-control">
-                <option value="Block A (Boys)">Block A (Boys)</option>
-                <option value="Block B (Boys)">Block B (Boys)</option>
-                <option value="Block C (Girls)">Block C (Girls)</option>
-                <option value="Block D (Girls)">Block D (Girls)</option>
+                <option value="Block A (Boys)" data-i18n="block_a">Block A (Boys)</option>
+                <option value="Block B (Boys)" data-i18n="block_b">Block B (Boys)</option>
+                <option value="Block C (Girls)" data-i18n="block_c">Block C (Girls)</option>
+                <option value="Block D (Girls)" data-i18n="block_d">Block D (Girls)</option>
               </select>
             </div>
             <div>
-              <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Room Number</label>
-              <input type="text" id="inlineUserRoom" class="form-control" placeholder="e.g. A-205">
+              <label class="form-label" for="inlineUserRoom" data-i18n="label_room">Room Number</label>
+              <input type="text" id="inlineUserRoom" class="form-control" placeholder="e.g. A-205" data-i18n-ph="placeholder_room" maxlength="20">
             </div>
           </div>
 
           <!-- Dynamic Technician Fields -->
           <div id="inlineTechnicianFields" style="margin-bottom: 1.25rem; display: none;">
-            <label style="display:block; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem; color:#334155;">Trade / Specialization *</label>
+            <label class="form-label" for="inlineUserTrade" data-i18n="label_trade">Trade / Specialization</label>
             <select id="inlineUserTrade" class="form-control" style="max-width: 380px;">
-              <option value="Electrical">Electrical</option>
-              <option value="Plumbing">Plumbing</option>
-              <option value="Carpentry">Carpentry</option>
-              <option value="Cleaning">Cleaning</option>
-              <option value="WiFi_Internet">WiFi &amp; Internet</option>
-              <option value="General">General Maintenance</option>
+              <option value="Electrical" data-i18n="trade_electrical">Electrical</option>
+              <option value="Plumbing" data-i18n="trade_plumbing">Plumbing</option>
+              <option value="Carpentry" data-i18n="trade_carpentry">Carpentry</option>
+              <option value="Cleaning" data-i18n="trade_cleaning">Cleaning</option>
+              <option value="WiFi_Internet" data-i18n="trade_wifi">WiFi &amp; Internet</option>
+              <option value="General" data-i18n="trade_general">General Maintenance</option>
             </select>
           </div>
 
           <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-            <button type="submit" class="btn btn-primary" id="btnInlineSubmitUser" style="padding: 0.75rem 2rem; font-weight: 700;">
-              ➕ Register &amp; Activate Account
+            <button type="submit" class="btn btn-primary" id="btnInlineSubmitUser" style="padding: 0.75rem 2rem; font-weight: 700;" data-i18n="button_create">
+              Create Account
             </button>
-            <button type="reset" class="btn btn-secondary" onclick="document.getElementById('inlineUserPassword').value='password123'; toggleInlineRoleFields();">
+            <button type="reset" class="btn btn-secondary" onclick="clearRegistrationFeedback(); toggleInlineRoleFields();" data-i18n="button_clear">
               Clear Form
             </button>
           </div>
+          <p id="registrationFeedback" class="registration-feedback" role="status" aria-live="polite"></p>
         </form>
       </div>
     </div>
 
   </main>
-
-  <!-- ── REGISTER NEW USER MODAL ───────────────────────── -->
-  <div class="modal-overlay" id="registerUserModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: white; border-radius: var(--radius-lg); width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); padding: 1.75rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
-        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-          <span>👤</span> Provision Institutional Account
-        </h3>
-        <button type="button" onclick="closeRegisterUserModal()" style="background:none; border:none; font-size: 1.4rem; cursor:pointer; color: var(--text-muted); line-height: 1;">&times;</button>
-      </div>
-
-      <form id="registerUserForm" onsubmit="handleAdminCreateUser(event)">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div>
-            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Role *</label>
-            <select id="newUserRole" class="form-control" onchange="toggleRoleFields()" required>
-              <option value="student">Student Resident</option>
-              <option value="staff">Hostel Staff / Warden</option>
-              <option value="technician">Maintenance Technician</option>
-              <option value="admin">Chief Administrator</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">User / Institutional ID</label>
-            <input type="text" id="newUserId" class="form-control" placeholder="e.g. STU-105 (or auto)">
-            <small style="color:var(--text-muted); font-size:0.75rem;">Leave empty to auto-generate</small>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 1rem;">
-          <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Full Name *</label>
-          <input type="text" id="newUserName" class="form-control" placeholder="e.g. Aditi Sharma" required>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div>
-            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Email Address *</label>
-            <input type="email" id="newUserEmail" class="form-control" placeholder="aditi@hostelcare.com" required>
-          </div>
-          <div>
-            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Phone Number</label>
-            <input type="tel" id="newUserPhone" class="form-control" placeholder="9876543210">
-          </div>
-        </div>
-
-        <!-- Student Specific Fields -->
-        <div id="studentFieldsBox" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div>
-            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Hostel Block</label>
-            <select id="newUserBlock" class="form-control">
-              <option value="Block A (Boys)">Block A (Boys)</option>
-              <option value="Block B (Boys)">Block B (Boys)</option>
-              <option value="Block C (Girls)">Block C (Girls)</option>
-              <option value="Block D (Girls)">Block D (Girls)</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Room Number</label>
-            <input type="text" id="newUserRoom" class="form-control" placeholder="e.g. A-205">
-          </div>
-        </div>
-
-        <!-- Technician Specific Fields -->
-        <div id="technicianFieldsBox" style="margin-bottom: 1rem; display: none;">
-          <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Trade / Specialization *</label>
-          <select id="newUserTrade" class="form-control">
-            <option value="Electrical">Electrical</option>
-            <option value="Plumbing">Plumbing</option>
-            <option value="Carpentry">Carpentry</option>
-            <option value="Cleaning">Cleaning</option>
-            <option value="WiFi_Internet">WiFi &amp; Internet</option>
-            <option value="General">General Maintenance</option>
-          </select>
-        </div>
-
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:0.35rem; color:#334155;">Initial Password *</label>
-          <input type="password" id="newUserPassword" class="form-control" value="password123" required minlength="6">
-          <small style="color:var(--text-muted); font-size:0.75rem;">Default is password123. The user can log in with this password.</small>
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; gap:0.75rem; border-top:1px solid var(--border); padding-top:1rem;">
-          <button type="button" class="btn btn-secondary btn-sm" onclick="closeRegisterUserModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitUser">Create Account</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
@@ -856,12 +780,114 @@
     let adminComplaintsList = [];
     let adminRoomsList = [];
     let adminStudentsList = [];
+    const adminTranslations = {
+      en: {
+        nav_register_users: 'User Management',
+        admin_title: '🏛️ Admin Dashboard',
+        admin_subtitle: 'Provision student, staff, and technician accounts for HostelCare.',
+        registration_title: 'User Management',
+        registration_intro: 'Manage students, wardens, and technicians. Register student, warden, and technician accounts here.',
+        label_role: 'Account Type *',
+        role_student: 'Student',
+        role_staff: 'Staff / Warden',
+        role_technician: 'Technician',
+        label_user_id: 'User ID *',
+        placeholder_user_id: 'e.g. STU-105',
+        label_name: 'Full Name *',
+        placeholder_name: 'e.g. Aditi Sharma',
+        label_email: 'Email Address *',
+        placeholder_email: 'name@hostelcare.com',
+        label_phone: 'Contact Number (Optional)',
+        placeholder_phone: '9876543210',
+        label_password: 'Password *',
+        placeholder_password: 'At least 6 characters',
+        label_block: 'Hostel Block',
+        label_room: 'Room Number',
+        placeholder_room: 'e.g. A-205',
+        label_trade: 'Trade / Specialization',
+        block_a: 'Block A (Boys)',
+        block_b: 'Block B (Boys)',
+        block_c: 'Block C (Girls)',
+        block_d: 'Block D (Girls)',
+        trade_electrical: 'Electrical',
+        trade_plumbing: 'Plumbing',
+        trade_carpentry: 'Carpentry',
+        trade_cleaning: 'Cleaning',
+        trade_wifi: 'WiFi & Internet',
+        trade_general: 'General Maintenance',
+        button_create: 'Create Account',
+        button_clear: 'Clear Form',
+        required_fields: 'Enter the full name, user ID, email, password, and account type.',
+        invalid_email: 'Enter a valid email address.',
+        short_password: 'Password must be at least 6 characters long.',
+        field_too_long: 'One or more fields exceed the maximum allowed length.',
+        invalid_role: 'Select Student, Staff / Warden, or Technician.',
+        invalid_trade: 'Select a valid technician specialization.',
+        duplicate_user_id: 'This user ID is already assigned.',
+        duplicate_email: 'An account with this email address already exists.',
+        duplicate_account: 'This user ID or email address is already registered.',
+        account_failed: 'Failed to create the account. Please try again.',
+        request_failed: 'Could not reach the server. Check your connection and try again.',
+        access_denied: 'Your account is not authorized to create users.',
+        account_created: 'Account created successfully. The user can now sign in.'
+      },
+      hi: {
+        nav_register_users: 'उपयोगकर्ता प्रबंधन',
+        admin_title: '🏛️ व्यवस्थापक डैशबोर्ड',
+        admin_subtitle: 'HostelCare के लिए छात्र, कर्मचारी और तकनीशियन खाते बनाएँ।',
+        registration_title: 'उपयोगकर्ता प्रबंधन',
+        registration_intro: 'छात्रों, वार्डनों और तकनीशियनों का प्रबंधन करें। यहाँ उनके खाते पंजीकृत करें।',
+        label_role: 'खाते का प्रकार *',
+        role_student: 'छात्र',
+        role_staff: 'कर्मचारी / वार्डन',
+        role_technician: 'तकनीशियन',
+        label_user_id: 'उपयोगकर्ता आईडी *',
+        placeholder_user_id: 'उदा. STU-105',
+        label_name: 'पूरा नाम *',
+        placeholder_name: 'उदा. अदिति शर्मा',
+        label_email: 'ईमेल पता *',
+        placeholder_email: 'name@hostelcare.com',
+        label_phone: 'संपर्क नंबर (वैकल्पिक)',
+        placeholder_phone: '9876543210',
+        label_password: 'पासवर्ड *',
+        placeholder_password: 'कम से कम 6 अक्षर',
+        label_block: 'छात्रावास ब्लॉक',
+        label_room: 'कमरा नंबर',
+        placeholder_room: 'उदा. A-205',
+        label_trade: 'कार्य विशेषज्ञता',
+        block_a: 'ब्लॉक A (लड़के)',
+        block_b: 'ब्लॉक B (लड़के)',
+        block_c: 'ब्लॉक C (लड़कियाँ)',
+        block_d: 'ब्लॉक D (लड़कियाँ)',
+        trade_electrical: 'इलेक्ट्रिकल',
+        trade_plumbing: 'प्लंबिंग',
+        trade_carpentry: 'बढ़ईगीरी',
+        trade_cleaning: 'सफाई',
+        trade_wifi: 'वाई-फ़ाई और इंटरनेट',
+        trade_general: 'सामान्य रखरखाव',
+        button_create: 'खाता बनाएँ',
+        button_clear: 'फ़ॉर्म साफ़ करें',
+        required_fields: 'पूरा नाम, उपयोगकर्ता आईडी, ईमेल, पासवर्ड और खाते का प्रकार भरें।',
+        invalid_email: 'मान्य ईमेल पता दर्ज करें।',
+        short_password: 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।',
+        field_too_long: 'एक या अधिक फ़ील्ड की लंबाई अनुमत सीमा से अधिक है।',
+        invalid_role: 'छात्र, कर्मचारी / वार्डन या तकनीशियन चुनें।',
+        invalid_trade: 'मान्य तकनीकी विशेषज्ञता चुनें।',
+        duplicate_user_id: 'यह उपयोगकर्ता आईडी पहले से आवंटित है।',
+        duplicate_email: 'इस ईमेल पते से खाता पहले से मौजूद है।',
+        duplicate_account: 'यह उपयोगकर्ता आईडी या ईमेल पहले से पंजीकृत है।',
+        account_failed: 'खाता नहीं बन सका। कृपया फिर से प्रयास करें।',
+        request_failed: 'सर्वर से संपर्क नहीं हो सका। कनेक्शन जाँचकर फिर प्रयास करें।',
+        access_denied: 'आपके खाते को उपयोगकर्ता बनाने की अनुमति नहीं है।',
+        account_created: 'खाता सफलतापूर्वक बन गया। उपयोगकर्ता अब लॉग इन कर सकता है।'
+      }
+    };
+
     let currentAdminTab = 'overview';
+    let currentAdminLanguage = localStorage.getItem('hostelcare_lang') === 'hi' ? 'hi' : 'en';
 
     // ── On Page Load & Role Guard ─────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-      renderNavbar();
-
       const user = getUser();
       if (!user) {
         showToast('Administrator credentials required.', 'warning');
@@ -877,8 +903,8 @@
         return;
       }
 
-      document.getElementById('adminSubtitle').innerText =
-        `Logged in as ${user.name} (${user.user_id || 'ADM-101'}) • Central Campus Management`;
+      renderNavbar();
+      applyAdminLanguage(currentAdminLanguage);
 
       // Handle hash navigation
       handleHash();
@@ -889,7 +915,7 @@
 
     function handleHash() {
       const hash = window.location.hash.toLowerCase().replace('#', '');
-      if (['rooms', 'complaints', 'staff', 'students', 'register'].includes(hash)) {
+      if (['overview', 'rooms', 'complaints', 'staff', 'students'].includes(hash)) {
         switchAdminTab(hash);
       } else {
         switchAdminTab('overview');
@@ -908,7 +934,15 @@
       });
 
       const navReg = document.getElementById('adminNavLinkRegister');
-      if (navReg) navReg.classList.toggle('active', tab === 'register');
+      if (navReg) {
+        navReg.classList.toggle('active', tab === 'register');
+        navReg.innerText = adminTranslations[currentAdminLanguage].nav_register_users;
+      }
+      const registerTab = document.getElementById('tabBtnRegister');
+      if (registerTab) {
+        registerTab.classList.toggle('active', tab === 'register');
+        registerTab.innerText = `👤 ${adminTranslations[currentAdminLanguage].nav_register_users}`;
+      }
 
       // Lazy load tab specific data
       if (tab === 'rooms' && adminRoomsList.length === 0) loadRoomsData();
@@ -939,31 +973,16 @@
     // ── Render KPI Cards ──────────────────────────────────────
     function renderKPIs(d) {
       const sys = d.system_stats || {};
-      const room = d.room_stats || {};
       const comp = d.complaint_stats || {};
 
+      document.getElementById('kpiTotalComplaints').innerText = comp.total || 0;
+      document.getElementById('kpiOpenComplaints').innerText = (comp.pending || 0) + (comp.assigned || 0);
+      document.getElementById('kpiInProgress').innerText = comp.in_progress || 0;
+      document.getElementById('kpiResolved').innerText = comp.resolved || 0;
+      document.getElementById('kpiClosed').innerText = comp.closed || 0;
       document.getElementById('kpiTotalStudents').innerText = sys.total_students || 0;
-      document.getElementById('kpiOccupancyRate').innerText = `${room.occupancy_rate || 0}%`;
-      document.getElementById('kpiOccupiedRooms').innerText = room.occupied_rooms || 0;
-      document.getElementById('kpiTotalCapacity').innerText = room.total_capacity || 200;
-
-      document.getElementById('kpiTotalStaff').innerText = (sys.total_staff || 0) + (sys.total_technicians || 0);
-      document.getElementById('kpiWardenCount').innerText = sys.total_staff || 0;
-      document.getElementById('kpiTechCount').innerText = sys.total_technicians || 0;
-
-      document.getElementById('kpiActiveBacklog').innerText =
-        (comp.pending || 0) + (comp.assigned || 0) + (comp.in_progress || 0);
-
-      document.getElementById('kpiEmergencyPending').innerText = comp.emergency_pending || 0;
-      const emergCard = document.getElementById('kpiEmergencyCard');
-      if (comp.emergency_pending > 0) {
-        emergCard.classList.add('pulse-emergency');
-      } else {
-        emergCard.classList.remove('pulse-emergency');
-      }
-
-      document.getElementById('kpiSatisfactionScore').innerText =
-        comp.satisfaction_score ? `⭐ ${comp.satisfaction_score} / 5` : 'No ratings yet';
+      document.getElementById('kpiTotalWardens').innerText = sys.total_staff || 0;
+      document.getElementById('kpiTotalTechnicians').innerText = sys.total_technicians || 0;
     }
 
     // ── Render Block Occupancy Bars ───────────────────────────
@@ -1347,89 +1366,142 @@
       }
     }
 
-    // ── Register User Modal Handlers ─────────────────────────
-    function openRegisterUserModal() {
-      document.getElementById('registerUserModal').style.display = 'flex';
-      toggleRoleFields();
+    function setAdminLanguage(lang) {
+      currentAdminLanguage = lang === 'hi' ? 'hi' : 'en';
+      localStorage.setItem('hostelcare_lang', currentAdminLanguage);
+      applyAdminLanguage(currentAdminLanguage);
     }
 
-    function closeRegisterUserModal() {
-      document.getElementById('registerUserModal').style.display = 'none';
-      document.getElementById('registerUserForm').reset();
-      document.getElementById('newUserPassword').value = 'password123';
+    function applyAdminLanguage(lang) {
+      const dictionary = adminTranslations[lang] || adminTranslations.en;
+      document.querySelectorAll('[data-i18n]').forEach((element) => {
+        const key = element.getAttribute('data-i18n');
+        if (dictionary[key]) element.innerText = dictionary[key];
+      });
+      document.querySelectorAll('[data-i18n-ph]').forEach((element) => {
+        const key = element.getAttribute('data-i18n-ph');
+        if (dictionary[key]) element.placeholder = dictionary[key];
+      });
+      document.getElementById('adminSubtitle').innerText = dictionary.admin_subtitle;
+      const navReg = document.getElementById('adminNavLinkRegister');
+      if (navReg) navReg.innerText = dictionary.nav_register_users;
+      const registerTab = document.getElementById('tabBtnRegister');
+      if (registerTab) registerTab.innerText = `👤 ${dictionary.nav_register_users}`;
     }
 
-    function toggleRoleFields() {
-      const role = document.getElementById('newUserRole').value;
-      const studentBox = document.getElementById('studentFieldsBox');
-      const techBox = document.getElementById('technicianFieldsBox');
-
-      studentBox.style.display = (role === 'student') ? 'grid' : 'none';
-      techBox.style.display = (role === 'technician') ? 'block' : 'none';
-
-      const idInput = document.getElementById('newUserId');
-      if (role === 'student') idInput.placeholder = 'e.g. STU-105 (or auto)';
-      else if (role === 'staff') idInput.placeholder = 'e.g. STF-102 (or auto)';
-      else if (role === 'technician') idInput.placeholder = 'e.g. TECH-106 (or auto)';
-      else if (role === 'admin') idInput.placeholder = 'e.g. ADM-102 (or auto)';
+    function setRegistrationFeedback(message, isError) {
+      const feedback = document.getElementById('registrationFeedback');
+      feedback.innerText = message;
+      feedback.style.color = isError ? 'var(--rose)' : 'var(--emerald-text)';
     }
 
-    async function handleAdminCreateUser(e) {
-      e.preventDefault();
-      const submitBtn = document.getElementById('btnSubmitUser');
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Creating account...';
+    function clearRegistrationFeedback() {
+      const feedback = document.getElementById('registrationFeedback');
+      feedback.innerText = '';
+      feedback.style.color = '';
+    }
 
-      const role = document.getElementById('newUserRole').value;
-      const payload = {
-        role,
-        user_id: document.getElementById('newUserId').value.trim() || undefined,
-        name: document.getElementById('newUserName').value.trim(),
-        email: document.getElementById('newUserEmail').value.trim(),
-        phone: document.getElementById('newUserPhone').value.trim() || undefined,
-        password: document.getElementById('newUserPassword').value,
-        hostel_block: role === 'student' ? document.getElementById('newUserBlock').value : undefined,
-        room_no: role === 'student' ? document.getElementById('newUserRoom').value.trim() : undefined,
-        trade: role === 'technician' ? document.getElementById('newUserTrade').value : undefined
+    function toggleInlineRoleFields() {
+      const role = document.getElementById('inlineUserRole').value;
+      document.getElementById('inlineStudentFields').style.display = role === 'student' ? 'grid' : 'none';
+      document.getElementById('inlineTechnicianFields').style.display = role === 'technician' ? 'block' : 'none';
+      clearRegistrationFeedback();
+    }
+
+    function registrationErrorMessage(code, fallback) {
+      const dictionary = adminTranslations[currentAdminLanguage];
+      const messages = {
+        REQUIRED_FIELDS: 'required_fields',
+        INVALID_EMAIL: 'invalid_email',
+        PASSWORD_TOO_SHORT: 'short_password',
+        FIELD_TOO_LONG: 'field_too_long',
+        INVALID_ROLE: 'invalid_role',
+        INVALID_TRADE: 'invalid_trade',
+        DUPLICATE_USER_ID: 'duplicate_user_id',
+        DUPLICATE_EMAIL: 'duplicate_email',
+        DUPLICATE_ACCOUNT: 'duplicate_account',
+        ACCOUNT_CREATE_FAILED: 'account_failed'
       };
+      return messages[code] ? dictionary[messages[code]] : fallback || dictionary.account_failed;
+    }
+
+    async function handleInlineCreateUser(event) {
+      event.preventDefault();
+      clearRegistrationFeedback();
+
+      const form = document.getElementById('inlineRegisterUserForm');
+      const role = document.getElementById('inlineUserRole').value;
+      const userId = document.getElementById('inlineUserId').value.trim();
+      const name = document.getElementById('inlineUserName').value.trim();
+      const email = document.getElementById('inlineUserEmail').value.trim();
+      const password = document.getElementById('inlineUserPassword').value;
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const dictionary = adminTranslations[currentAdminLanguage];
+
+      if (!userId || !name || !email || !password || !role) {
+        setRegistrationFeedback(dictionary.required_fields, true);
+        return;
+      }
+      if (!emailPattern.test(email)) {
+        setRegistrationFeedback(dictionary.invalid_email, true);
+        return;
+      }
+      if (password.length < 6) {
+        setRegistrationFeedback(dictionary.short_password, true);
+        return;
+      }
+      if (name.length > 100 || userId.length > 50 || email.length > 150 ||
+        document.getElementById('inlineUserPhone').value.trim().length > 20 ||
+        document.getElementById('inlineUserRoom').value.trim().length > 20) {
+        setRegistrationFeedback(dictionary.field_too_long, true);
+        return;
+      }
+      if (!['student', 'staff', 'technician'].includes(role)) {
+        setRegistrationFeedback(dictionary.invalid_role, true);
+        return;
+      }
+
+      const submitButton = document.getElementById('btnInlineSubmitUser');
+      submitButton.disabled = true;
+      const originalLabel = dictionary.button_create;
+      submitButton.innerText = currentAdminLanguage === 'hi' ? 'खाता बनाया जा रहा है...' : 'Creating account...';
 
       try {
-        const res = await apiRequest('/api/admin/users', {
+        const response = await apiRequest('/api/admin/users', {
           method: 'POST',
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            role,
+            user_id: userId,
+            name,
+            email,
+            password,
+            phone: document.getElementById('inlineUserPhone').value.trim() || undefined,
+            hostel_block: role === 'student' ? document.getElementById('inlineUserBlock').value : undefined,
+            room_no: role === 'student' ? document.getElementById('inlineUserRoom').value.trim() : undefined,
+            trade: role === 'technician' ? document.getElementById('inlineUserTrade').value : undefined
+          })
         });
 
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'Create Account';
-
-        if (res.success) {
-          showToast(res.message || 'Account provisioned successfully! 🎉', 'success');
-          closeRegisterUserModal();
-          // Refresh datasets
-          loadAdminData();
-          if (currentAdminTab === 'students') loadStudentsData();
-          if (currentAdminTab === 'staff') loadStaffData();
-        } else {
-          showToast(res.error || 'Failed to create user account.', 'error');
+        if (!response.success) {
+          const message = response.status === undefined
+            ? dictionary.request_failed
+            : response.status === 401 || response.status === 403
+              ? dictionary.access_denied
+              : registrationErrorMessage(response.code, response.error);
+          setRegistrationFeedback(message, true);
+          return;
         }
-      } catch (err) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'Create Account';
-        showToast('Network error while provisioning user.', 'error');
+
+        form.reset();
+        toggleInlineRoleFields();
+        setRegistrationFeedback(dictionary.account_created, false);
+        showToast(dictionary.account_created, 'success');
+        await loadAdminData();
+      } finally {
+        submitButton.disabled = false;
+        submitButton.innerText = originalLabel;
       }
     }
-
-    // Modal click-outside dismissal
-    window.addEventListener('click', (e) => {
-      const modal = document.getElementById('registerUserModal');
-      if (e.target === modal) {
-        closeRegisterUserModal();
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeRegisterUserModal();
-    });
 
     // ── Helpers ───────────────────────────────────────────────
     function capitalize(str) {

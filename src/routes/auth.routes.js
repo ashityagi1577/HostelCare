@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
-const { authenticateToken } = require('../middleware/auth.middleware');
+const { authenticateToken, requireRoles } = require('../middleware/auth.middleware');
 
 /**
- * Public Authentication Endpoints
+ * Authentication and administrator-controlled account provisioning endpoints.
  */
-router.post('/register', authController.register);
+router.post('/register', authenticateToken, requireRoles('admin'), authController.register);
 router.post('/login', authController.login);
 
 /**

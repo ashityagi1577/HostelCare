@@ -182,6 +182,13 @@ async function getComplaintById(req, res) {
     const techId = await resolveTechId(req.user);
     const complaintId = parseInt(req.params.id, 10);
 
+    if (!techId) {
+      return res.status(403).json({
+        success: false,
+        error: 'No technician record associated with this account.'
+      });
+    }
+
     if (isNaN(complaintId)) {
       return res.status(400).json({ success: false, error: 'Invalid complaint ID.' });
     }
@@ -256,7 +263,7 @@ async function updateComplaintStatus(req, res) {
   try {
     const techId = await resolveTechId(req.user);
     const complaintId = parseInt(req.params.id, 10);
-    const { status, remarks } = req.body;
+    const { status, remarks } = req.body || {};
 
     if (isNaN(complaintId)) {
       return res.status(400).json({ success: false, error: 'Invalid complaint ID.' });
@@ -270,57 +277,83 @@ async function updateComplaintStatus(req, res) {
       });
     }
 
-    // 1. Verify existence & ownership
-    const [existingRows] = await pool.query(
-      'SELECT id, status, resolution_notes FROM complaints WHERE id = ? AND assigned_tech_id = ? LIMIT 1;',
-      [complaintId, techId]
-    );
-
-    if (existingRows.length === 0) {
-      return res.status(404).json({
+    if (!techId) {
+      return res.status(403).json({
         success: false,
-        error: 'Complaint not found or you are not authorized to update it.'
+        error: 'No technician record associated with this account.'
       });
     }
 
-    const currentComplaint = existingRows[0];
-    const prevStatus = currentComplaint.status;
-    const cleanRemarks = remarks && remarks.trim() ? remarks.trim() : null;
+    if (remarks !== undefined && remarks !== null && typeof remarks !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Work remarks must be text.'
+      });
+    }
 
-    // Build update SQL
-    let updateSql = 'UPDATE complaints SET status = ?, updated_at = NOW()';
-    const params = [status];
+    const cleanRemarks = typeof remarks === 'string' && remarks.trim() ? remarks.trim() : null;
+    if (cleanRemarks && cleanRemarks.length > 10000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Work remarks must be 10,000 characters or fewer.'
+      });
+    }
 
-    if (status === 'Resolved') {
-      updateSql += ', resolved_at = NOW()';
+    const connection = await pool.getConnection();
+    let prevStatus;
+    try {
+      await connection.beginTransaction();
+      const [existingRows] = await connection.query(
+        'SELECT id, status FROM complaints WHERE id = ? AND assigned_tech_id = ? LIMIT 1 FOR UPDATE;',
+        [complaintId, techId]
+      );
+
+      if (existingRows.length === 0) {
+        await connection.rollback();
+        return res.status(404).json({
+          success: false,
+          error: 'Complaint not found or you are not authorized to update it.'
+        });
+      }
+
+      prevStatus = existingRows[0].status;
+      let updateSql = 'UPDATE complaints SET status = ?, updated_at = NOW()';
+      const params = [status];
+
+      if (status === 'Resolved') {
+        updateSql += ', resolved_at = NOW()';
+      }
       if (cleanRemarks) {
         updateSql += ', resolution_notes = ?';
         params.push(cleanRemarks);
       }
-    } else if (cleanRemarks) {
-      updateSql += ', resolution_notes = ?';
-      params.push(cleanRemarks);
+      updateSql += ' WHERE id = ? AND assigned_tech_id = ?;';
+      params.push(complaintId, techId);
+      await connection.execute(updateSql, params);
+
+      const actionLabel = status === 'In_Progress'
+        ? 'Work In Progress'
+        : status === 'Resolved'
+          ? 'Complaint Resolved'
+          : 'Status Updated';
+      const logRemarks = cleanRemarks || `Technician marked complaint as ${status.replace('_', ' ')}`;
+
+      await connection.execute(
+        `INSERT INTO complaint_logs (complaint_id, action, previous_status, new_status, updated_by_user_id, remarks, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, NOW());`,
+        [complaintId, actionLabel, prevStatus, status, req.user.id, logRemarks]
+      );
+      await connection.commit();
+    } catch (error) {
+      try {
+        await connection.rollback();
+      } catch (rollbackError) {
+        console.error('[Technician Update Status Rollback Error]:', rollbackError);
+      }
+      throw error;
+    } finally {
+      connection.release();
     }
-
-    updateSql += ' WHERE id = ? AND assigned_tech_id = ?;';
-    params.push(complaintId, techId);
-
-    await pool.execute(updateSql, params);
-
-    // 2. Add audit log
-    const actionLabel = status === 'In_Progress'
-      ? 'Work In Progress'
-      : status === 'Resolved'
-      ? 'Complaint Resolved'
-      : 'Status Updated';
-
-    const logRemarks = cleanRemarks || `Technician marked complaint as ${status.replace('_', ' ')}`;
-
-    await pool.execute(
-      `INSERT INTO complaint_logs (complaint_id, action, previous_status, new_status, updated_by_user_id, remarks, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, NOW());`,
-      [complaintId, actionLabel, prevStatus, status, req.user.id, logRemarks]
-    );
 
     return res.status(200).json({
       success: true,

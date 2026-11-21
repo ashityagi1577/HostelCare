@@ -61,6 +61,13 @@
       color: var(--primary);
       border-bottom-color: var(--primary);
     }
+    .view-tab-count {
+      padding: 0.1rem 0.45rem;
+      border-radius: var(--radius-full);
+      background: #e2e8f0;
+      color: #475569;
+      font-size: 0.75rem;
+    }
 
     /* ── Metric Cards ───────────────────────────────── */
     .metric-grid {
@@ -327,16 +334,12 @@
   </header>
 
   <main class="container">
-    <!-- View Switcher Tabs -->
-    <div class="view-tabs">
-      <button class="view-tab active" id="tabBtnTriage" onclick="switchView('triage')">
-        📋 Complaints Triage (<span id="triageBadgeCount">0</span>)
+    <div class="view-tabs" role="tablist" aria-label="Staff portal sections">
+      <button type="button" class="view-tab active" id="tabBtnTriage" role="tab" aria-selected="true" onclick="switchView('triage')">
+        Complaints <span class="view-tab-count" id="triageBadgeCount">0</span>
       </button>
-      <button class="view-tab" id="tabBtnTechs" onclick="switchView('technicians')">
-        🔧 Technicians Roster (<span id="techBadgeCount">0</span>)
-      </button>
-      <button class="view-tab" id="tabBtnAnalytics" onclick="switchView('analytics')">
-        📊 Operations Analytics
+      <button type="button" class="view-tab" id="tabBtnTechs" role="tab" aria-selected="false" onclick="switchView('technicians')">
+        Technicians <span class="view-tab-count" id="techBadgeCount">0</span>
       </button>
     </div>
 
@@ -587,6 +590,25 @@
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL: CLOSE RESOLVED TICKET                                          -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="closeTicketModal">
+    <div class="modal-card">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.35rem; color: #1e1b4b;">Close Resolved Ticket?</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+        Confirm that ticket <strong id="closeTicketNo" class="ticket-cell"></strong> should be closed.
+      </p>
+      <input type="hidden" id="closeComplaintId">
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('closeTicketModal')">Cancel</button>
+        <button type="button" id="closeTicketConfirmBtn" class="btn btn-primary" style="background:#334155; border-color:#334155;" onclick="handleCloseTicketConfirm()">
+          ✔ Confirm Close Ticket
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
   <!-- MODAL: QUICK VIEW COMPLAINT DETAILS                                   -->
   <!-- ══════════════════════════════════════════════════════════════════════ -->
   <div class="modal-backdrop" id="detailModal">
@@ -741,9 +763,14 @@
     // ── Tab Switcher ──────────────────────────────────────────
     function switchView(view) {
       currentView = view;
-      document.getElementById('tabBtnTriage').classList.toggle('active', view === 'triage');
-      document.getElementById('tabBtnTechs').classList.toggle('active', view === 'technicians');
-      document.getElementById('tabBtnAnalytics').classList.toggle('active', view === 'analytics');
+      const tabTriage = document.getElementById('tabBtnTriage');
+      const tabTechs = document.getElementById('tabBtnTechs');
+      const tabAnalytics = document.getElementById('tabBtnAnalytics');
+      if (tabTriage) tabTriage.classList.toggle('active', view === 'triage');
+      if (tabTechs) tabTechs.classList.toggle('active', view === 'technicians');
+      if (tabAnalytics) tabAnalytics.classList.toggle('active', view === 'analytics');
+      if (tabTriage) tabTriage.setAttribute('aria-selected', String(view === 'triage'));
+      if (tabTechs) tabTechs.setAttribute('aria-selected', String(view === 'technicians'));
 
       document.getElementById('viewTriage').style.display = view === 'triage' ? 'block' : 'none';
       document.getElementById('viewTechnicians').style.display = view === 'technicians' ? 'block' : 'none';
@@ -859,6 +886,12 @@
         if (c.status === 'Assigned' || c.status === 'In_Progress') {
           actionButtons += `
             <button onclick="openResolveModal(${c.id}, '${c.ticket_no}')" class="btn btn-sm" style="background:#059669; color:white;" title="Confirm resolved">✔ Resolve</button>
+          `;
+        }
+
+        if (c.status === 'Resolved') {
+          actionButtons += `
+            <button onclick="openCloseTicketModal(${c.id}, '${c.ticket_no}')" class="btn btn-sm" style="background:#334155; color:white;" title="Close resolved ticket">✔ Close Ticket</button>
           `;
         }
 
@@ -1024,23 +1057,53 @@
 
     // ── Quick Update Status ───────────────────────────────────
     async function quickUpdateStatus(id, newStatus) {
-      if (!confirm(`Update ticket status to '${newStatus.replace('_', ' ')}'?`)) return;
+      const statusLabel = newStatus.replace('_', ' ');
+      if (!confirm(`Update ticket status to '${statusLabel}'?`)) return;
 
+      await updateComplaintStatus(id, newStatus);
+    }
+
+    async function updateComplaintStatus(id, newStatus) {
+      const statusLabel = newStatus.replace('_', ' ');
+      const isClosing = newStatus === 'Closed';
       const res = await apiRequest(`/api/staff/complaints/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({
           status: newStatus,
-          remarks: `Maintenance started on-site by assigned technician`
+          action: isClosing ? 'Ticket Closed by Warden' : undefined,
+          remarks: isClosing
+            ? 'Resolved ticket closed by hostel staff.'
+            : 'Maintenance started on-site by assigned technician'
         })
       });
 
       if (!res.success) {
         showToast(res.error || 'Failed to update status.', 'error');
-        return;
+        return false;
       }
 
-      showToast('Status updated to In Progress!', 'success');
+      showToast(isClosing ? 'Ticket closed successfully.' : `Status updated to ${statusLabel}!`, 'success');
       refreshData();
+      return true;
+    }
+
+    function openCloseTicketModal(id, ticketNo) {
+      document.getElementById('closeComplaintId').value = id;
+      document.getElementById('closeTicketNo').innerText = ticketNo;
+      document.getElementById('closeTicketModal').classList.add('active');
+    }
+
+    async function handleCloseTicketConfirm() {
+      const id = document.getElementById('closeComplaintId').value;
+      const btn = document.getElementById('closeTicketConfirmBtn');
+      btn.disabled = true;
+      btn.innerText = 'Closing...';
+
+      const closed = await updateComplaintStatus(id, 'Closed');
+      btn.disabled = false;
+      btn.innerText = '✔ Confirm Close Ticket';
+
+      if (closed) closeModal('closeTicketModal');
     }
 
     // ── Resolve Modal ─────────────────────────────────────────

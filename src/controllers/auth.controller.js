@@ -3,11 +3,18 @@ const { hashPassword, comparePassword } = require('../utils/password.util');
 const { generateToken } = require('../utils/jwt.util');
 
 /**
- * Register a new hostel student resident.
+ * Register a student account for an authenticated administrator.
  * POST /api/auth/register
  */
 async function register(req, res) {
   try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only administrators can provision accounts.'
+      });
+    }
+
     const { user_id, student_id, name, email, password, hostel_block, room_no, phone } = req.body;
     const requestedId = (user_id || student_id || '').trim();
 

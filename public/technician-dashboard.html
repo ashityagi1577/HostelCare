@@ -7,44 +7,25 @@
   <title>Technician Panel – HostelCare Portal</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    /* ── Layout & Sidebar Structure ─────────────────── */
+    /* ── Shared Panel Layout ─────────────────────────── */
     .tech-layout {
-      display: flex;
       min-height: calc(100vh - 70px);
       background-color: var(--bg-main);
     }
 
-    .tech-sidebar {
-      width: 260px;
-      background: white;
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      transition: all 0.25s ease;
+    .tech-main-content {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
     }
 
-    .tech-sidebar-brand {
-      padding: 1.5rem 1.25rem 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .tech-sidebar-brand h3 {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #1e1b4b;
+    .tech-view-tabs {
       display: flex;
-      align-items: center;
       gap: 0.5rem;
-    }
-
-    .tech-sidebar-nav {
-      list-style: none;
-      padding: 1rem 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      flex: 1;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
     }
 
     .tech-nav-item {
@@ -61,8 +42,10 @@
       cursor: pointer;
       border: none;
       background: none;
-      width: 100%;
       text-align: left;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
     }
 
     .tech-nav-item:hover {
@@ -71,27 +54,8 @@
     }
 
     .tech-nav-item.active {
-      background-color: var(--primary);
-      color: white;
-    }
-
-    .tech-nav-item.active .badge-pill {
-      background: rgba(255, 255, 255, 0.25);
-      color: white;
-    }
-
-    .tech-sidebar-footer {
-      padding: 1rem 1.25rem;
-      border-top: 1px solid var(--border);
-      font-size: 0.85rem;
-      color: var(--text-subtle);
-    }
-
-    .tech-main-content {
-      flex: 1;
-      padding: 2rem 2.5rem;
-      overflow-y: auto;
-      max-width: 1300px;
+      color: var(--primary);
+      border-bottom-color: var(--primary);
     }
 
     /* ── Top Panel Header ───────────────────────────── */
@@ -593,21 +557,15 @@
 
     /* Responsive */
     @media (max-width: 860px) {
-      .tech-layout {
-        flex-direction: column;
-      }
-      .tech-sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-      }
-      .tech-sidebar-nav {
-        flex-direction: row;
-        overflow-x: auto;
-      }
       .tech-main-content {
-        padding: 1.25rem;
+        padding: 1.25rem 1rem;
       }
+    }
+    @media (max-width: 520px) {
+      .tech-header-card { padding: 1rem; }
+      .tech-profile-row { align-items: flex-start; }
+      .tech-nav-item { padding: 0.7rem 0.85rem; }
+      .tech-main-content { padding: 1rem 0.75rem; }
     }
   </style>
 </head>
@@ -617,7 +575,7 @@
   <nav class="navbar">
     <div class="container nav-container">
       <a href="/index.html" class="brand">
-        <span class="brand-icon">🔧</span>
+        <span class="brand-icon">🏠</span>
         <span>Hostel<span style="color: var(--primary);">Care</span></span>
       </a>
       <ul class="nav-links" id="navbar-links">
@@ -628,44 +586,8 @@
 
   <!-- Technician Portal Container -->
   <div class="tech-layout">
-    <!-- Sidebar -->
-    <aside class="tech-sidebar">
-      <div class="tech-sidebar-brand">
-        <h3><span style="font-size: 1.2rem;">🛠️</span> <span data-i18n="tech_panel_title">Technician Workspace</span></h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;" data-i18n="tech_panel_subtitle">Field Operations &amp; Repairs</p>
-      </div>
-
-      <ul class="tech-sidebar-nav">
-        <li>
-          <button type="button" class="tech-nav-item active" id="navBtnDashboard" onclick="switchView('dashboard')">
-            <span>📊</span>
-            <span data-i18n="nav_dashboard">Dashboard</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="tech-nav-item" id="navBtnAssigned" onclick="switchView('assigned')">
-            <span>📋</span>
-            <span data-i18n="nav_assigned">My Assigned Jobs</span>
-            <span class="badge-pill badge-assigned" id="sidebarPendingCount" style="margin-left: auto;">0</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="tech-nav-item" id="navBtnHistory" onclick="switchView('history')">
-            <span>📜</span>
-            <span data-i18n="nav_history">Work History</span>
-            <span class="badge-pill badge-resolved" id="sidebarCompletedCount" style="margin-left: auto;">0</span>
-          </button>
-        </li>
-      </ul>
-
-      <div class="tech-sidebar-footer">
-        <div style="font-weight: 700; color: #334155;" id="sidebarTechTrade">Trade: General</div>
-        <div style="margin-top: 0.25rem;" id="sidebarTechId">ID: TECH-000</div>
-      </div>
-    </aside>
-
     <!-- Main Content -->
-    <main class="tech-main-content">
+    <main class="container tech-main-content">
       <!-- Profile & Language Switcher Header -->
       <header class="tech-header-card">
         <div class="tech-profile-row">
@@ -674,6 +596,9 @@
             <div class="tech-name">
               <span data-i18n="greeting_welcome">Welcome,</span> <span id="technicianNameDisplay">Technician</span>
             </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.2rem;" data-i18n="tech_panel_subtitle">
+              My assigned maintenance work
+            </p>
             <div class="tech-meta">
               <span>🏷️ <strong id="technicianTradeDisplay">Electrical</strong> <span data-i18n="meta_specialist">Specialist</span></span>
               <span>•</span>
@@ -692,84 +617,17 @@
         </div>
       </header>
 
-      <!-- VIEW 1: DASHBOARD OVERVIEW -->
-      <div id="viewDashboard">
-        <!-- Metric Cards -->
-        <div class="metric-grid">
-          <div class="metric-card card-total" onclick="switchView('assigned');" style="cursor: pointer;">
-            <div class="metric-top">
-              <span class="metric-title" data-i18n="card_total_assigned">Total Assigned</span>
-              <span class="metric-icon">📦</span>
-            </div>
-            <div class="metric-num" id="statTotalAssigned">0</div>
-            <div class="metric-sub" data-i18n="sub_all_tasks">All allotted jobs</div>
-          </div>
-
-          <div class="metric-card card-pending" onclick="switchView('assigned', 'Assigned');" style="cursor: pointer;">
-            <div class="metric-top">
-              <span class="metric-title" data-i18n="card_pending">Pending / Assigned</span>
-              <span class="metric-icon">⏳</span>
-            </div>
-            <div class="metric-num" id="statPending">0</div>
-            <div class="metric-sub" data-i18n="sub_ready_to_start">Awaiting inspection</div>
-          </div>
-
-          <div class="metric-card card-progress" onclick="switchView('assigned', 'In_Progress');" style="cursor: pointer;">
-            <div class="metric-top">
-              <span class="metric-title" data-i18n="card_in_progress">In Progress</span>
-              <span class="metric-icon">⚡</span>
-            </div>
-            <div class="metric-num" id="statInProgress">0</div>
-            <div class="metric-sub" data-i18n="sub_active_repairs">Repairs underway</div>
-          </div>
-
-          <div class="metric-card card-completed" onclick="switchView('history');" style="cursor: pointer;">
-            <div class="metric-top">
-              <span class="metric-title" data-i18n="card_completed">Completed</span>
-              <span class="metric-icon">✅</span>
-            </div>
-            <div class="metric-num" id="statCompleted">0</div>
-            <div class="metric-sub" data-i18n="sub_fixed_closed">Resolved &amp; verified</div>
-          </div>
-        </div>
-
-        <!-- Priority / Action Needed Table -->
-        <section class="content-card">
-          <div class="content-card-header">
-            <h2 class="content-card-title">
-              <span>⚡</span> <span data-i18n="title_immediate_tasks">Active Jobs Requiring Action</span>
-            </h2>
-            <button class="btn btn-secondary btn-sm" onclick="switchView('assigned')">
-              <span data-i18n="btn_view_all_assigned">View Full List →</span>
-            </button>
-          </div>
-          <div class="table-container">
-            <table class="tech-table">
-              <thead>
-                <tr>
-                  <th data-i18n="th_ticket">Ticket No</th>
-                  <th data-i18n="th_student_room">Resident &amp; Room</th>
-                  <th data-i18n="th_issue">Issue Title</th>
-                  <th data-i18n="th_priority">Priority</th>
-                  <th data-i18n="th_status">Status</th>
-                  <th data-i18n="th_action">Quick Action</th>
-                </tr>
-              </thead>
-              <tbody id="overviewActiveTableBody">
-                <tr>
-                  <td colspan="6" class="empty-state">
-                    <div class="empty-state-icon">⏳</div>
-                    <div data-i18n="loading_assigned">Loading assigned complaints...</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+      <div class="tech-view-tabs" role="tablist" aria-label="Technician complaints">
+        <button type="button" class="tech-nav-item active" id="navBtnAssigned" role="tab" aria-selected="true" onclick="switchView('assigned')">
+          <span>📋</span> <span data-i18n="nav_assigned">My Assigned Complaints</span>
+        </button>
+        <button type="button" class="tech-nav-item" id="navBtnHistory" role="tab" aria-selected="false" onclick="switchView('history')">
+          <span>✅</span> <span data-i18n="nav_history">Completed Complaints</span>
+        </button>
       </div>
 
-      <!-- VIEW 2: MY ASSIGNED COMPLAINTS -->
-      <div id="viewAssigned" style="display: none;">
+      <!-- My Assigned Complaints -->
+      <div id="viewAssigned">
         <section class="content-card">
           <div class="content-card-header">
             <h2 class="content-card-title">
@@ -788,19 +646,18 @@
             <table class="tech-table">
               <thead>
                 <tr>
-                  <th data-i18n="th_ticket">Ticket No</th>
-                  <th data-i18n="th_student_room">Resident &amp; Room</th>
+                  <th data-i18n="th_complaint_id">Complaint ID</th>
                   <th data-i18n="th_category">Category</th>
-                  <th data-i18n="th_issue">Problem Description</th>
+                  <th data-i18n="th_description">Description</th>
+                  <th data-i18n="th_location">Location</th>
                   <th data-i18n="th_priority">Priority</th>
                   <th data-i18n="th_status">Status</th>
-                  <th data-i18n="th_date">Assigned Date</th>
                   <th data-i18n="th_action">Actions</th>
                 </tr>
               </thead>
               <tbody id="assignedTableBody">
                 <tr>
-                  <td colspan="8" class="empty-state">
+                  <td colspan="7" class="empty-state">
                     <div class="empty-state-icon">🔍</div>
                     <div data-i18n="loading_assigned">Loading complaints...</div>
                   </td>
@@ -811,12 +668,12 @@
         </section>
       </div>
 
-      <!-- VIEW 3: COMPLAINT HISTORY -->
+      <!-- Completed Complaints -->
       <div id="viewHistory" style="display: none;">
         <section class="content-card">
           <div class="content-card-header">
             <h2 class="content-card-title">
-              <span>📜</span> <span data-i18n="title_work_history">Completed Work History</span>
+              <span>📜</span> <span data-i18n="title_work_history">Completed Complaints</span>
             </h2>
             <div class="filter-bar">
               <input type="text" id="historySearchInput" class="search-input" placeholder="Search past tickets..." oninput="filterHistoryTable()" data-i18n-ph="ph_search_history">
@@ -826,7 +683,7 @@
             <table class="tech-table">
               <thead>
                 <tr>
-                  <th data-i18n="th_ticket">Ticket No</th>
+                  <th data-i18n="th_complaint_id">Complaint ID</th>
                   <th data-i18n="th_student_room">Resident &amp; Room</th>
                   <th data-i18n="th_category">Category</th>
                   <th data-i18n="th_issue">Title</th>
@@ -923,10 +780,10 @@
     const i18n = {
       en: {
         tech_panel_title: "Technician Workspace",
-        tech_panel_subtitle: "Field Operations & Repairs",
+        tech_panel_subtitle: "My assigned maintenance work",
         nav_dashboard: "Dashboard",
-        nav_assigned: "My Assigned Jobs",
-        nav_history: "Work History",
+        nav_assigned: "My Assigned Complaints",
+        nav_history: "Completed Complaints",
         greeting_welcome: "Welcome,",
         meta_specialist: "Technician",
         status_on_duty: "● Active On-Duty",
@@ -941,11 +798,14 @@
         title_immediate_tasks: "Active Jobs Requiring Action",
         btn_view_all_assigned: "View Full List →",
         title_my_assigned: "My Assigned Complaints",
-        title_work_history: "Completed Work History",
+        title_work_history: "Completed Complaints",
         th_ticket: "Ticket No",
+        th_complaint_id: "Complaint ID",
         th_student_room: "Resident & Room",
         th_category: "Category",
         th_issue: "Issue Title",
+        th_description: "Description",
+        th_location: "Location",
         th_priority: "Priority",
         th_status: "Status",
         th_date: "Assigned Date",
@@ -983,19 +843,30 @@
         prio_Low: "Low",
         loading_assigned: "Loading assigned complaints...",
         loading_history: "Loading history records...",
-        no_active_jobs: "Great work! No pending complaints requiring attention.",
-        no_history_records: "No completed jobs on record yet.",
+        no_active_jobs: "No complaints are currently assigned to you.",
+        no_history_records: "No completed complaints are on record yet.",
         toast_status_saved: "Status updated successfully!",
         toast_work_started: "Work commenced. Status marked In Progress.",
         resident_phone_label: "Phone:",
-        resident_room_label: "Room:"
+        resident_room_label: "Room:",
+        label_resident: "Resident:",
+        label_submitted: "Submitted:",
+        label_estimated_date: "Estimated completion:",
+        label_completed_on: "Completed on:",
+        label_status_history: "Status progression:",
+        label_complaint_photo: "Complaint photo",
+        loading_details: "Loading complaint details...",
+        start_work_confirm: "Start work on this complaint? Its status will change to In Progress.",
+        start_work_remark: "Technician arrived on-site and commenced repair inspection.",
+        saving: "Saving...",
+        table_no_remarks: "No work remarks recorded"
       },
       hi: {
         tech_panel_title: "तकनीशियन कार्यक्षेत्र",
-        tech_panel_subtitle: "फील्ड संचालन एवं मरम्मत कार्य",
+        tech_panel_subtitle: "मेरे असाइन किए गए रखरखाव कार्य",
         nav_dashboard: "डैशबोर्ड",
-        nav_assigned: "असाइन किए गए कार्य",
-        nav_history: "कार्य इतिहास",
+        nav_assigned: "मेरी असाइन की गई शिकायतें",
+        nav_history: "पूर्ण की गई शिकायतें",
         greeting_welcome: "नमस्ते,",
         meta_specialist: "तकनीशियन",
         status_on_duty: "● ड्यूटी पर सक्रिय",
@@ -1010,11 +881,14 @@
         title_immediate_tasks: "तत्काल ध्यान देने योग्य कार्य",
         btn_view_all_assigned: "पूरी सूची देखें →",
         title_my_assigned: "मेरी असाइन की गई शिकायतें",
-        title_work_history: "पूरा हुआ कार्य इतिहास",
+        title_work_history: "पूर्ण की गई शिकायतें",
         th_ticket: "टिकट संख्या",
+        th_complaint_id: "शिकायत आईडी",
         th_student_room: "छात्र एवं कमरा",
         th_category: "श्रेणी",
         th_issue: "समस्या का विवरण",
+        th_description: "विवरण",
+        th_location: "स्थान",
         th_priority: "प्राथमिकता",
         th_status: "स्थिति",
         th_date: "सौंपने की तिथि",
@@ -1052,17 +926,28 @@
         prio_Low: "सामान्य",
         loading_assigned: "शिकायतें लोड हो रही हैं...",
         loading_history: "इतिहास रिकॉर्ड लोड हो रहे हैं...",
-        no_active_jobs: "शानदार! वर्तमान में कोई लंबित शिकायत नहीं है।",
-        no_history_records: "अभी तक कोई पूर्ण कार्य रिकॉर्ड नहीं है।",
+        no_active_jobs: "वर्तमान में आपको कोई शिकायत असाइन नहीं की गई है।",
+        no_history_records: "अभी तक कोई पूर्ण शिकायत दर्ज नहीं है।",
         toast_status_saved: "शिकायत की स्थिति सफलतापूर्वक अपडेट हो गई!",
         toast_work_started: "कार्य शुरू हुआ। स्थिति 'प्रगति में' दर्ज की गई।",
         resident_phone_label: "फोन:",
-        resident_room_label: "कमरा:"
+        resident_room_label: "कमरा:",
+        label_resident: "निवासी:",
+        label_submitted: "दर्ज:",
+        label_estimated_date: "अनुमानित पूर्णता:",
+        label_completed_on: "पूर्ण होने की तिथि:",
+        label_status_history: "स्थिति का इतिहास:",
+        label_complaint_photo: "शिकायत की तस्वीर",
+        loading_details: "शिकायत का विवरण लोड हो रहा है...",
+        start_work_confirm: "क्या इस शिकायत पर कार्य शुरू करें? स्थिति 'प्रगति में' हो जाएगी।",
+        start_work_remark: "तकनीशियन साइट पर पहुँचा और मरम्मत निरीक्षण शुरू किया।",
+        saving: "सहेजा जा रहा है...",
+        table_no_remarks: "कार्य विवरण दर्ज नहीं है"
       }
     };
 
     // State Variables
-    let currentLang = localStorage.getItem('hostelcare_lang') || 'en';
+    let currentLang = localStorage.getItem('hostelcare_lang') === 'hi' ? 'hi' : 'en';
     let assignedComplaintsList = [];
     let historyComplaintsList = [];
     let currentTechnicianInfo = null;
@@ -1079,9 +964,10 @@
       // 2. Set Language
       applyLanguage(currentLang);
 
-      // 3. Load Overview & Data
-      await loadTechnicianOverview();
-      await loadAssignedComplaints();
+      document.getElementById('assignedTableBody').addEventListener('click', handleAssignedAction);
+      document.getElementById('historyTableBody').addEventListener('click', handleHistoryAction);
+
+      await Promise.all([loadTechnicianOverview(), loadAssignedComplaints()]);
     });
 
     /* ── Language Switcher Handler ─────────────────────── */
@@ -1089,8 +975,6 @@
       currentLang = lang;
       localStorage.setItem('hostelcare_lang', lang);
       applyLanguage(lang);
-      // Re-render table badges and texts
-      renderOverviewTable();
       renderAssignedTable(assignedComplaintsList);
       renderHistoryTable(historyComplaintsList);
     }
@@ -1117,6 +1001,10 @@
           el.placeholder = dict[key];
         }
       });
+      document.querySelector('.tech-view-tabs').setAttribute(
+        'aria-label',
+        lang === 'hi' ? 'तकनीशियन शिकायतें' : 'Technician complaints'
+      );
     }
 
     function t(key) {
@@ -1125,13 +1013,13 @@
 
     /* ── Navigation / View Switching ───────────────────── */
     function switchView(viewName, filterVal) {
-      document.getElementById('viewDashboard').style.display = viewName === 'dashboard' ? 'block' : 'none';
       document.getElementById('viewAssigned').style.display = viewName === 'assigned' ? 'block' : 'none';
       document.getElementById('viewHistory').style.display = viewName === 'history' ? 'block' : 'none';
 
-      document.getElementById('navBtnDashboard').classList.toggle('active', viewName === 'dashboard');
       document.getElementById('navBtnAssigned').classList.toggle('active', viewName === 'assigned');
       document.getElementById('navBtnHistory').classList.toggle('active', viewName === 'history');
+      document.getElementById('navBtnAssigned').setAttribute('aria-selected', String(viewName === 'assigned'));
+      document.getElementById('navBtnHistory').setAttribute('aria-selected', String(viewName === 'history'));
 
       if (viewName === 'assigned') {
         if (filterVal) {
@@ -1151,7 +1039,7 @@
         return;
       }
 
-      const { technician, stats } = res.data;
+      const { technician } = res.data;
       currentTechnicianInfo = technician;
 
       // Profile Header
@@ -1160,19 +1048,6 @@
       document.getElementById('technicianPhoneDisplay').innerText = technician.phone;
       document.getElementById('avatarInitial').innerText = technician.name ? technician.name[0].toUpperCase() : 'T';
 
-      // Sidebar Footer
-      document.getElementById('sidebarTechTrade').innerText = `Trade: ${technician.trade}`;
-      document.getElementById('sidebarTechId').innerText = `Tech ID: #${technician.id}`;
-
-      // Stat Counters
-      document.getElementById('statTotalAssigned').innerText = stats.total_assigned;
-      document.getElementById('statPending').innerText = stats.pending;
-      document.getElementById('statInProgress').innerText = stats.in_progress;
-      document.getElementById('statCompleted').innerText = stats.completed;
-
-      // Sidebar Badges
-      document.getElementById('sidebarPendingCount').innerText = stats.pending;
-      document.getElementById('sidebarCompletedCount').innerText = stats.completed;
     }
 
     async function loadAssignedComplaints() {
@@ -1185,7 +1060,6 @@
 
       assignedComplaintsList = res.data || [];
       renderAssignedTable(assignedComplaintsList);
-      renderOverviewTable();
     }
 
     async function loadComplaintHistory() {
@@ -1224,66 +1098,13 @@
       });
     }
 
-    // 1. Overview Table (Top 5 active tasks)
-    function renderOverviewTable() {
-      const tbody = document.getElementById('overviewActiveTableBody');
-      const activeJobs = assignedComplaintsList.filter(c => c.status === 'Assigned' || c.status === 'In_Progress');
-
-      if (activeJobs.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="empty-state">
-              <div class="empty-state-icon">🎉</div>
-              <div>${t('no_active_jobs')}</div>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = activeJobs.slice(0, 5).map(c => `
-        <tr>
-          <td>
-            <strong style="color: var(--primary); font-family: monospace;">${c.ticket_no}</strong>
-          </td>
-          <td>
-            <div style="font-weight: 700;">${c.student_name}</div>
-            <div style="font-size: 0.82rem; color: var(--text-muted);">${c.hostel_block || ''} • Room ${c.room_no || 'N/A'}</div>
-          </td>
-          <td>
-            <div style="font-weight: 600; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(c.title)}">
-              ${escapeHtml(c.title)}
-            </div>
-          </td>
-          <td>${getPriorityBadge(c.priority)}</td>
-          <td>${getStatusBadge(c.status)}</td>
-          <td>
-            <div class="action-btn-group">
-              ${c.status === 'Assigned' ? `
-                <button class="btn-action-start" onclick="quickStartWork(${c.id}, '${c.ticket_no}')">
-                  ${t('btn_start_work')}
-                </button>
-              ` : `
-                <button class="btn-action-resolve" onclick="openStatusModal(${c.id}, '${c.ticket_no}', '${escapeHtml(c.title)}', 'Resolved')">
-                  ${t('btn_resolve_work')}
-                </button>
-              `}
-              <button class="btn-action-view" onclick="openDetailsModal(${c.id})">
-                ${t('btn_view_details')}
-              </button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    // 2. My Assigned Complaints Table
+    // My Assigned Complaints Table
     function renderAssignedTable(items) {
       const tbody = document.getElementById('assignedTableBody');
       if (!items || items.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="empty-state">
+            <td colspan="7" class="empty-state">
               <div class="empty-state-icon">📋</div>
               <div>${t('no_active_jobs')}</div>
             </td>
@@ -1294,40 +1115,38 @@
 
       tbody.innerHTML = items.map(c => `
         <tr>
-          <td><strong style="color: var(--primary); font-family: monospace;">${c.ticket_no}</strong></td>
           <td>
-            <div style="font-weight: 700;">${c.student_name}</div>
-            <div style="font-size: 0.82rem; color: var(--text-muted);">${c.hostel_block || ''} • Room ${c.room_no || 'N/A'}</div>
-            <div style="font-size: 0.8rem; color: #64748b;">📞 ${c.student_phone || 'N/A'}</div>
+            <strong style="color: var(--primary); font-family: monospace;">#${Number(c.id)}</strong>
+            <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(c.ticket_no)}</div>
           </td>
           <td>
-            <span style="font-weight: 600; font-size: 0.85rem; color: #475569;">${c.category}</span>
+            <span style="font-weight: 600; font-size: 0.85rem; color: #475569;">${escapeHtml(c.category)}</span>
           </td>
           <td>
             <div style="font-weight: 700; color: #0f172a; margin-bottom: 0.2rem;">${escapeHtml(c.title)}</div>
-            <div style="font-size: 0.84rem; color: #475569; max-width: 320px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            <div style="font-size: 0.84rem; color: #475569; max-width: 320px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
               ${escapeHtml(c.description)}
             </div>
           </td>
+          <td>${escapeHtml(c.hostel_block || '')}${c.room_no ? `, ${t('resident_room_label')} ${escapeHtml(c.room_no)}` : ''}</td>
           <td>${getPriorityBadge(c.priority)}</td>
           <td>${getStatusBadge(c.status)}</td>
-          <td style="font-size: 0.85rem; color: #64748b;">${formatDate(c.created_at)}</td>
           <td>
             <div class="action-btn-group">
               ${c.status === 'Assigned' ? `
-                <button class="btn-action-start" onclick="quickStartWork(${c.id}, '${c.ticket_no}')">
+                <button type="button" class="btn-action-start" data-action="start" data-complaint-id="${Number(c.id)}">
                   ${t('btn_start_work')}
                 </button>
               ` : ''}
               ${c.status === 'In_Progress' ? `
-                <button class="btn-action-resolve" onclick="openStatusModal(${c.id}, '${c.ticket_no}', '${escapeHtml(c.title)}', 'Resolved')">
+                <button type="button" class="btn-action-resolve" data-action="resolve" data-complaint-id="${Number(c.id)}">
                   ${t('btn_resolve_work')}
                 </button>
               ` : ''}
-              <button class="btn-action-view" onclick="openStatusModal(${c.id}, '${c.ticket_no}', '${escapeHtml(c.title)}', '${c.status}')">
+              <button type="button" class="btn-action-view" data-action="update" data-complaint-id="${Number(c.id)}">
                 ${t('btn_update')}
               </button>
-              <button class="btn-action-view" onclick="openDetailsModal(${c.id})">
+              <button type="button" class="btn-action-view" data-action="details" data-complaint-id="${Number(c.id)}">
                 ${t('btn_view_details')}
               </button>
             </div>
@@ -1336,7 +1155,7 @@
       `).join('');
     }
 
-    // 3. History Table
+    // Completed Complaints Table
     function renderHistoryTable(items) {
       const tbody = document.getElementById('historyTableBody');
       if (!items || items.length === 0) {
@@ -1353,22 +1172,25 @@
 
       tbody.innerHTML = items.map(c => `
         <tr>
-          <td><strong style="color: var(--primary); font-family: monospace;">${c.ticket_no}</strong></td>
           <td>
-            <div style="font-weight: 700;">${c.student_name}</div>
-            <div style="font-size: 0.82rem; color: var(--text-muted);">${c.hostel_block || ''} • Room ${c.room_no || 'N/A'}</div>
+            <strong style="color: var(--primary); font-family: monospace;">#${Number(c.id)}</strong>
+            <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(c.ticket_no)}</div>
           </td>
-          <td>${c.category}</td>
+          <td>
+            <div style="font-weight: 700;">${escapeHtml(c.student_name)}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(c.hostel_block || '')} • ${t('resident_room_label')} ${escapeHtml(c.room_no || 'N/A')}</div>
+          </td>
+          <td>${escapeHtml(c.category)}</td>
           <td style="font-weight: 600;">${escapeHtml(c.title)}</td>
           <td>
             <div style="font-size: 0.85rem; color: #334155; font-style: ${c.resolution_notes ? 'normal' : 'italic'};">
-              ${c.resolution_notes ? escapeHtml(c.resolution_notes) : '— No notes recorded —'}
+              ${c.resolution_notes ? escapeHtml(c.resolution_notes) : t('table_no_remarks')}
             </div>
           </td>
           <td style="font-size: 0.85rem; color: #64748b;">${formatDate(c.resolved_at || c.updated_at)}</td>
           <td>${getStatusBadge(c.status)}</td>
           <td>
-            <button class="btn-action-view" onclick="openDetailsModal(${c.id})">
+            <button type="button" class="btn-action-view" data-action="details" data-complaint-id="${Number(c.id)}">
               ${t('btn_view_details')}
             </button>
           </td>
@@ -1409,22 +1231,41 @@
       renderHistoryTable(filtered);
     }
 
+    function handleAssignedAction(event) {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+
+      const complaint = assignedComplaintsList.find(item => Number(item.id) === Number(button.dataset.complaintId));
+      if (!complaint) return;
+
+      if (button.dataset.action === 'start') {
+        quickStartWork(complaint.id);
+      } else if (button.dataset.action === 'resolve') {
+        openStatusModal(complaint.id, complaint.ticket_no, complaint.title, 'Resolved');
+      } else if (button.dataset.action === 'update') {
+        openStatusModal(complaint.id, complaint.ticket_no, complaint.title, complaint.status);
+      } else if (button.dataset.action === 'details') {
+        openDetailsModal(complaint.id);
+      }
+    }
+
+    function handleHistoryAction(event) {
+      const button = event.target.closest('button[data-action="details"]');
+      if (button) openDetailsModal(Number(button.dataset.complaintId));
+    }
+
     /* ── Quick Action: Start Work ───────────────────────── */
-    async function quickStartWork(complaintId, ticketNo) {
-      const submit = confirm(
-        currentLang === 'hi' 
-          ? `क्या आप टिकट ${ticketNo} पर कार्य शुरू करना चाहते हैं? स्थिति 'प्रगति में' हो जाएगी।`
-          : `Commence repair work on ${ticketNo}? Status will change to In Progress.`
-      );
+    async function quickStartWork(complaintId) {
+      const complaint = assignedComplaintsList.find(item => Number(item.id) === Number(complaintId));
+      if (!complaint) return;
+      const submit = confirm(`${t('start_work_confirm')} (${complaint.ticket_no})`);
       if (!submit) return;
 
       const res = await apiRequest(`/api/technician/complaints/${complaintId}/status`, {
         method: 'PUT',
         body: JSON.stringify({
           status: 'In_Progress',
-          remarks: currentLang === 'hi' 
-            ? 'तकनीशियन साइट पर उपस्थित हुआ एवं मरम्मत कार्य शुरू किया।' 
-            : 'Technician reached the room and commenced repair inspection.'
+          remarks: t('start_work_remark')
         })
       });
 
@@ -1462,7 +1303,7 @@
       const submitBtn = document.getElementById('modalSubmitBtn');
 
       submitBtn.disabled = true;
-      submitBtn.innerText = currentLang === 'hi' ? 'सुरक्षित हो रहा है...' : 'Saving...';
+      submitBtn.innerText = t('saving');
 
       const res = await apiRequest(`/api/technician/complaints/${complaintId}/status`, {
         method: 'PUT',
@@ -1489,23 +1330,30 @@
       body.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">⏳</div>
-          <div>${currentLang === 'hi' ? 'विवरण लोड हो रहा है...' : 'Loading full complaint dossier...'}</div>
+          <div>${t('loading_details')}</div>
         </div>
       `;
       modal.classList.add('active');
 
       const res = await apiRequest(`/api/technician/complaints/${complaintId}`);
       if (!res.success) {
-        body.innerHTML = `<div class="empty-state" style="color:var(--rose);">${res.error || 'Failed to load details'}</div>`;
+        body.innerHTML = `<div class="empty-state" style="color:var(--rose);">${escapeHtml(res.error || 'Failed to load details')}</div>`;
         return;
       }
 
       const c = res.data;
+      const photoMarkup = typeof c.photo_url === 'string' && c.photo_url.startsWith('/uploads/')
+        ? `<div style="margin-top:1rem;"><img src="${escapeHtml(c.photo_url)}" alt="${t('label_complaint_photo')}" style="max-width:100%; max-height:320px; border-radius:var(--radius-md);"></div>`
+        : '';
 
       body.innerHTML = `
         <div class="detail-row">
+          <span class="detail-label">${t('th_complaint_id')}:</span>
+          <span class="detail-value">#${Number(c.id)}</span>
+        </div>
+        <div class="detail-row">
           <span class="detail-label">${t('th_ticket')}:</span>
-          <span class="detail-value"><strong style="color:var(--primary); font-family:monospace; font-size:1.05rem;">${c.ticket_no}</strong></span>
+          <span class="detail-value"><strong style="color:var(--primary); font-family:monospace; font-size:1.05rem;">${escapeHtml(c.ticket_no)}</strong></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">${t('th_status')}:</span>
@@ -1517,24 +1365,33 @@
         </div>
         <div class="detail-row">
           <span class="detail-label">${t('th_category')}:</span>
-          <span class="detail-value"><strong>${c.category}</strong></span>
+          <span class="detail-value"><strong>${escapeHtml(c.category)}</strong></span>
         </div>
         <hr style="border:none; border-top:1px solid var(--border); margin:1rem 0;">
         <div class="detail-row">
-          <span class="detail-label">${currentLang === 'hi' ? 'छात्र विवरण:' : 'Resident:'}</span>
+          <span class="detail-label">${t('label_resident')}</span>
           <span class="detail-value">
-            <strong>${c.student_name}</strong> (${c.hostel_block || ''}, Room ${c.room_no || 'N/A'})
-            <div style="font-size:0.85rem; color:#64748b; margin-top:0.25rem;">📞 ${c.student_phone || 'N/A'}</div>
+            <strong>${escapeHtml(c.student_name)}</strong> (${escapeHtml(c.hostel_block || '')}, ${t('resident_room_label')} ${escapeHtml(c.room_no || 'N/A')})
+            <div style="font-size:0.85rem; color:#64748b; margin-top:0.25rem;">📞 ${escapeHtml(c.student_phone || 'N/A')}</div>
           </span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">${currentLang === 'hi' ? 'दर्ज करने की तिथि:' : 'Submitted:'}</span>
+          <span class="detail-label">${t('th_location')}:</span>
+          <span class="detail-value">${escapeHtml(c.hostel_block || '')}${c.room_no ? `, ${t('resident_room_label')} ${escapeHtml(c.room_no)}` : ''}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">${t('label_submitted')}</span>
           <span class="detail-value">${formatDate(c.created_at)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">${t('label_estimated_date')}</span>
+          <span class="detail-value">${formatDate(c.estimated_date)}</span>
         </div>
         <div style="margin-top:1.25rem;">
           <strong style="color:#0f172a; font-size:0.95rem;">${escapeHtml(c.title)}</strong>
           <div class="desc-box">${escapeHtml(c.description)}</div>
         </div>
+        ${photoMarkup}
 
         ${c.resolution_notes ? `
           <div style="margin-top:1.25rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:var(--radius-md); padding:1rem;">
@@ -1542,13 +1399,13 @@
               ✔ ${t('th_remarks')}
             </div>
             <div style="font-size:0.9rem; color:#064e3b; line-height:1.5;">${escapeHtml(c.resolution_notes)}</div>
-            ${c.resolved_at ? `<div style="font-size:0.8rem; color:#047857; margin-top:0.4rem;">Completed on: ${formatDate(c.resolved_at)}</div>` : ''}
+            ${c.resolved_at ? `<div style="font-size:0.8rem; color:#047857; margin-top:0.4rem;">${t('label_completed_on')} ${formatDate(c.resolved_at)}</div>` : ''}
           </div>
         ` : ''}
 
         ${c.logs && c.logs.length > 0 ? `
           <div style="margin-top:1.5rem;">
-            <strong style="font-size:0.9rem; color:#334155;">${currentLang === 'hi' ? 'स्थिति का इतिहास (Audit Trail):' : 'Status Progression Trail:'}</strong>
+            <strong style="font-size:0.9rem; color:#334155;">${t('label_status_history')}</strong>
             <div style="margin-top:0.75rem; border-left: 2px solid var(--border); padding-left: 1rem; display:flex; flex-direction:column; gap:0.75rem;">
               ${c.logs.map(log => `
                 <div style="font-size:0.85rem;">

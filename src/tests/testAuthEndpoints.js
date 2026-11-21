@@ -29,16 +29,18 @@ async function runAuthTests() {
   console.log('   🧪 HostelCare Auth REST API Test Suite');
   console.log('=============================================\n');
 
+  const testUserId = `AUTH-${Date.now()}`;
   const testEmail = `student_${Date.now()}@hostelcare.test`;
   const testPassword = 'StudentPass@123';
   let createdUserId = null;
   let userToken = null;
 
   try {
-    // Test 1: Student Registration (Valid)
-    console.log('[1/7] Testing POST /api/auth/register (New Student)...');
+    // Test 1: Public self-registration is blocked
+    console.log('[1/7] Testing that POST /api/auth/register requires an administrator...');
     const regReq = {
       body: {
+        user_id: testUserId,
         name: 'Priya Sharma',
         email: testEmail,
         password: testPassword,
@@ -50,20 +52,32 @@ async function runAuthTests() {
     const regRes = createMockRes();
     await authController.register(regReq, regRes);
 
-    if (regRes.statusCode !== 201 || !regRes.body.success) {
-      throw new Error(`Registration failed: ${JSON.stringify(regRes.body)}`);
+    if (regRes.statusCode !== 403 || regRes.body.success) {
+      throw new Error(`Unauthenticated registration was not rejected: ${JSON.stringify(regRes.body)}`);
     }
-    createdUserId = regRes.body.data.user.id;
-    console.log(`      ✔ HTTP 201 Created: User ID ${createdUserId}, Token issued.`);
+    console.log('      ✔ HTTP 403 Forbidden: unauthenticated account creation rejected.');
 
-    // Test 2: Duplicate Registration Prevention
-    console.log('\n[2/7] Testing Duplicate Email Prevention...');
+    const passwordHash = await hashPassword(testPassword);
+    const testUser = await UserModel.createUser({
+      user_id: testUserId,
+      name: 'Priya Sharma',
+      email: testEmail,
+      passwordHash,
+      role: 'student',
+      hostel_block: 'Block C (Girls)',
+      room_no: 'C-204',
+      phone: '9876543210'
+    });
+    createdUserId = testUser.id;
+
+    // Test 2: Public registration stays blocked for duplicate account data too
+    console.log('\n[2/7] Testing public registration cannot bypass provisioning...');
     const dupRes = createMockRes();
     await authController.register(regReq, dupRes);
-    if (dupRes.statusCode !== 409) {
-      throw new Error(`Expected 409 Conflict, received ${dupRes.statusCode}`);
+    if (dupRes.statusCode !== 403) {
+      throw new Error(`Expected 403 Forbidden, received ${dupRes.statusCode}`);
     }
-    console.log(`      ✔ HTTP 409 Conflict: "${dupRes.body.error}"`);
+    console.log(`      ✔ HTTP 403 Forbidden: "${dupRes.body.error}"`);
 
     // Test 3: Login with Valid Email Credentials
     console.log('\n[3/7] Testing POST /api/auth/login (Correct Email)...');

@@ -19,7 +19,7 @@ class AdminController {
         "SELECT COUNT(*) AS total FROM users WHERE role = 'student';"
       );
       const [staffCount] = await db.query(
-        "SELECT COUNT(*) AS total FROM users WHERE role IN ('staff', 'admin');"
+        "SELECT COUNT(*) AS total FROM users WHERE role = 'staff';"
       );
       const [technicianCount] = await db.query(
         "SELECT COUNT(*) AS total FROM technicians;"
@@ -369,117 +369,162 @@ class AdminController {
   }
 
   /**
-   * Institutional User Provisioning: Admin registers any role (Student, Staff, Technician, Admin)
+   * Institutional User Provisioning: Admin registers students, staff, and technicians.
    * POST /api/admin/users
    */
   static async registerUser(req, res) {
+    const { user_id, name, email, password, role, hostel_block, room_no, phone, trade } = req.body || {};
+
+    const cleanName = typeof name === 'string' ? name.trim() : '';
+    const cleanUserId = typeof user_id === 'string' ? user_id.trim().toUpperCase() : '';
+    const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const cleanPassword = typeof password === 'string' ? password : '';
+    const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
+    const cleanBlock = typeof hostel_block === 'string' ? hostel_block.trim() : '';
+    const cleanRoom = typeof room_no === 'string' ? room_no.trim() : '';
+    const validRoles = ['student', 'staff', 'technician'];
+
+    if (!cleanName || !cleanUserId || !cleanEmail || !cleanPassword || !role) {
+      return res.status(400).json({
+        success: false,
+        code: 'REQUIRED_FIELDS',
+        error: 'Full name, user ID, email, password, and role are required.'
+      });
+    }
+
+    if (cleanName.length > 100 || cleanUserId.length > 50 || cleanEmail.length > 150 ||
+      cleanPhone.length > 20 || cleanBlock.length > 50 || cleanRoom.length > 20) {
+      return res.status(400).json({
+        success: false,
+        code: 'FIELD_TOO_LONG',
+        error: 'One or more fields exceed the maximum allowed length.'
+      });
+    }
+
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_ROLE',
+        error: 'Role must be Student, Staff/Warden, or Technician.'
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_EMAIL',
+        error: 'Please provide a valid email address.'
+      });
+    }
+
+    if (cleanPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        code: 'PASSWORD_TOO_SHORT',
+        error: 'Password must be at least 6 characters long.'
+      });
+    }
+
+    if (role === 'technician' && trade && !['Electrical', 'Plumbing', 'Carpentry', 'Cleaning', 'WiFi_Internet', 'General'].includes(trade)) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_TRADE',
+        error: 'Please select a valid technician specialization.'
+      });
+    }
+
     try {
-      const { user_id, name, email, password, role, hostel_block, room_no, phone, trade } = req.body;
-
-      if (!name || !email || !password || !role) {
-        return res.status(400).json({
-          success: false,
-          error: 'Name, email, password, and role are required fields.'
-        });
-      }
-
-      const validRoles = ['student', 'staff', 'technician', 'admin'];
-      if (!validRoles.includes(role)) {
-        return res.status(400).json({
-          success: false,
-          error: `Invalid role specified. Must be one of: ${validRoles.join(', ')}.`
-        });
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({
-          success: false,
-          error: 'Please provide a valid email address.'
-        });
-      }
-
-      if (password.length < 6) {
-        return res.status(400).json({
-          success: false,
-          error: 'Password must be at least 6 characters long.'
-        });
-      }
-
-      // Check if email already registered
-      const emailTaken = await UserModel.emailExists(email);
+      const emailTaken = await UserModel.emailExists(cleanEmail);
       if (emailTaken) {
         return res.status(409).json({
           success: false,
-          error: `An account with email '${email}' already exists.`
+          code: 'DUPLICATE_EMAIL',
+          error: 'An account with this email address already exists.'
         });
       }
 
-      // Check or generate user_id
-      let finalUserId = (user_id || '').trim().toUpperCase();
-      if (finalUserId) {
-        const idTaken = await UserModel.userIdExists(finalUserId);
-        if (idTaken) {
-          return res.status(409).json({
-            success: false,
-            error: `Institutional ID '${finalUserId}' is already assigned.`
-          });
-        }
-      } else {
-        finalUserId = UserModel.generateDefaultUserId(role);
+      const idTaken = await UserModel.userIdExists(cleanUserId);
+      if (idTaken) {
+        return res.status(409).json({
+          success: false,
+          code: 'DUPLICATE_USER_ID',
+          error: 'This user ID is already assigned.'
+        });
       }
 
-      const passwordHash = await hashPassword(password);
+      const passwordHash = await hashPassword(cleanPassword);
+      const connection = await db.pool.getConnection();
+      let result;
       let techId = null;
 
-      // If technician, create or find technician record
-      if (role === 'technician') {
-        const validTrades = ['Electrical', 'Plumbing', 'Carpentry', 'Cleaning', 'WiFi_Internet', 'General'];
-        const assignedTrade = validTrades.includes(trade) ? trade : 'General';
+      try {
+        await connection.beginTransaction();
 
-        const [techRes] = await db.execute(
-          'INSERT INTO technicians (name, trade, phone, is_available) VALUES (?, ?, ?, 1);',
-          [name.trim(), assignedTrade, phone ? phone.trim() : '']
+        if (role === 'technician') {
+          const assignedTrade = trade || 'General';
+          const [techResult] = await connection.execute(
+            'INSERT INTO technicians (name, trade, phone, is_available) VALUES (?, ?, ?, 1);',
+            [cleanName, assignedTrade, cleanPhone]
+          );
+          techId = techResult.insertId;
+        }
+
+        const [userResult] = await connection.execute(
+          `INSERT INTO users (user_id, name, email, password_hash, role, tech_id, hostel_block, room_no, phone)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          [
+            cleanUserId,
+            cleanName,
+            cleanEmail,
+            passwordHash,
+            role,
+            techId,
+            role === 'student' && cleanBlock ? cleanBlock : null,
+            role === 'student' && cleanRoom ? cleanRoom : null,
+            cleanPhone || null
+          ]
         );
-        techId = techRes.insertId;
+        result = userResult;
+        await connection.commit();
+      } catch (error) {
+        try {
+          await connection.rollback();
+        } catch (rollbackError) {
+          console.error('[Admin registerUser Rollback Error]:', rollbackError);
+        }
+        throw error;
+      } finally {
+        connection.release();
       }
-
-      const insertSql = `
-        INSERT INTO users (user_id, name, email, password_hash, role, tech_id, hostel_block, room_no, phone)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-      `;
-
-      const result = await db.execute(insertSql, [
-        finalUserId,
-        name.trim(),
-        email.trim().toLowerCase(),
-        passwordHash,
-        role,
-        techId,
-        hostel_block ? hostel_block.trim() : null,
-        room_no ? room_no.trim() : null,
-        phone ? phone.trim() : null
-      ]);
 
       return res.status(201).json({
         success: true,
-        message: `Account created successfully for ${name.trim()} (${role.toUpperCase()}) with ID ${finalUserId}.`,
+        message: `Account created successfully for ${cleanName} (${role.toUpperCase()}) with ID ${cleanUserId}.`,
         data: {
           id: result.insertId,
-          user_id: finalUserId,
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
+          user_id: cleanUserId,
+          name: cleanName,
+          email: cleanEmail,
           role,
           tech_id: techId,
-          hostel_block: hostel_block || null,
-          room_no: room_no || null,
-          phone: phone || null
+          hostel_block: role === 'student' ? cleanBlock || null : null,
+          room_no: role === 'student' ? cleanRoom || null : null,
+          phone: cleanPhone || null
         }
       });
     } catch (error) {
       console.error('[Admin registerUser Error]:', error);
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({
+          success: false,
+          code: 'DUPLICATE_ACCOUNT',
+          error: 'This user ID or email address is already registered.'
+        });
+      }
       return res.status(500).json({
         success: false,
+        code: 'ACCOUNT_CREATE_FAILED',
         error: 'Failed to create user account.'
       });
     }

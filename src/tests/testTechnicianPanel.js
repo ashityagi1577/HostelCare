@@ -59,7 +59,8 @@ async function runTests() {
       method: 'GET'
     });
     assert(htmlRes.statusCode === 200, 'GET /technician-dashboard.html returns 200 OK');
-    assert(htmlRes.rawBody && htmlRes.rawBody.includes('Technician Workspace'), 'HTML includes Technician Workspace UI elements');
+    assert(htmlRes.rawBody && htmlRes.rawBody.includes('id="viewAssigned"') && htmlRes.rawBody.includes('My Assigned Complaints'), 'HTML includes assigned complaints panel');
+    assert(htmlRes.rawBody.includes('id="viewHistory"') && htmlRes.rawBody.includes('Completed Complaints'), 'HTML includes completed complaints panel');
 
     // 2. Login as Technician with TECH-101
     console.log('\n2. Testing Technician Authentication (TECH-101)...');
@@ -172,9 +173,30 @@ async function runTests() {
     assert(updateRes.statusCode === 200, 'Status updated to In_Progress successfully');
     assert(updateRes.body.data.new_status === 'In_Progress', 'Response confirms new_status is In_Progress');
 
+    const updatedDetailRes = await makeRequest({
+      hostname: 'localhost',
+      port: 3000,
+      path: `/api/technician/complaints/${targetComplaint.id}`,
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${techToken}` }
+    });
+    const savedRemark = updatedDetailRes.body.data.logs.some(log =>
+      log.remarks === 'Automated Test: Inspected circuit board and tested terminal voltage.'
+    );
+    assert(savedRemark, 'Work remarks are retained in the complaint audit log');
+
     // 8. Prevent Technician from Modifying Complaints Belonging to Other Technicians
     console.log('\n8. Testing Anti-Tamper Isolation (Rejecting modifications to foreign complaints)...');
     // Let's find a complaint assigned to Plumbing (tech_id = 4)
+    const foreignDetailsRes = await makeRequest({
+      hostname: 'localhost',
+      port: 3000,
+      path: '/api/technician/complaints/20',
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${techToken}` }
+    });
+    assert(foreignDetailsRes.statusCode === 404, 'Technician cannot read another technician complaint details');
+
     const foreignRes = await makeRequest({
       hostname: 'localhost',
       port: 3000,
