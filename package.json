@@ -28,7 +28,7 @@
     "express",
     "mysql"
   ],
-  "author": "HostelCare Team",
+  "author": "Ashi Tyagi",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
